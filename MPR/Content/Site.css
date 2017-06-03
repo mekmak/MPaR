@@ -22,3 +22,8 @@ select,
 textarea {
     max-width: 280px;
 }
+
+td {
+  text-align: center;
+  vertical-align: middle;
+}

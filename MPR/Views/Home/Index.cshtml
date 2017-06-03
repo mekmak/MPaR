@@ -1,31 +1,113 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "MPaR";
 }
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="http://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+<p/>
+
+<div class="container">
+
+    <div class="row" align="right">
+        <button id="addBtn" type="button" class="btn btn-outline-primary">Add</button>
+        <button id="splitBtn" type="button" class="btn btn-outline-primary">Split</button>
+        <button style="margin: 0 0 0 5px;" id="doItBtn" type="button" class="btn btn-primary">Do It</button>
+    </div>
+
+    <p/>
+
+    <div class="row">
+        <div id="trm_alert" class="alert alert-danger alert-dismissable collapse">
+            <a class="close" onclick="$('#trm_alert').hide()">×</a>
+            Percentages need to add up to 100. Total is [<span id="trm_alert_value"></span>]. Decimals are ignored.
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="trm_success" class="alert alert-success alert-dismissable collapse">
+            <a class="close" onclick="$('#trm_success').hide()">×</a>
+            Your value is: [<span id="trm_success_value"></span>]
+        </div>
+    </div>
+
+    <div class="row">
+        <table id="trm_table" class="table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>% Chance</th>
+                <th/>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><input id="foo" name="foo" class="form-control trm_tv_name" type="text"/></td>
+                <td><input id="bar" name="bar" class="form-control trm_tv_pc" type="number" min="0" max="100" step="1"/></td>
+                <td><a class='form-control close' style="visibility : hidden">×</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-    </div>
-</div>
+<script>
+    $("#addBtn").on("click", function () {
+        var newRow = "<tr><td><input class='form-control trm_tv_name' type='text' /></td><td><input class='form-control trm_tv_pc' type='number' min='0' max='100' step='1' /></td><td><a class='form-control close' onclick=\"$(this).closest('tr').remove();\">×</a></td></tr>";
+
+        $("table").append(newRow);
+    });
+
+    $("#doItBtn").on("click", function () {
+        $("#trm_alert").hide();
+        $("#trm_success").hide();
+
+        var total = 0;
+        $('#trm_table tbody tr').each(function () {
+            var pc = parseInt($(this).find(".trm_tv_pc").val(), 10);
+            if (pc) {
+                total += pc;
+            }
+        });
+
+        if (total !== 100) {
+            $('#trm_alert_value').text(total);
+            $("#trm_alert").show();
+            return;
+        }
+
+        var weAt = 100;
+        var randomNum = Math.floor(Math.random() * 99) + 1;
+        var picked = "";
+
+        $('#trm_table tbody tr').each(function () {
+            var name = $(this).find(".trm_tv_name").val();
+            var pc = parseInt($(this).find(".trm_tv_pc").val(), 10);
+
+            weAt = weAt - pc;
+            if (randomNum >= weAt) {
+                picked = name;
+                return false;
+            }
+        });
+
+        $("#trm_success_value").text(picked);
+        $("#trm_success").show();
+    });
+
+    $("#splitBtn").on("click", function () {
+        var numOfRows = $('#trm_table tbody tr').length;
+        var even = Math.floor(100 / numOfRows);
+        $('#trm_table tbody tr').each(function () { $(this).find(".trm_tv_pc").val(even) });
+        var remainder = 100 % (even * numOfRows);
+        if (remainder !== 0) {
+            $('#trm_table tbody tr').each(function () {
+                var cell = $(this).find(".trm_tv_pc");
+                var pc = parseInt(cell.val(), 10);
+                cell.val(pc + 1);
+                remainder = remainder - 1;
+
+                if (remainder === 0) {
+                    return false;
+                }
+            });
+        }
+    });
+</script>
