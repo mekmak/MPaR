@@ -41,7 +41,7 @@
             <tr>
                 <td><input id="foo" name="foo" class="form-control trm_tv_name" type="text"/></td>
                 <td><input id="bar" name="bar" class="form-control trm_tv_pc" type="number" min="0" max="100" step="1"/></td>
-                <td><a class='form-control close' style="visibility : hidden">×</a></td>
+                <td><a class='form-control close' onclick="$(this).closest('tr').remove();">×</a></td>
             </tr>
             </tbody>
         </table>
