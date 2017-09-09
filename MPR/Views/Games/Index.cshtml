@@ -1,0 +1,52 @@
+﻿@{
+    ViewBag.Title = "Games";
+}
+
+<div class="container">
+    <div class="row">
+        <div id="games_partial"></div>
+    </div>
+    <div class="row">
+        <div id="last_update_time"></div>
+    </div>
+</div>
+
+<script>
+    function loadPartialView() {
+        $.ajax({
+            url: "@Url.Action("Games", "Games")",
+            type: 'GET', // <-- make a async request by GET
+            dataType: 'html', // <-- to expect an html response
+            cache: false,
+            success: function(result) {
+                $('#games_partial').html(result);
+                var currentdate = new Date();
+                var hours = currentdate.getHours().toString();
+                if (hours.length === 1) {
+                    hours = "0" + hours;
+                }
+
+                var minutes = currentdate.getMinutes().toString();
+                if (minutes.length === 1) {
+                    minutes = "0" + minutes;
+                }
+
+                var seconds = currentdate.getSeconds().toString();
+                if (seconds.length === 1) {
+                    seconds = "0" + seconds;
+                }
+
+                var datetime = "Last updated at: " + hours + ":"
+                                + minutes + ":"
+                                + seconds;
+                $('#last_update_time').html(datetime);
+        }
+    });
+    }
+
+    $(function() {
+
+        loadPartialView(); // first time
+        setInterval(loadPartialView, 5000);
+    });
+</script>
