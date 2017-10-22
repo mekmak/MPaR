@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading;
 using System.Web;
+using System.Web.Services.Description;
 using MPR.Models.Games;
 using MPR.Rest;
 using WebGrease;
@@ -12,7 +13,7 @@ namespace MPR.ScoreConnectors
 {
     public class EspnScoreConnector
     {
-        private List<string> NameSubs = new List<string>
+        private readonly List<string> _nameSubs = new List<string>
         {
             "Flaccid Chodes",
             "Suckville",
@@ -24,8 +25,8 @@ namespace MPR.ScoreConnectors
             "Wife Beaters"
         };
 
-        private static Dictionary<Sport, List<Game>> GameCache = new Dictionary<Sport, List<Game>>();
-        private static Dictionary<string, Tuple<string, string>> ScoreCache = new Dictionary<string, Tuple<string, string>>();
+        private static readonly Dictionary<Sport, List<Game>> GameCache = new Dictionary<Sport, List<Game>>();
+        private static readonly Dictionary<string, Tuple<string, string>> ScoreCache = new Dictionary<string, Tuple<string, string>>();
 
         private static readonly object GameCacheLocker = new object();
         private static readonly object ScoreCacheLocker = new object();
@@ -42,38 +43,37 @@ namespace MPR.ScoreConnectors
 
         private string GetEndPoint(Sport sport)
         {
-            return string.Format(@"http://sports.espn.go.com/{0}/bottomline/scores", sport);
+            return $@"http://sports.espn.go.com/{sport}/bottomline/scores";
         }
 
         private string GetCountKey(Sport sport)
         {
-            return string.Format("{0}_s_count", sport);
+            return $"{sport}_s_count";
         }
 
         private string GetGameKey(Sport sport)
         {
-            return string.Format("{0}_s_left", sport);
+            return $"{sport}_s_left";
         }
 
         private string GetUrlKey(Sport sport)
         {
-            return string.Format("{0}_s_url", sport);
+            return $"{sport}_s_url";
         }
 
         #endregion
 
         private static EspnScoreConnector _instance;
-        public static EspnScoreConnector Instance
-        {
-            get { return _instance ?? (_instance = new EspnScoreConnector()); }
-        }
+        public static EspnScoreConnector Instance => _instance ?? (_instance = new EspnScoreConnector());
 
         private EspnScoreConnector()
         {
-            Thread thread = new Thread(new ThreadStart(UpdateGames));
-            thread.Name = "Game Pull";
-            thread.Priority = ThreadPriority.Normal;
-            thread.IsBackground = true;
+            Thread thread = new Thread(new ThreadStart(UpdateGames))
+            {
+                Name = "Game Pull",
+                Priority = ThreadPriority.Normal,
+                IsBackground = true
+            };
             thread.Start();
         }
 
@@ -126,16 +126,17 @@ namespace MPR.ScoreConnectors
             {
                 string score = GetScore(sport, keyValues, gameNumber);
                 string link = GetLink(sport, keyValues, gameNumber);
-                Tuple<string, string, string, string> teams = GetTeamsAndScores(sport, keyValues, gameNumber);
+                GameInfo gameInfo = GetGameInfo(sport, keyValues, gameNumber);
 
                 var game = new Game
                 {
-                    HomeTeam = teams.Item1,
-                    HomeTeamScore = teams.Item2,
-                    AwayTeam = teams.Item3,
-                    AwayTeamScore = teams.Item4,
+                    HomeTeam = gameInfo.HomeTeam,
+                    HomeTeamScore = gameInfo.HomeTeamScore,
+                    AwayTeam = gameInfo.AwayTeam,
+                    AwayTeamScore = gameInfo.AwayTeamScore,
                     Score = score,
-                    Link = link
+                    Link = link,
+                    Time = gameInfo.Time
                 };
 
                 SetShouldNotify(sport, game);
@@ -163,15 +164,15 @@ namespace MPR.ScoreConnectors
 
         private string GetNameSub()
         {
-            int count = NameSubs.Count;
+            int count = _nameSubs.Count;
             var rand = new Random();
             int num = rand.Next(0, count - 1);
-            return NameSubs[num];
+            return _nameSubs[num];
         }
 
         private void SetShouldNotify(Sport sport, Game game)
         {
-            string gameKey = string.Format("{0}.{1}.{2}", sport, game.HomeTeam, game.AwayTeam);
+            string gameKey = $"{sport}.{game.HomeTeam}.{game.AwayTeam}";
 
             if (ScoreCache.ContainsKey(gameKey))
             {
@@ -197,16 +198,45 @@ namespace MPR.ScoreConnectors
 
         private string GetScore(Sport sport, NameValueCollection collection, int gameNumber)
         {
-            return collection[string.Format("{0}{1}", GetGameKey(sport), gameNumber)];
+            return collection[$"{GetGameKey(sport)}{gameNumber}"];
         }
 
-        private Tuple<string, string, string, string> GetTeamsAndScores(Sport sport, NameValueCollection collection, int gameNumber)
+        private class GameInfo
+        {
+            public GameInfo(string homeTeam, string homeTeamScore, string awayTeam, string awayTeamScore, string time)
+            {
+                HomeTeam = homeTeam;
+                HomeTeamScore = homeTeamScore;
+                AwayTeam = awayTeam;
+                AwayTeamScore = awayTeamScore;
+                Time = time;
+            }
+
+            public string HomeTeam { get; }
+            public string HomeTeamScore { get; }
+            public string AwayTeam { get; }
+            public string AwayTeamScore { get; }
+            public string Time { get; }
+        }
+
+        private GameInfo GetGameInfo(Sport sport, NameValueCollection collection, int gameNumber)
         {
             string score = GetScore(sport, collection, gameNumber);
 
-            if (score.IndexOf(" at ") < 0)
+            if (score.IndexOf(" at ", StringComparison.Ordinal) < 0)
             {
                 string[] splits = score.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+
+                string time = "";
+                try
+                {
+                    time = splits[splits.Length - 1];
+                }
+                catch
+                {
+                    // ignored
+                }
+
                 string homeTeam = "";
                 string homeTeamScore = "";
 
@@ -247,20 +277,22 @@ namespace MPR.ScoreConnectors
                 homeTeam = homeTeam.Replace("^", "");
                 awayTeam = awayTeam.Replace("^", "");
 
-                return new Tuple<string, string, string, string>(homeTeam, homeTeamScore, awayTeam, awayTeamScore);
+                return new GameInfo(homeTeam, homeTeamScore, awayTeam, awayTeamScore, time);
             }
             else
             {
-                string[] splits = score.Split(new string[] { " at " }, StringSplitOptions.RemoveEmptyEntries);
-                string homeTeam = splits[1].Split(new string[] { "(" }, StringSplitOptions.RemoveEmptyEntries)[0];
+                string[] splits = score.Split(new [] { " at " }, StringSplitOptions.RemoveEmptyEntries);
+                string[] homeSplits = splits[1].Split(new [] {"(", ")"}, StringSplitOptions.RemoveEmptyEntries);
+                string homeTeam = homeSplits[0];
+                string time = homeSplits[1];
                 string awayTeam = splits[0];
-                return new Tuple<string, string, string, string>(homeTeam, "-", awayTeam, "-");
+                return new GameInfo(homeTeam, "-", awayTeam, "-", time);
             }
         }
 
         private string GetLink(Sport sport, NameValueCollection collection, int gameNumber)
         {
-            return collection[string.Format("{0}{1}", GetUrlKey(sport), gameNumber)];
+            return collection[$"{GetUrlKey(sport)}{gameNumber}"];
         }
     }
 }
