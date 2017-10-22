@@ -25,8 +25,45 @@ namespace MPR.ScoreConnectors
             "Wife Beaters"
         };
 
+        private readonly Dictionary<string, string> _shortNameMap = new Dictionary<string, string>
+        {
+            {"Kansas City", "KC"},
+            {"Oakland", "OAK"},
+            {"Philadelphia", "PHI"},
+            {"Washington", "WAS"},
+            {"New England", "NE"},
+            {"Atlanta", "ATL"},
+            {"NY Giants", "NYG"},
+            {"Seattle", "SEA"},
+            {"Los Angeles", "LA"},
+            {"Denver", "DEN"},
+            {"Pittsburgh", "PIT"},
+            {"Cincinnati", "CIN"},
+            {"San Francisco", "SF"},
+            {"Dallas", "DAL"},
+            {"Minnesota", "MIN"},
+            {"Baltimore", "BAL"},
+            {"Miami", "MIA"},
+            {"NY Jets", "NYJ"},
+            {"Arizona", "ARI"},
+            {"Green Bay", "GB"},
+            {"New Orleans", "NO"},
+            {"Cleveland", "CLE"},
+            {"Tennessee", "TEN"},
+            {"Chicago", "CHI"},
+            {"Carolina", "CAR"},
+            {"Buffalo", "BUF"},
+            {"Tampa Bay", "TB"},
+            {"Detroit", "DET"},
+            {"Houston", "HOU"},
+            {"Jacksonville", "JAX" },
+            {"Indianapolis", "IND" }
+        };
+
         private static readonly Dictionary<Sport, List<Game>> GameCache = new Dictionary<Sport, List<Game>>();
-        private static readonly Dictionary<string, Tuple<string, string>> ScoreCache = new Dictionary<string, Tuple<string, string>>();
+
+        private static readonly Dictionary<string, Tuple<string, string>> ScoreCache =
+            new Dictionary<string, Tuple<string, string>>();
 
         private static readonly object GameCacheLocker = new object();
         private static readonly object PullInitLocker = new object();
@@ -64,6 +101,7 @@ namespace MPR.ScoreConnectors
         #endregion
 
         public static EspnScoreConnector Instance = new EspnScoreConnector();
+
         public void InitGameDownload()
         {
             var thread = new Thread(UpdateGames)
@@ -126,11 +164,14 @@ namespace MPR.ScoreConnectors
                 string link = GetLink(sport, keyValues, gameNumber);
                 GameInfo gameInfo = GetGameInfo(sport, keyValues, gameNumber);
 
+                string homeTeam = sport == Sport.nfl ? TryShorten(gameInfo.HomeTeam) : gameInfo.HomeTeam;
+                string awayTeam = sport == Sport.nfl ? TryShorten(gameInfo.AwayTeam) : gameInfo.AwayTeam;
+
                 var game = new Game
                 {
-                    HomeTeam = gameInfo.HomeTeam,
+                    HomeTeam = homeTeam,
                     HomeTeamScore = gameInfo.HomeTeamScore,
-                    AwayTeam = gameInfo.AwayTeam,
+                    AwayTeam = awayTeam,
                     AwayTeamScore = gameInfo.AwayTeamScore,
                     Score = score,
                     Link = link,
@@ -145,6 +186,17 @@ namespace MPR.ScoreConnectors
             }
 
             return games;
+        }
+
+        private string TryShorten(string teamName)
+        {
+            string shortened;
+            if (!_shortNameMap.TryGetValue(teamName.Trim(), out shortened))
+            {
+                return teamName;
+            }
+
+            return shortened;
         }
 
         private void UpdateNames(Game game)
