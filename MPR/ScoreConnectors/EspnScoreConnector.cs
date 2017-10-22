@@ -29,7 +29,7 @@ namespace MPR.ScoreConnectors
         private static readonly Dictionary<string, Tuple<string, string>> ScoreCache = new Dictionary<string, Tuple<string, string>>();
 
         private static readonly object GameCacheLocker = new object();
-        private static readonly object ScoreCacheLocker = new object();
+        private static readonly object PullInitLocker = new object();
 
         #region Sport
 
@@ -63,12 +63,10 @@ namespace MPR.ScoreConnectors
 
         #endregion
 
-        private static EspnScoreConnector _instance;
-        public static EspnScoreConnector Instance => _instance ?? (_instance = new EspnScoreConnector());
-
-        private EspnScoreConnector()
+        public static EspnScoreConnector Instance = new EspnScoreConnector();
+        public void InitGameDownload()
         {
-            Thread thread = new Thread(new ThreadStart(UpdateGames))
+            var thread = new Thread(UpdateGames)
             {
                 Name = "Game Pull",
                 Priority = ThreadPriority.Normal,
