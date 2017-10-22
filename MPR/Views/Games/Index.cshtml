@@ -3,9 +3,19 @@
 }
 
 <div class="container">
-    <div class="row" id="sportTypeRadio">
-        <label class="radio-inline"><input id="nflRadio" type="radio" name="sportType" value="nfl" onchange="loadPartialView()" checked="checked">NFL</label>
-        <label class="radio-inline"><input id="nbaRadio" type="radio" name="sportType" value="nba" onchange="loadPartialView()">NBA</label>
+
+    <div class="row">
+        
+        <table class="table" id="example">
+            <tbody>
+            <tr>
+                <td>
+                    <label class="radio-inline"><input id="nflRadio" type="radio" name="sportType" value="nfl" onchange="loadPartialView()" checked="checked">NFL</label>
+                    <label class="radio-inline"><input id="nbaRadio" type="radio" name="sportType" value="nba" onchange="loadPartialView()">NBA</label>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </div>
     <div class="row">
         <div id="games_partial"></div>
