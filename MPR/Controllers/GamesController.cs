@@ -16,9 +16,15 @@ namespace MPR.Controllers
             return View();
         }
 
-        public ActionResult Games()
+        public ActionResult Games(string gameType)
         {
-            List<Game> games = EspnScoreConnector.Instance.GetGames(EspnScoreConnector.Sport.nfl);
+            EspnScoreConnector.Sport sportType;
+            if (!Enum.TryParse(gameType.ToLower(), out sportType))
+            {
+                sportType = EspnScoreConnector.Sport.nfl;
+            }
+
+            List<Game> games = EspnScoreConnector.Instance.GetGames(sportType);
             return PartialView("_Games", games);
         }
     }

@@ -3,6 +3,10 @@
 }
 
 <div class="container">
+    <div class="row" id="sportTypeRadio">
+        <label class="radio-inline"><input id="nflRadio" type="radio" name="sportType" value="nfl" onchange="loadPartialView()" checked="checked">NFL</label>
+        <label class="radio-inline"><input id="nbaRadio" type="radio" name="sportType" value="nba" onchange="loadPartialView()">NBA</label>
+    </div>
     <div class="row">
         <div id="games_partial"></div>
     </div>
@@ -14,7 +18,7 @@
 <script>
     function loadPartialView() {
         $.ajax({
-            url: "@Url.Action("Games", "Games")",
+            url: "@Url.Action("Games", "Games")" + "?gameType=" + getSelectedSportType(),
             type: 'GET', // <-- make a async request by GET
             dataType: 'html', // <-- to expect an html response
             cache: false,
@@ -44,7 +48,12 @@
     });
     }
 
-    $(function() {
+    function getSelectedSportType() {
+        var sportType = $("input[name=sportType]:checked").val()
+        return sportType;
+    }
+
+    $(function () {
         loadPartialView(); // first time
         setInterval(loadPartialView, 5000);
     });
