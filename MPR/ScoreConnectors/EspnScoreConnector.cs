@@ -224,11 +224,17 @@ namespace MPR.ScoreConnectors
             if (score.IndexOf(" at ", StringComparison.Ordinal) < 0)
             {
                 string[] splits = score.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                string[] timeSplits = score.Split(new[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);
 
                 string time = "";
                 try
                 {
-                    time = splits[splits.Length - 1];
+                    time = timeSplits[timeSplits.Length - 1];
+                    if (time != "FINAL")
+                    {
+                        var quarterSplits = time.Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
+                        time = quarterSplits[quarterSplits.Length - 1].ToLower();
+                    }
                 }
                 catch
                 {
