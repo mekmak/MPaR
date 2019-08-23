@@ -1,32 +1,56 @@
-﻿<table class="table" id="example">
+﻿@model List<MPR.Models.Games.Game>
+<table class="table" id="example">
     <tbody>
         @foreach (var game in Model)
         {
-            <tr>
+        <tr>
 
-                @if (@game.NotifyAway)
-                {
-                    <td style="font-weight: bold">@game.AwayTeam</td>
-                    <td style="font-weight: bold">@game.AwayTeamScore</td>
-                }
-                else
-                {
-                    <td>@game.AwayTeam</td>
-                    <td>@game.AwayTeamScore</td>
-                }
+            @if (@game.AwayTeamLink == null)
+            {
+                <td>@game.AwayTeam</td>
+            }
+            else
+            {
+                <td><a href="@game.AwayTeamLink">@game.AwayTeam</a></td>
+            }
 
-                @if (@game.NotifyHome)
-                {
-                    <td style="font-weight: bold">@game.HomeTeam</td>
-                    <td style="font-weight: bold">@game.HomeTeamScore</td>
-                }
-                else
-                {
-                    <td>@game.HomeTeam</td>
-                    <td>@game.HomeTeamScore</td>
-                }
+            @if (@game.NotifyAway)
+            {
+                <td style="font-weight: bold">@game.AwayTeamScore</td>
+            }
+            else
+            {
+                <td>@game.AwayTeamScore</td>
+            }
+
+            @if (@game.HomeTeamLink == null)
+            {
+                <td>@game.HomeTeam</td>
+            }
+            else
+            {
+                <td><a href="@game.HomeTeamLink">@game.HomeTeam</a></td>
+            }
+
+            @if (@game.NotifyHome)
+            {
+                <td style="font-weight: bold">@game.HomeTeamScore</td>
+            }
+            else
+            {
+                <td>@game.HomeTeamScore</td>
+            }
+
+            @if (@game.TimeLink == null)
+            {
                 <td>@game.Time</td>
-            </tr>
+            }
+            else
+            {
+                <td><a href="@game.TimeLink">@game.Time</a></td>
+            }
+
+        </tr>
         }
     </tbody>
 </table>

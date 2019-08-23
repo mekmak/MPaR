@@ -174,7 +174,7 @@ namespace MPR.ScoreConnectors
                     AwayTeam = awayTeam,
                     AwayTeamScore = gameInfo.AwayTeamScore,
                     Score = score,
-                    Link = link,
+                    TimeLink = link,
                     Time = gameInfo.Time
                 };
 

@@ -50,18 +50,30 @@ namespace MPR.ScoreConnectors
             var game = new Game
             {
                 HomeTeam = m.Competitors[0].AbbreviatedName,
+                HomeTeamLink = GetLink(m.Competitors[0]),
                 HomeTeamScore = GetScore(m, 0),
                 NotifyHome = ShouldNotify(m, 0),
 
                 AwayTeam = m.Competitors[1].AbbreviatedName,
+                AwayTeamLink = GetLink(m.Competitors[1]),
                 AwayTeamScore = GetScore(m, 1),
                 NotifyAway = ShouldNotify(m, 1),
 
-                Time = GetTime(m, clientOffset)
-
+                Time = GetTime(m, clientOffset),
+                TimeLink = GetLink(m)
             };
 
             return game;
+        }
+
+        private string GetLink(Competitor competitor)
+        {
+            return $"https://overwatchleague.com/en-us/teams/{competitor.Id}";
+        }
+
+        private string GetLink(Match match)
+        {
+            return $"https://overwatchleague.com/en-us/match/{match.Id}";
         }
 
         private List<Match> GetCurrentMatches()
@@ -104,7 +116,7 @@ namespace MPR.ScoreConnectors
         private string GetTime(Match m, int clientOffset)
         {
             return MatchOver(m)
-                ? "FINAL"
+                ? m.Games.Count > 4 ? "FINAL (OT)" : "FINAL"
                 : GetClientTime(m.StartDate, clientOffset).ToString("ddd dd, HH:mm");
         }
 
@@ -143,8 +155,6 @@ namespace MPR.ScoreConnectors
                 .Where(w => w.EndDate >= now)
                 .OrderBy(w => w.StartDate)
                 .ToList();
-
-
 
             return weeks.FirstOrDefault();
         }
