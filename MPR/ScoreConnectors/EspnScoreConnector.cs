@@ -106,7 +106,7 @@ namespace MPR.ScoreConnectors
         {
             var thread = new Thread(UpdateGames)
             {
-                Name = "Game Pull",
+                Name = "Espn Game Pull",
                 Priority = ThreadPriority.Normal,
                 IsBackground = true
             };

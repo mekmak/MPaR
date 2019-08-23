@@ -13,6 +13,7 @@
                     <label class="radio-inline"><input id="nflRadio" type="radio" name="sportType" value="nfl" onchange="loadPartialView()" checked="checked">NFL</label>
                     <label class="radio-inline"><input id="nbaRadio" type="radio" name="sportType" value="nba" onchange="loadPartialView()">NBA</label>
                     <label class="radio-inline"><input id="nhlRadio" type="radio" name="sportType" value="nhl" onchange="loadPartialView()">NHL</label>
+                    <label class="radio-inline"><input id="owlRadio" type="radio" name="sportType" value="owl" onchange="loadPartialView()">OWL</label>
                 </td>
             </tr>
             </tbody>
@@ -60,7 +61,7 @@
     }
 
     function getSelectedSportType() {
-        var sportType = $("input[name=sportType]:checked").val()
+        var sportType = $("input[name=sportType]:checked").val();
         return sportType;
     }
 

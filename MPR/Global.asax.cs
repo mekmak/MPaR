@@ -18,6 +18,7 @@ namespace MPR
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             EspnScoreConnector.Instance.InitGameDownload();
+            OwlConnector.Instance.InitGameDownload();
         }
     }
 }
