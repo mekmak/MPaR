@@ -29,8 +29,9 @@
 
 <script>
     function loadPartialView() {
+        var offset = new Date().getTimezoneOffset();
         $.ajax({
-            url: "@Url.Action("Games", "Games")" + "?gameType=" + getSelectedSportType(),
+            url: "@Url.Action("Games", "Games")" + "?gameType=" + getSelectedSportType() + "&offset=" + offset,
             type: 'GET', // <-- make a async request by GET
             dataType: 'html', // <-- to expect an html response
             cache: false,

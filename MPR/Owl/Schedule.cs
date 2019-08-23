@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace MPR.Owl
 {
     public class Schedule
     {
-        [JsonProperty("data")] 
+        [JsonProperty("data")]
         public Data Data { get; set; }
 
         public static Schedule FromJson(string response)
@@ -17,20 +16,18 @@ namespace MPR.Owl
 
     public class Data
     {
-        [JsonProperty("id")]
-        public String Id { get; set; }
+        [JsonProperty("id")] public string Id { get; set; }
 
-        [JsonProperty("stages")]
-        public List<Stage> Stages { get; set; }
+        [JsonProperty("stages")] public List<Stage> Stages { get; set; }
     }
 
     public class Stage
     {
         [JsonProperty("id")]
-        public String Id { get; set; }
+        public string Id { get; set; }
 
         [JsonProperty("name")]
-        public String Name { get; set; }
+        public string Name { get; set; }
 
         [JsonProperty("weeks")]
         public List<Week> Weeks { get; set; }
@@ -39,10 +36,10 @@ namespace MPR.Owl
     public class Week
     {
         [JsonProperty("id")]
-        public String Id { get; set; }
+        public string Id { get; set; }
 
         [JsonProperty("name")]
-        public String Name { get; set; }
+        public string Name { get; set; }
 
         [JsonProperty("startDate")]
         public long StartDate { get; set; }
@@ -57,10 +54,10 @@ namespace MPR.Owl
     public class Match
     {
         [JsonProperty("id")]
-        public String Id { get; set; }
+        public string Id { get; set; }
 
         [JsonProperty("status")]
-        public String Status { get; set; }
+        public string Status { get; set; }
 
         [JsonProperty("startDateTS")]
         public long StartDate { get; set; }
@@ -81,10 +78,13 @@ namespace MPR.Owl
     public class Competitor
     {
         [JsonProperty("id")]
-        public String Id { get; set; }
+        public string Id { get; set; }
 
         [JsonProperty("name")]
-        public String Name { get; set; }
+        public string Name { get; set; }
+
+        [JsonProperty("abbreviatedName")]
+        public string AbbreviatedName { get; set; }
     }
 
     public class Score
@@ -96,7 +96,7 @@ namespace MPR.Owl
     public class MatchGame
     {
         [JsonProperty("id")]
-        public String Id { get; set; }
+        public string Id { get; set; }
 
         [JsonProperty("number")]
         public int Number { get; set; }
@@ -104,5 +104,4 @@ namespace MPR.Owl
         [JsonProperty("points")]
         public List<int> Points { get; set; }
     }
-
 }

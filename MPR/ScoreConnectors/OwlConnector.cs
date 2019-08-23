@@ -15,8 +15,7 @@ namespace MPR.ScoreConnectors
         private OwlConnector() { }
 
         public static OwlConnector Instance = new OwlConnector();
-
-        private volatile List<Game> _currentGames = new List<Game>();
+        private volatile List<Match> _currentMatches = new List<Match>();
 
         public void InitGameDownload()
         {
@@ -31,22 +30,41 @@ namespace MPR.ScoreConnectors
             thread.Start();
         }
 
-        public List<Game> GetGames()
+        public List<Game> GetGames(int clientOffset)
         {
-            return new List<Game>(_currentGames);
+            return _currentMatches.Select(m => ToGame(m, clientOffset)).ToList();
         }
 
         private async void UpdateGames()
         {
             while (true)
             {
-                List<Game> currentGames = GetCurrentGames();
-                _currentGames = currentGames;
+                List<Match> currentMatches = GetCurrentMatches();
+                _currentMatches = currentMatches;
                 await Task.Delay(TimeSpan.FromSeconds(10));
             }
         }
 
-        private List<Game> GetCurrentGames()
+        private Game ToGame(Match m, int clientOffset)
+        {
+            var game = new Game
+            {
+                HomeTeam = m.Competitors[0].AbbreviatedName,
+                HomeTeamScore = GetScore(m, 0),
+                NotifyHome = ShouldNotify(m, 0),
+
+                AwayTeam = m.Competitors[1].AbbreviatedName,
+                AwayTeamScore = GetScore(m, 1),
+                NotifyAway = ShouldNotify(m, 1),
+
+                Time = GetTime(m, clientOffset)
+
+            };
+
+            return game;
+        }
+
+        private List<Match> GetCurrentMatches()
         {
             try
             {
@@ -54,28 +72,14 @@ namespace MPR.ScoreConnectors
                 Week week = GetCurrentWeek(schedule);
                 if (week == null)
                 {
-                    return new List<Game>();
+                    return new List<Match>();
                 }
 
-                var games = week.Matches.Select(m => new Game
-                {
-                    HomeTeam = m.Competitors[0].Name,
-                    HomeTeamScore = GetScore(m, 0),
-                    NotifyHome = ShouldNotify(m, 0),
-
-                    AwayTeam = m.Competitors[1].Name,
-                    AwayTeamScore = GetScore(m, 1),
-                    NotifyAway = ShouldNotify(m, 1),
-
-                    Time = GetTime(m)
-
-                }).ToList();
-
-                return games;
+                return week.Matches;
             }
             catch
             {
-                return new List<Game>();
+                return new List<Match>();
             }
         }
 
@@ -90,25 +94,25 @@ namespace MPR.ScoreConnectors
             return match.Scores[i].Value > match.Scores[other].Value;
         }
 
-        private String GetScore(Match m, int index)
+        private string GetScore(Match m, int index)
         {
             string score = m.Scores[index].Value.ToString();
             string games = $"({string.Join("-", m.Games.Select(g => g.Points != null && g.Points.Count > index ? g.Points[index] : 0))})";
             return $"{score} {games}";
         }
 
-        private String GetTime(Match m)
+        private string GetTime(Match m, int clientOffset)
         {
             return MatchOver(m)
                 ? "FINAL"
-                : GetEstTime(m.StartDate).ToString("MMMM dd, HH:mm");
+                : GetClientTime(m.StartDate, clientOffset).ToString("ddd dd, HH:mm");
         }
 
-        private DateTime GetEstTime(long dateMs)
+        private DateTime GetClientTime(long dateMs, int clientOffset)
         {
-            DateTime utc = DateTimeOffset.FromUnixTimeMilliseconds(dateMs).ToUniversalTime().DateTime;
-            DateTime est = TimeZoneInfo.ConvertTimeFromUtc(utc, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
-            return est;
+            // Offset will be positive for timezones behind UTC
+            DateTime clientTime = DateTimeOffset.FromUnixTimeMilliseconds(dateMs).ToUniversalTime().DateTime.AddMinutes(-clientOffset);
+            return clientTime;
         }
 
         private bool MatchOver(Match m)
