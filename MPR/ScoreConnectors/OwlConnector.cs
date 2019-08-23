@@ -101,7 +101,14 @@ namespace MPR.ScoreConnectors
         {
             return MatchOver(m)
                 ? "FINAL"
-                : DateTimeOffset.FromUnixTimeMilliseconds(m.StartDate).ToLocalTime().ToString("MMMM dd, HH:mm");
+                : GetEstTime(m.StartDate).ToString("MMMM dd, HH:mm");
+        }
+
+        private DateTime GetEstTime(long dateMs)
+        {
+            DateTime utc = DateTimeOffset.FromUnixTimeMilliseconds(dateMs).ToUniversalTime().DateTime;
+            DateTime est = TimeZoneInfo.ConvertTimeFromUtc(utc, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
+            return est;
         }
 
         private bool MatchOver(Match m)
