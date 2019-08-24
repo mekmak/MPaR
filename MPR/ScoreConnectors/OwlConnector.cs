@@ -115,9 +115,17 @@ namespace MPR.ScoreConnectors
 
         private string GetTime(Match m, int clientOffset)
         {
-            return MatchOver(m)
-                ? m.Games.Count > 4 ? "FINAL (OT)" : "FINAL"
-                : GetClientTime(m.StartDate, clientOffset).ToString("ddd dd, HH:mm");
+            if(MatchOver(m))
+            {
+                return m.Games.Count > 4 ? "FINAL (OT)" : "FINAL";
+            }
+
+            if(m.Status == "IN_PROGRESS")
+            {
+                return "Live";
+            }
+
+            return GetClientTime(m.StartDate, clientOffset).ToString("ddd dd, HH:mm");
         }
 
         private DateTime GetClientTime(long dateMs, int clientOffset)
