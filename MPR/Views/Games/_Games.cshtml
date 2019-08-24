@@ -41,14 +41,20 @@
                 <td>@game.HomeTeamScore</td>
             }
 
+            <td>
             @if (@game.TimeLink == null)
             {
-                <td>@game.Time</td>
+                @game.Time
             }
             else
             {
-                <td><a href="@game.TimeLink">@game.Time</a></td>
+                <a href="@game.TimeLink">@game.Time</a>
             }
+            @if(game.LiveLink != null)
+            {
+                <span> | </span><a href="@game.LiveLink">Twitch</a>
+            }
+            </td>
 
         </tr>
         }

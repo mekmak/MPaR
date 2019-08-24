@@ -60,7 +60,9 @@ namespace MPR.ScoreConnectors
                 NotifyAway = ShouldNotify(m, 1),
 
                 Time = GetTime(m, clientOffset),
-                TimeLink = GetLink(m)
+                TimeLink = GetTimeLink(m),
+
+                LiveLink = GetLiveLink(m)
             };
 
             return game;
@@ -71,7 +73,7 @@ namespace MPR.ScoreConnectors
             return $"https://overwatchleague.com/en-us/teams/{competitor.Id}";
         }
 
-        private string GetLink(Match match)
+        private string GetTimeLink(Match match)
         {
             return $"https://overwatchleague.com/en-us/match/{match.Id}";
         }
@@ -113,6 +115,11 @@ namespace MPR.ScoreConnectors
             return $"{score} {games}";
         }
 
+        private string GetLiveLink(Match m)
+        {
+            return MatchLive(m) ? @"https://www.twitch.tv/overwatchleague" : null;
+        }
+
         private string GetTime(Match m, int clientOffset)
         {
             if(MatchOver(m))
@@ -120,7 +127,7 @@ namespace MPR.ScoreConnectors
                 return m.Games.Count > 4 ? "FINAL (OT)" : "FINAL";
             }
 
-            if(m.Status == "IN_PROGRESS")
+            if(MatchLive(m))
             {
                 return "Live";
             }
@@ -133,6 +140,11 @@ namespace MPR.ScoreConnectors
             // Offset will be positive for timezones behind UTC
             DateTime clientTime = DateTimeOffset.FromUnixTimeMilliseconds(dateMs).ToUniversalTime().DateTime.AddMinutes(-clientOffset);
             return clientTime;
+        }
+
+        private bool MatchLive(Match m)
+        {
+            return m.Status == "IN_PROGRESS";
         }
 
         private bool MatchOver(Match m)

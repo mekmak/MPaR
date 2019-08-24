@@ -24,6 +24,8 @@ namespace MPR.Models.Games
         public string Time { get; set; }
         public string TimeLink { get; set; }
 
+        public string LiveLink { get; set; }
+
         public bool IsOver => Score != null && Score.ToLower().Contains("final");
 
         public string GetSummary()
