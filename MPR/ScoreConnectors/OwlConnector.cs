@@ -30,10 +30,10 @@ namespace MPR.ScoreConnectors
             thread.Start();
         }
 
-        public List<Game> GetGames(int clientOffset)
+        public List<OwlGame> GetGames(int clientOffset)
         {
             var currentMatches = new List<Match>(_currentMatches);
-            return _currentMatches.Select(m => ToGame(m, clientOffset)).ToList();
+            return currentMatches.Select(m => ToGame(m, clientOffset)).ToList();
         }
 
         private async void UpdateGames()
@@ -46,9 +46,9 @@ namespace MPR.ScoreConnectors
             }
         }
 
-        private Game ToGame(Match m, int clientOffset)
+        private OwlGame ToGame(Match m, int clientOffset)
         {
-            var game = new Game
+            var game = new OwlGame
             {
                 HomeTeam = m.Competitors[0].AbbreviatedName,
                 HomeTeamLink = GetLink(m.Competitors[0]),

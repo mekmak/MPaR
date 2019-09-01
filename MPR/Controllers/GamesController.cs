@@ -29,13 +29,14 @@ namespace MPR.Controllers
                 case SportType.Espn:
                     return GetEspnGames(gameType);
                 case SportType.Owl:
-                    return GetOwlGames(clientOffset);
+                    return GetEspnGames(gameType);
+                    //return GetOwlGames(clientOffset);
                 default:
                     return GetEspnGames(EspnScoreConnector.Sport.nfl.ToString());
             }
         }
 
-        private List<Game> GetOwlGames(int clientOffset)
+        private List<OwlGame> GetOwlGames(int clientOffset)
         {
             return OwlConnector.Instance.GetGames(clientOffset);
         }

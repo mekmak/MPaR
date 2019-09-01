@@ -111,7 +111,8 @@ namespace MPR.ScoreConnectors
 
         public List<Game> GetGames(Sport sport)
         {
-            if(_gameCache.TryGetValue(sport, out List<Game> games))
+            List<Game> games;
+            if(_gameCache.TryGetValue(sport, out games))
             {
                 return games;
             }
@@ -157,7 +158,8 @@ namespace MPR.ScoreConnectors
 
         private string TryShorten(string teamName)
         {
-            return !_shortNameMap.TryGetValue(teamName.Trim(), out string shortened) ? teamName : shortened;
+            string shortened;
+            return !_shortNameMap.TryGetValue(teamName.Trim(), out shortened) ? teamName : shortened;
         }
         
         private void SetShouldNotify(Sport sport, Game game)
@@ -240,9 +242,10 @@ namespace MPR.ScoreConnectors
                 string awayTeam = "";
                 string awayTeamScore = "";
 
-                foreach (var split in splits)
+                foreach (string split in splits)
                 {
-                    if (int.TryParse(split, out int teamScore))
+                    int teamScore = 0;
+                    if (int.TryParse(split, out teamScore))
                     {
                         if (awayTeamSet)
                         {
