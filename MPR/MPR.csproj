@@ -125,7 +125,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\Games\Game.cs" />
+    <Compile Include="Models\Games\EspnGame.cs" />
     <Compile Include="Models\Games\OwlGame.cs" />
     <Compile Include="Owl\Schedule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -169,7 +169,8 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Games\Index.cshtml" />
-    <Content Include="Views\Games\_Games.cshtml" />
+    <Content Include="Views\Games\_EspnGames.cshtml" />
+    <Content Include="Views\Games\_OwlGames.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

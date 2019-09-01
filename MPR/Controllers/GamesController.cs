@@ -16,23 +16,16 @@ namespace MPR.Controllers
 
         public ActionResult Games(string gameType, int offset = 0)
         {
-            List<Game> games = GetGames(gameType, offset);
-            return PartialView("_Games", games);
-        }
-
-        private List<Game> GetGames(string gameType, int clientOffset)
-        {
             SportType sportType = GetSportType(gameType);
-
             switch (sportType)
             {
                 case SportType.Espn:
-                    return GetEspnGames(gameType);
-                case SportType.Owl:
-                    return GetEspnGames(gameType);
-                    //return GetOwlGames(clientOffset);
+                    var espnGames = GetEspnGames(gameType);
+                    return PartialView("_EspnGames", espnGames);
                 default:
-                    return GetEspnGames(EspnScoreConnector.Sport.nfl.ToString());
+                    var owlGames = GetOwlGames(offset);
+                    return PartialView("_OwlGames", owlGames);
+
             }
         }
 
@@ -41,7 +34,7 @@ namespace MPR.Controllers
             return OwlConnector.Instance.GetGames(clientOffset);
         }
 
-        private List<Game> GetEspnGames(string gameType)
+        private List<EspnGame> GetEspnGames(string gameType)
         {
             EspnScoreConnector.Sport sportType;
             if(!Enum.TryParse(gameType.ToLower(), out sportType))
@@ -49,7 +42,7 @@ namespace MPR.Controllers
                 sportType = EspnScoreConnector.Sport.nfl;
             }
 
-            List<Game> games = EspnScoreConnector.Instance.GetGames(sportType);
+            List<EspnGame> games = EspnScoreConnector.Instance.GetGames(sportType);
             return games;
         }
 

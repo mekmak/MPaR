@@ -5,7 +5,7 @@ using System.Web;
 
 namespace MPR.Models.Games
 {
-    public class Game
+    public class EspnGame
     {
         public string HomeTeam { get; set; }
         public string AwayTeam { get; set; }

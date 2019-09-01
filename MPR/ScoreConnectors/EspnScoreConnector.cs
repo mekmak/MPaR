@@ -47,7 +47,7 @@ namespace MPR.ScoreConnectors
             {"Indianapolis", "IND" }
         };
 
-        private readonly ConcurrentDictionary<Sport, List<Game>> _gameCache = new ConcurrentDictionary<Sport, List<Game>>();
+        private readonly ConcurrentDictionary<Sport, List<EspnGame>> _gameCache = new ConcurrentDictionary<Sport, List<EspnGame>>();
         private readonly Dictionary<string, Tuple<string, string>> _scoreCache = new Dictionary<string, Tuple<string, string>>();
 
         #region Sport
@@ -88,7 +88,7 @@ namespace MPR.ScoreConnectors
         {
             var thread = new Thread(UpdateGames)
             {
-                Name = "Espn Game Pull",
+                Name = "Espn EspnGame Pull",
                 Priority = ThreadPriority.Normal,
                 IsBackground = true
             };
@@ -101,7 +101,7 @@ namespace MPR.ScoreConnectors
             {
                 foreach (Sport sport in Enum.GetValues(typeof(Sport)).Cast<Sport>())
                 {
-                    List<Game> games = DownloadGames(sport);
+                    List<EspnGame> games = DownloadGames(sport);
                     _gameCache.AddOrUpdate(sport, _ => games, (v1, v2) => games);
                 }
 
@@ -109,18 +109,18 @@ namespace MPR.ScoreConnectors
             }
         }
 
-        public List<Game> GetGames(Sport sport)
+        public List<EspnGame> GetGames(Sport sport)
         {
-            List<Game> games;
+            List<EspnGame> games;
             if(_gameCache.TryGetValue(sport, out games))
             {
                 return games;
             }
 
-            return new List<Game>();
+            return new List<EspnGame>();
         }
 
-        private List<Game> DownloadGames(Sport sport)
+        private List<EspnGame> DownloadGames(Sport sport)
         {
             var client = new RestClient(GetEndPoint(sport));
             string requestResponse = client.MakeRequest();
@@ -128,7 +128,7 @@ namespace MPR.ScoreConnectors
             NameValueCollection keyValues = HttpUtility.ParseQueryString(requestResponse);
 
             int gameCount = GetCount(sport, keyValues);
-            var games = new List<Game>();
+            var games = new List<EspnGame>();
             for (int gameNumber = 1; gameNumber <= gameCount; gameNumber++)
             {
                 string score = GetScore(sport, keyValues, gameNumber);
@@ -138,7 +138,7 @@ namespace MPR.ScoreConnectors
                 string homeTeam = sport == Sport.nfl ? TryShorten(gameInfo.HomeTeam) : gameInfo.HomeTeam;
                 string awayTeam = sport == Sport.nfl ? TryShorten(gameInfo.AwayTeam) : gameInfo.AwayTeam;
 
-                var game = new Game
+                var game = new EspnGame
                 {
                     HomeTeam = homeTeam,
                     HomeTeamScore = gameInfo.HomeTeamScore,
@@ -162,25 +162,25 @@ namespace MPR.ScoreConnectors
             return !_shortNameMap.TryGetValue(teamName.Trim(), out shortened) ? teamName : shortened;
         }
         
-        private void SetShouldNotify(Sport sport, Game game)
+        private void SetShouldNotify(Sport sport, EspnGame espnGame)
         {
-            string gameKey = $"{sport}.{game.HomeTeam}.{game.AwayTeam}";
+            string gameKey = $"{sport}.{espnGame.HomeTeam}.{espnGame.AwayTeam}";
 
             if (_scoreCache.ContainsKey(gameKey))
             {
-                if (!game.HomeTeamScore.Equals(_scoreCache[gameKey].Item1))
+                if (!espnGame.HomeTeamScore.Equals(_scoreCache[gameKey].Item1))
                 {
-                    game.NotifyHome = true;
+                    espnGame.NotifyHome = true;
                 }
 
-                if (!game.AwayTeamScore.Equals(_scoreCache[gameKey].Item2))
+                if (!espnGame.AwayTeamScore.Equals(_scoreCache[gameKey].Item2))
                 {
-                    game.NotifyAway = true;
+                    espnGame.NotifyAway = true;
                 }
             }
 
 
-            _scoreCache[gameKey] = new Tuple<string, string>(game.HomeTeamScore, game.AwayTeamScore);
+            _scoreCache[gameKey] = new Tuple<string, string>(espnGame.HomeTeamScore, espnGame.AwayTeamScore);
         }
 
         private int GetCount(Sport sport, NameValueCollection collection)
