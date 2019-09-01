@@ -125,7 +125,7 @@ namespace MPR.ScoreConnectors
         {
             if(MatchOver(m))
             {
-                return m.Games.Count > 4 ? "FINAL (OT)" : "FINAL";
+                return "Final";
             }
 
             if(MatchLive(m))
