@@ -4,7 +4,6 @@
         @foreach (var game in Model)
         {
         <tr>
-
             <td>@game.AwayTeam</td>
             @if (@game.NotifyAway)
             {
@@ -16,7 +15,6 @@
             }
 
             <td>@game.HomeTeam</td>
-
             @if (@game.NotifyHome)
             {
                 <td style="font-weight: bold">@game.HomeTeamScore</td>
@@ -26,16 +24,7 @@
                 <td>@game.HomeTeamScore</td>
             }
 
-            <td>
-                @if (@game.TimeLink == null)
-                {
-                    @game.Time
-                }
-                else
-                {
-                    <a href="@game.TimeLink">@game.Time</a>
-                }
-            </td>
+            <td><a href="@game.TimeLink">@game.Time</a></td>
         </tr>
         }
     </tbody>

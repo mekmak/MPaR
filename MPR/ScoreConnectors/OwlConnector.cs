@@ -53,12 +53,12 @@ namespace MPR.ScoreConnectors
                 HomeTeam = m.Competitors[0].AbbreviatedName,
                 HomeTeamLink = GetLink(m.Competitors[0]),
                 HomeTeamScore = GetScore(m, 0),
-                NotifyHome = ShouldNotify(m, 0),
+                HomeTeamWon = ShouldNotify(m, 0),
 
                 AwayTeam = m.Competitors[1].AbbreviatedName,
                 AwayTeamLink = GetLink(m.Competitors[1]),
                 AwayTeamScore = GetScore(m, 1),
-                NotifyAway = ShouldNotify(m, 1),
+                AwayTeamWon = ShouldNotify(m, 1),
 
                 Time = GetTime(m, clientOffset),
                 TimeLink = GetTimeLink(m),

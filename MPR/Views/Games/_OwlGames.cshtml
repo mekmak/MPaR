@@ -4,53 +4,29 @@
     @foreach (var game in Model)
     {
         <tr>
-
-            @if (@game.AwayTeamLink == null)
+            @if (@game.AwayTeamWon)
             {
-                <td>@game.AwayTeam</td>
+                <td style="font-weight: bold"><a href="@game.AwayTeamLink">@game.AwayTeam</a></td>
             }
             else
             {
                 <td><a href="@game.AwayTeamLink">@game.AwayTeam</a></td>
             }
+            <td>@game.AwayTeamScore</td>
 
-            @if (@game.NotifyAway)
+            @if (@game.HomeTeamWon)
             {
-                <td style="color: green">@game.AwayTeamScore</td>
-            }
-            else
-            {
-                <td>@game.AwayTeamScore</td>
-            }
-
-            @if (@game.HomeTeamLink == null)
-            {
-                <td>@game.HomeTeam</td>
+                <td style="font-weight: bold"><a href="@game.HomeTeamLink">@game.HomeTeam</a></td>
             }
             else
             {
                 <td><a href="@game.HomeTeamLink">@game.HomeTeam</a></td>
             }
-
-            @if (@game.NotifyHome)
-            {
-                <td style="color: green">@game.HomeTeamScore</td>
-            }
-            else
-            {
-                <td>@game.HomeTeamScore</td>
-            }
+            <td>@game.HomeTeamScore</td>
 
             <td>
-                @if (@game.TimeLink == null)
-                {
-                    @game.Time
-                }
-                else
-                {
-                    <a href="@game.TimeLink">@game.Time</a>
-                }
-                @if(game.LiveLink != null)
+                <a href="@game.TimeLink">@game.Time</a>
+                @if (game.LiveLink != null)
                 {
                     <span> | </span><a href="@game.LiveLink">Twitch</a>
                 }

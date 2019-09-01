@@ -7,8 +7,8 @@
         public string AwayTeam { get; set; }
         public string AwayTeamLink { get; set; }
 
-        public bool NotifyAway { get; set; }
-        public bool NotifyHome { get; set; }
+        public bool AwayTeamWon { get; set; }
+        public bool HomeTeamWon { get; set; }
 
         public string HomeTeamScore { get; set; }
         public string AwayTeamScore { get; set; }

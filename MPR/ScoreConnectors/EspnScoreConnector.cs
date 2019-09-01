@@ -220,11 +220,15 @@ namespace MPR.ScoreConnectors
                 string[] splits = score.Split(new [] { " " }, StringSplitOptions.RemoveEmptyEntries);
                 string[] timeSplits = score.Split(new[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);
 
-                string time = "";
+                string time = "-";
                 try
                 {
                     time = timeSplits[timeSplits.Length - 1];
-                    if (time != "FINAL")
+                    if(time == "FINAL" || time == "END OF 4TH" || time == "00:00 IN 4TH" || time == "00:00 IN 3RD")
+                    {
+                        time = "Final";
+                    }
+                    else
                     {
                         var quarterSplits = time.Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
                         time = quarterSplits[quarterSplits.Length - 1].ToLower();
