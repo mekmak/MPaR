@@ -1,30 +1,17 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading;
 using System.Web;
-using System.Web.Services.Description;
 using MPR.Models.Games;
 using MPR.Rest;
-using WebGrease;
 
 namespace MPR.ScoreConnectors
 {
     public class EspnScoreConnector
     {
-        private readonly List<string> _nameSubs = new List<string>
-        {
-            "Flaccid Chodes",
-            "Suckville",
-            "Butt Munchers",
-            "Grundle Grabbers",
-            "Shoplifters",
-            "Beliebers",
-            "Murderers",
-            "Wife Beaters"
-        };
-
         private readonly Dictionary<string, string> _shortNameMap = new Dictionary<string, string>
         {
             {"Kansas City", "KC"},
@@ -60,13 +47,8 @@ namespace MPR.ScoreConnectors
             {"Indianapolis", "IND" }
         };
 
-        private static readonly Dictionary<Sport, List<Game>> GameCache = new Dictionary<Sport, List<Game>>();
-
-        private static readonly Dictionary<string, Tuple<string, string>> ScoreCache =
-            new Dictionary<string, Tuple<string, string>>();
-
-        private static readonly object GameCacheLocker = new object();
-        private static readonly object PullInitLocker = new object();
+        private readonly ConcurrentDictionary<Sport, List<Game>> _gameCache = new ConcurrentDictionary<Sport, List<Game>>();
+        private readonly Dictionary<string, Tuple<string, string>> _scoreCache = new Dictionary<string, Tuple<string, string>>();
 
         #region Sport
 
@@ -120,41 +102,29 @@ namespace MPR.ScoreConnectors
                 foreach (Sport sport in Enum.GetValues(typeof(Sport)).Cast<Sport>())
                 {
                     List<Game> games = DownloadGames(sport);
-                    lock (GameCacheLocker)
-                    {
-                        GameCache[sport] = games;
-                    }
+                    _gameCache.AddOrUpdate(sport, _ => games, (v1, v2) => games);
                 }
 
                 Thread.Sleep(10000);
             }
         }
 
-        public void ResetCache()
-        {
-            GameCache.Clear();
-            ScoreCache.Clear();
-        }
-
         public List<Game> GetGames(Sport sport)
         {
-            if (!GameCache.ContainsKey(sport))
+            if(_gameCache.TryGetValue(sport, out List<Game> games))
             {
-                return new List<Game>();
+                return games;
             }
 
-            List<Game> games = GameCache[sport];
-            return games;
+            return new List<Game>();
         }
 
         private List<Game> DownloadGames(Sport sport)
         {
             var client = new RestClient(GetEndPoint(sport));
-            string requestRespone = client.MakeRequest();
+            string requestResponse = client.MakeRequest();
 
-            //Logger.Info(string.Format("Request response: {0}", requestRespone));
-
-            NameValueCollection keyValues = HttpUtility.ParseQueryString(requestRespone);
+            NameValueCollection keyValues = HttpUtility.ParseQueryString(requestResponse);
 
             int gameCount = GetCount(sport, keyValues);
             var games = new List<Game>();
@@ -179,9 +149,6 @@ namespace MPR.ScoreConnectors
                 };
 
                 SetShouldNotify(sport, game);
-                UpdateNames(game);
-
-                //Logger.Info(string.Format("Game: {0}", game));
                 games.Add(game);
             }
 
@@ -190,60 +157,33 @@ namespace MPR.ScoreConnectors
 
         private string TryShorten(string teamName)
         {
-            string shortened;
-            if (!_shortNameMap.TryGetValue(teamName.Trim(), out shortened))
-            {
-                return teamName;
-            }
-
-            return shortened;
+            return !_shortNameMap.TryGetValue(teamName.Trim(), out string shortened) ? teamName : shortened;
         }
-
-        private void UpdateNames(Game game)
-        {
-            if (game.AwayTeam.Equals("Baltimore"))
-            {
-                game.AwayTeam = GetNameSub();
-            }
-
-            if (game.HomeTeam.Equals("Baltimore"))
-            {
-                game.HomeTeam = GetNameSub();
-            }
-        }
-
-        private string GetNameSub()
-        {
-            int count = _nameSubs.Count;
-            var rand = new Random();
-            int num = rand.Next(0, count - 1);
-            return _nameSubs[num];
-        }
-
+        
         private void SetShouldNotify(Sport sport, Game game)
         {
             string gameKey = $"{sport}.{game.HomeTeam}.{game.AwayTeam}";
 
-            if (ScoreCache.ContainsKey(gameKey))
+            if (_scoreCache.ContainsKey(gameKey))
             {
-                if (!game.HomeTeamScore.Equals(ScoreCache[gameKey].Item1))
+                if (!game.HomeTeamScore.Equals(_scoreCache[gameKey].Item1))
                 {
                     game.NotifyHome = true;
                 }
 
-                if (!game.AwayTeamScore.Equals(ScoreCache[gameKey].Item2))
+                if (!game.AwayTeamScore.Equals(_scoreCache[gameKey].Item2))
                 {
                     game.NotifyAway = true;
                 }
             }
 
 
-            ScoreCache[gameKey] = new Tuple<string, string>(game.HomeTeamScore, game.AwayTeamScore);
+            _scoreCache[gameKey] = new Tuple<string, string>(game.HomeTeamScore, game.AwayTeamScore);
         }
 
         private int GetCount(Sport sport, NameValueCollection collection)
         {
-            return Int32.Parse(collection[GetCountKey(sport)]);
+            return int.Parse(collection[GetCountKey(sport)]);
         }
 
         private string GetScore(Sport sport, NameValueCollection collection, int gameNumber)
@@ -275,7 +215,7 @@ namespace MPR.ScoreConnectors
 
             if (score.IndexOf(" at ", StringComparison.Ordinal) < 0)
             {
-                string[] splits = score.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                string[] splits = score.Split(new [] { " " }, StringSplitOptions.RemoveEmptyEntries);
                 string[] timeSplits = score.Split(new[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);
 
                 string time = "";
@@ -302,8 +242,7 @@ namespace MPR.ScoreConnectors
 
                 foreach (var split in splits)
                 {
-                    int teamScore = 0;
-                    if (int.TryParse(split, out teamScore))
+                    if (int.TryParse(split, out int teamScore))
                     {
                         if (awayTeamSet)
                         {

@@ -32,6 +32,7 @@ namespace MPR.ScoreConnectors
 
         public List<Game> GetGames(int clientOffset)
         {
+            var currentMatches = new List<Match>(_currentMatches);
             return _currentMatches.Select(m => ToGame(m, clientOffset)).ToList();
         }
 
@@ -40,7 +41,7 @@ namespace MPR.ScoreConnectors
             while (true)
             {
                 List<Match> currentMatches = GetCurrentMatches();
-                _currentMatches = currentMatches;
+                Interlocked.Exchange(ref _currentMatches, currentMatches);
                 await Task.Delay(TimeSpan.FromSeconds(10));
             }
         }
