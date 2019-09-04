@@ -46,32 +46,60 @@ namespace MPR.ScoreConnectors
             }
         }
 
-        private OwlGame ToGame(Match m, int clientOffset)
+        private class CompetitorInfo
         {
-            var game = new OwlGame
+            public string TeamName { get; private set; }
+            public string TeamLink { get; private set; }
+
+            public static CompetitorInfo FromMatch(Competitor competitor)
             {
-                HomeTeam = m.Competitors[0].AbbreviatedName,
-                HomeTeamLink = GetLink(m.Competitors[0]),
-                HomeTeamScore = GetScore(m, 0),
-                HomeTeamWon = ShouldNotify(m, 0),
+                if (competitor == null)
+                {
+                    return Empty();
+                }
 
-                AwayTeam = m.Competitors[1].AbbreviatedName,
-                AwayTeamLink = GetLink(m.Competitors[1]),
-                AwayTeamScore = GetScore(m, 1),
-                AwayTeamWon = ShouldNotify(m, 1),
+                return new CompetitorInfo
+                {
+                    TeamName = competitor.AbbreviatedName,
+                    TeamLink = $"https://overwatchleague.com/en-us/teams/{competitor.Id}"
+                };
+            }
 
-                Time = GetTime(m, clientOffset),
-                TimeLink = GetTimeLink(m),
-
-                LiveLink = GetLiveLink(m)
-            };
-
-            return game;
+            private static CompetitorInfo Empty()
+            {
+                return new CompetitorInfo
+                {
+                    TeamName = "TBD",
+                    TeamLink = "https://overwatchleague.com/en-us/teams"
+                };
+            }
         }
 
-        private string GetLink(Competitor competitor)
+        private OwlGame ToGame(Match m, int clientOffset)
         {
-            return $"https://overwatchleague.com/en-us/teams/{competitor.Id}";
+            var game = new OwlGame();
+
+            var homeTeam = CompetitorInfo.FromMatch(m.Competitors[0]);
+            var awayTeam = CompetitorInfo.FromMatch(m.Competitors[1]);
+            
+            game.HomeTeam = homeTeam.TeamName;
+            game.HomeTeamLink = homeTeam.TeamLink;
+            game.AwayTeam = awayTeam.TeamName;
+            game.AwayTeamLink = awayTeam.TeamLink;
+
+            if (m.Scores.Any())
+            {
+                game.HomeTeamScore = GetScore(m, 0);
+                game.HomeTeamWon = ShouldNotify(m, 0);
+                game.AwayTeamScore = GetScore(m, 1);
+                game.AwayTeamWon = ShouldNotify(m, 1);
+            }
+
+            game.Time = GetTime(m, clientOffset);
+            game.TimeLink = GetTimeLink(m);
+            game.LiveLink = GetLiveLink(m);
+
+            return game;
         }
 
         private string GetTimeLink(Match match)
@@ -111,6 +139,11 @@ namespace MPR.ScoreConnectors
 
         private string GetScore(Match m, int index)
         {
+            if (!MatchLive(m))
+            {
+                return "-";
+            }
+
             string score = m.Scores[index].Value.ToString();
             string games = $"({string.Join("-", m.Games.Select(g => g.Points != null && g.Points.Count > index ? g.Points[index] : 0))})";
             return $"{score} {games}";
@@ -143,12 +176,12 @@ namespace MPR.ScoreConnectors
             return clientTime;
         }
 
-        private bool MatchLive(Match m)
+        private static bool MatchLive(Match m)
         {
             return m.Status == "IN_PROGRESS";
         }
 
-        private bool MatchOver(Match m)
+        private static bool MatchOver(Match m)
         {
             return m.Status.Equals("CONCLUDED");
         }
