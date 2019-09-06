@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.ModelBinding;
 using MPR.Models.Games;
 using MPR.Owl;
 
@@ -69,7 +70,7 @@ namespace MPR.ScoreConnectors
             {
                 return new CompetitorInfo
                 {
-                    TeamName = "TBD",
+                    TeamName = "---",
                     TeamLink = "https://overwatchleague.com/en-us/teams"
                 };
             }
@@ -139,7 +140,7 @@ namespace MPR.ScoreConnectors
 
         private string GetScore(Match m, int index)
         {
-            if (!MatchLive(m))
+            if (MatchPending(m))
             {
                 return "-";
             }
@@ -184,6 +185,11 @@ namespace MPR.ScoreConnectors
         private static bool MatchOver(Match m)
         {
             return m.Status.Equals("CONCLUDED");
+        }
+
+        private static bool MatchPending(Match m)
+        {
+            return !MatchLive(m) && !MatchOver(m);
         }
 
         private Schedule FetchSchedule()
