@@ -146,6 +146,11 @@ namespace MPR.ScoreConnectors
             }
 
             string score = m.Scores[index].Value.ToString();
+            if (MatchOver(m))
+            {
+                return score;
+            }
+
             string games = $"({string.Join("-", m.Games.Select(g => g.Points != null && g.Points.Count > index ? g.Points[index] : 0))})";
             return $"{score} {games}";
         }
