@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.ModelBinding;
 using MPR.Models.Games;
 using MPR.Owl;
 
@@ -172,7 +171,12 @@ namespace MPR.ScoreConnectors
                 return "Live";
             }
 
-            return GetClientTime(m.StartDate, clientOffset).ToString("ddd dd, HH:mm");
+            if (!m.StartDate.HasValue)
+            {
+                return "Unknown";
+            }
+
+            return GetClientTime(m.StartDate.Value, clientOffset).ToString("ddd dd, HH:mm");
         }
 
         private DateTime GetClientTime(long dateMs, int clientOffset)

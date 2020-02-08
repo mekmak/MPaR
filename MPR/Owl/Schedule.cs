@@ -60,10 +60,10 @@ namespace MPR.Owl
         public string Status { get; set; }
 
         [JsonProperty("startDateTS")]
-        public long StartDate { get; set; }
+        public long? StartDate { get; set; }
 
         [JsonProperty("endDateTS")]
-        public long EndDate { get; set; }
+        public long? EndDate { get; set; }
 
         [JsonProperty("competitors")]
         public List<Competitor> Competitors { get; set; }
