@@ -127,11 +127,13 @@
     </Compile>
     <Compile Include="Models\Games\EspnGame.cs" />
     <Compile Include="Models\Games\OwlGame.cs" />
-    <Compile Include="Owl\Schedule.cs" />
+    <Compile Include="Owl\V1\Schedule.cs" />
+    <Compile Include="Owl\V2\Schedule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rest\RestClient.cs" />
     <Compile Include="ScoreConnectors\EspnScoreConnector.cs" />
-    <Compile Include="ScoreConnectors\OwlConnector.cs" />
+    <Compile Include="ScoreConnectors\OwlConnectorV1.cs" />
+    <Compile Include="ScoreConnectors\OwlConnectorV2.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />

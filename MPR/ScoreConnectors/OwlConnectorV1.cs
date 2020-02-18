@@ -6,15 +6,18 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using MPR.Models.Games;
-using MPR.Owl;
+using MPR.Owl.V1;
 
 namespace MPR.ScoreConnectors
 {
-    public class OwlConnector
+    /// <summary>
+    /// Used for the 2019 season - does not work for 2020 (yet)
+    /// </summary>
+    public class OwlConnectorV1
     {
-        private OwlConnector() { }
+        private OwlConnectorV1() { }
 
-        public static OwlConnector Instance = new OwlConnector();
+        public static OwlConnectorV1 Instance = new OwlConnectorV1();
         private volatile List<Match> _currentMatches = new List<Match>();
 
         public void InitGameDownload()
@@ -23,7 +26,7 @@ namespace MPR.ScoreConnectors
 
             var thread = new Thread(UpdateGames)
             {
-                Name = "Owl Game Pull",
+                Name = "Owl Game Pull V1",
                 Priority = ThreadPriority.Normal,
                 IsBackground = true
             };

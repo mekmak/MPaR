@@ -28,10 +28,10 @@ namespace MPR.Controllers
 
             }
         }
-
+        
         private List<OwlGame> GetOwlGames(int clientOffset)
         {
-            return OwlConnector.Instance.GetGames(clientOffset);
+            return OwlConnectorV2.Instance.GetGames(clientOffset);
         }
 
         private List<EspnGame> GetEspnGames(string gameType)

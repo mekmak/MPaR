@@ -17,5 +17,6 @@
         public string TimeLink { get; set; }
 
         public string LiveLink { get; set; }
+        public int Week { get; set; }
     }
 }

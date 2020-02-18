@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace MPR.Owl
+namespace MPR.Owl.V1
 {
     public class Schedule
     {

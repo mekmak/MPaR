@@ -1,38 +1,42 @@
 ﻿@model List<MPR.Models.Games.OwlGame>
 <table class="table" id="example">
     <tbody>
-    @foreach (var game in Model)
+    @foreach (var week in Model.Select(m => m.Week).Distinct().OrderBy(w => w))
     {
-        <tr>
-            @if (@game.AwayTeamWon)
-            {
-                <td style="font-weight: bold"><a href="@game.AwayTeamLink">@game.AwayTeam</a></td>
-            }
-            else
-            {
-                <td><a href="@game.AwayTeamLink">@game.AwayTeam</a></td>
-            }
-            <td>@game.AwayTeamScore</td>
-
-            @if (@game.HomeTeamWon)
-            {
-                <td style="font-weight: bold"><a href="@game.HomeTeamLink">@game.HomeTeam</a></td>
-            }
-            else
-            {
-                <td><a href="@game.HomeTeamLink">@game.HomeTeam</a></td>
-            }
-            <td>@game.HomeTeamScore</td>
-
-            <td>
-                <a href="@game.TimeLink">@game.Time</a>
-                @if (game.LiveLink != null)
+        <tr><td colspan="5">Week @week</td></tr>
+        foreach (var game in Model.Where(m => m.Week == week))
+        {
+            <tr>
+                @if (@game.AwayTeamWon)
                 {
-                    <span> | </span><a href="@game.LiveLink">Twitch</a>
+                    <td style="font-weight: bold"><a href="@game.AwayTeamLink">@game.AwayTeam</a></td>
                 }
-            </td>
+                else
+                {
+                    <td><a href="@game.AwayTeamLink">@game.AwayTeam</a></td>
+                }
+                <td>@game.AwayTeamScore</td>
 
-        </tr>
+                @if (@game.HomeTeamWon)
+                {
+                    <td style="font-weight: bold"><a href="@game.HomeTeamLink">@game.HomeTeam</a></td>
+                }
+                else
+                {
+                    <td><a href="@game.HomeTeamLink">@game.HomeTeam</a></td>
+                }
+                <td>@game.HomeTeamScore</td>
+
+                <td>
+                    <a href="@game.TimeLink">@game.Time</a>
+                    @if (game.LiveLink != null)
+                    {
+                        <span> | </span><a href="@game.LiveLink">Live</a>
+                    }
+                </td>
+
+            </tr>
+        }
     }
     </tbody>
 </table>
