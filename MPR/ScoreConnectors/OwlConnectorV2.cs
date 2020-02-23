@@ -189,7 +189,7 @@ namespace MPR.ScoreConnectors
 
         private async Task<List<Schedule>> FetchLatestSchedules()
         {
-            int currentWeek = CultureInfo.CurrentUICulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay,DayOfWeek.Monday);
+            int currentWeek = CultureInfo.CurrentUICulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Saturday);
             int owlWeek = currentWeek - 6; // Tribal knowledge
 
             var scheduleTasks = new List<Task<Schedule>>();

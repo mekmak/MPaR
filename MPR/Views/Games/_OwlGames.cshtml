@@ -1,4 +1,6 @@
-﻿@model List<MPR.Models.Games.OwlGame>
+﻿@model List<MPR.Models.
+
+.OwlGame>
 <table class="table" id="example">
     <tbody>
     @foreach (var week in Model.Select(m => m.Week).Distinct().OrderBy(w => w))
@@ -31,7 +33,7 @@
                     <a href="@game.TimeLink">@game.Time</a>
                     @if (game.LiveLink != null)
                     {
-                        <span> | </span><a href="@game.LiveLink">Live</a>
+                        <span> | </span><a href="@game.LiveLink">Watch</a>
                     }
                 </td>
 
