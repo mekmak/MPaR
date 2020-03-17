@@ -190,26 +190,58 @@ namespace MPR.ScoreConnectors
         private async Task<List<Schedule>> FetchLatestSchedules()
         {
             int currentWeek = CultureInfo.CurrentUICulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Saturday);
-            int owlWeek = currentWeek - 6; // Tribal knowledge
-
-            var scheduleTasks = new List<Task<Schedule>>();
-            if (owlWeek > 1)
-            {
-                scheduleTasks.Add(FetchSchedule(owlWeek - 1));
-            }
-
-            if (owlWeek > 0)
-            {
-                scheduleTasks.Add(FetchSchedule(owlWeek));
-            }
-
-            if (owlWeek > -1)
-            {
-                scheduleTasks.Add(FetchSchedule(owlWeek + 1));
-            }
-
+            int[] weeksToDisplay = GetWeeksToFetch(currentWeek, 3);
+            List<Task<Schedule>> scheduleTasks = weeksToDisplay.Select(FetchSchedule).ToList();
             var schedules = await Task.WhenAll(scheduleTasks);
             return schedules.ToList();
+        }
+
+        public const int CoronaWeek = 6; // Week skipped due to COVID-19
+        public const int LastOwlWeek = 27;
+        /// <summary>
+        /// Returns which weeks to display, skipping weeks that had no games
+        /// </summary>
+        public int[] GetWeeksToFetch(int currentWeek, int numOfWeeksToDisplay)
+        {
+            if (numOfWeeksToDisplay > LastOwlWeek)
+            {
+                numOfWeeksToDisplay = LastOwlWeek;
+            }
+
+            int owlWeek = currentWeek - 6; // Tribal knowledge
+
+            // We want 'this' week to be in the 'middle'
+            int firstWeekToDisplay = owlWeek - (numOfWeeksToDisplay / 2);
+
+            // If it's still the beginning, just show the first x weeks
+            if (firstWeekToDisplay < 1)
+            {
+                firstWeekToDisplay = 1;
+            }
+
+            // If it's near the end, show the last x weeks
+            if (firstWeekToDisplay + numOfWeeksToDisplay > LastOwlWeek)
+            {
+                firstWeekToDisplay = LastOwlWeek - numOfWeeksToDisplay + 1;
+            }
+
+            int[] weeks = new int[numOfWeeksToDisplay];
+            bool coronaWeekSkipped = false;
+            for(int index = 0; index < numOfWeeksToDisplay; index++)
+            {
+                int week = firstWeekToDisplay + index;
+
+                // If corona-week is one of the ones we would have normally displayed, then shift everything forward after that week
+                if (week == CoronaWeek)
+                {
+                    coronaWeekSkipped = true;
+                }
+
+                int weekToDisplay = coronaWeekSkipped ? week + 1 : week;
+                weeks[index] = weekToDisplay;
+            }
+
+            return weeks;
         }
 
         private async Task<Schedule> FetchSchedule(int weekNumber)
