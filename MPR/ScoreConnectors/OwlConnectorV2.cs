@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using MPR.Models.Games;
@@ -94,9 +93,6 @@ namespace MPR.ScoreConnectors
                 return score;
             }
 
-            // TODO - will  have to see what live games  return to do  this part
-            //string games = $"({string.Join("-", m.Games.Select(g => g.Points != null && g.Points.Count > index ? g.Points[index] : 0))})";
-            //return $"{score} {games}";
             return score;
         }
 
@@ -186,7 +182,7 @@ namespace MPR.ScoreConnectors
             }
         }
 
-        public const int CoronaWeek = 6; // Week skipped due to COVID-19
+        public static readonly int[] CoronaWeeks = { 6, 7 }; // Weeks skipped due to COVID-19
         public const int LastOwlWeek = 27;
 
         private async Task<List<Schedule>> FetchLatestSchedules()
@@ -194,7 +190,7 @@ namespace MPR.ScoreConnectors
             int currentWeek = CultureInfo.CurrentUICulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Saturday);
             int owlWeek = currentWeek - 6; // Tribal knowledge
 
-            int[] weeksToDisplay = GetWeeksToFetch(owlWeek, 3, LastOwlWeek, new [] { CoronaWeek });
+            int[] weeksToDisplay = GetWeeksToFetch(owlWeek, 3, LastOwlWeek, CoronaWeeks);
             List<Task<Schedule>> scheduleTasks = weeksToDisplay.Select(FetchSchedule).ToList();
             var schedules = await Task.WhenAll(scheduleTasks);
             return schedules.ToList();
