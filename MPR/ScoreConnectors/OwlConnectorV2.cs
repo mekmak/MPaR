@@ -182,7 +182,12 @@ namespace MPR.ScoreConnectors
             }
         }
 
-        public static readonly int[] CoronaWeeks = { 6, 7 }; // Weeks skipped due to COVID-19
+        public static readonly int[] WeeksToSkip =
+        {
+            6, 7, // Weeks skipped due to COVID-19
+            13    // Not sure why, but no games this week
+        }; 
+
         public const int LastOwlWeek = 27;
 
         private async Task<List<Schedule>> FetchLatestSchedules()
@@ -190,7 +195,7 @@ namespace MPR.ScoreConnectors
             int currentWeek = CultureInfo.CurrentUICulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Saturday);
             int owlWeek = currentWeek - 6; // Tribal knowledge
 
-            int[] weeksToDisplay = GetWeeksToFetch(owlWeek, 3, LastOwlWeek, CoronaWeeks);
+            int[] weeksToDisplay = GetWeeksToFetch(owlWeek, 3, LastOwlWeek, WeeksToSkip);
             List<Task<Schedule>> scheduleTasks = weeksToDisplay.Select(FetchSchedule).ToList();
             var schedules = await Task.WhenAll(scheduleTasks);
             return schedules.ToList();
