@@ -15,154 +15,154 @@
     margin: 0;
 }
 
-.bracket td.top {
-    border-bottom: solid black 1px;
-}
+    .bracket td.top {
+        border-bottom: solid black 1px;
+    }
 
-.bracket td.bottom {
-    border-bottom: solid black 1px;
-    border-right: solid black 1px;
-}
+    .bracket td.bottom {
+        border-bottom: solid black 1px;
+        border-right: solid black 1px;
+    }
 
-.bracket td.gap {
-    border-right: solid black 1px;
-}
+    .bracket td.gap {
+        border-right: solid black 1px;
+    }
 
-.bracket td span {
-    padding-top: 10px;
-    padding-left: 5px;
-}
+    .bracket td span {
+        padding-top: 10px;
+        padding-left: 5px;
+    }
 
-/* Players */
+        /* Players */
 
-/* 16 */
+        /* 16 */
 
-.bracket td span.s1:after {
-    content: '1';
-}
+        .bracket td span.s1:after {
+            content: 'Megan / Maya';
+        }
 
-.bracket td span.s2:after {
-    content: '2';
-}
+        .bracket td span.s2:after {
+            content: 'Chris';
+        }
 
-.bracket td span.s3:after {
-    content: '3';
-}
+        .bracket td span.s3:after {
+            content: 'Mirek';
+        }
 
-.bracket td span.s4:after {
-    content: '4';
-}
+        .bracket td span.s4:after {
+            content: 'Ursula';
+        }
 
-.bracket td span.s5:after {
-    content: '5';
-}
+        .bracket td span.s5:after {
+            content: 'Wojtek';
+        }
 
-.bracket td span.s6:after {
-    content: '6';
-}
+        .bracket td span.s6:after {
+            content: 'Jurek';
+        }
 
-.bracket td span.s7:after {
-    content: '7';
-}
+        .bracket td span.s7:after {
+            content: 'Lodzia';
+        }
 
-.bracket td span.s8:after {
-    content: '8';
-}
+        .bracket td span.s8:after {
+            content: 'Maria';
+        }
 
-.bracket td span.s9:after {
-    content: '9';
-}
+        .bracket td span.s9:after {
+            content: 'Jasiek';
+        }
 
-.bracket td span.s10:after {
-    content: '10';
-}
+        .bracket td span.s10:after {
+            content: 'Alex';
+        }
 
-.bracket td span.s11:after {
-    content: '11';
-}
+        .bracket td span.s11:after {
+            content: 'Mishmek';
+        }
 
-.bracket td span.s12:after {
-    content: '12';
-}
+        .bracket td span.s12:after {
+            content: 'Klara';
+        }
 
-.bracket td span.s13:after {
-    content: '13';
-}
+        .bracket td span.s13:after {
+            content: 'Dorota';
+        }
 
-.bracket td span.s14:after {
-    content: '14';
-}
+        .bracket td span.s14:after {
+            content: 'Ania';
+        }
 
-.bracket td span.s15:after {
-    content: '15';
-}
+        .bracket td span.s15:after {
+            content: 'Misia';
+        }
 
-.bracket td span.s16:after {
-    content: '16';
-}
+        .bracket td span.s16:after {
+            content: 'Martin / Max';
+        }
 
-/* Eight */
+        /* Eight */
 
-.bracket td span.e1:after {
-    content: '1';
-}
+        .bracket td span.e1:after {
+            content: '-';
+        }
 
-.bracket td span.e2:after {
-    content: '4';
-}
+        .bracket td span.e2:after {
+            content: '-';
+        }
 
-.bracket td span.e3:after {
-    content: '6';
-}
+        .bracket td span.e3:after {
+            content: '-';
+        }
 
-.bracket td span.e4:after {
-    content: '7';
-}
+        .bracket td span.e4:after {
+            content: '-';
+        }
 
-.bracket td span.e5:after {
-    content: '10';
-}
+        .bracket td span.e5:after {
+            content: '-';
+        }
 
-.bracket td span.e6:after {
-    content: '11';
-}
+        .bracket td span.e6:after {
+            content: '-';
+        }
 
-.bracket td span.e7:after {
-    content: '13';
-}
+        .bracket td span.e7:after {
+            content: '-';
+        }
 
-.bracket td span.e8:after {
-    content: '16';
-}
+        .bracket td span.e8:after {
+            content: '-';
+        }
 
-/* Four */
+        /* Four */
 
-.bracket td span.f1:after {
-    content: '1';
-}
+        .bracket td span.f1:after {
+            content: '-';
+        }
 
-.bracket td span.f2:after {
-    content: '7';
-}
+        .bracket td span.f2:after {
+            content: '-';
+        }
 
-.bracket td span.f3:after {
-    content: '11';
-}
+        .bracket td span.f3:after {
+            content: '-';
+        }
 
-.bracket td span.f4:after {
-    content: '16';
-}
+        .bracket td span.f4:after {
+            content: '-';
+        }
 
-/* Two */
-.bracket td span.t1:after {
-    content: '1';
-}
+        /* Two */
+        .bracket td span.t1:after {
+            content: '-';
+        }
 
-.bracket td span.t2:after {
-    content: '16';
-}
+        .bracket td span.t2:after {
+            content: '-';
+        }
 
-/* Champ */
-.bracket td span.c1:after {
-    content: '16';
-}
+        /* Champ */
+        .bracket td span.c1:after {
+            content: '-';
+        }
