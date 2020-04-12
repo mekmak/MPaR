@@ -50,7 +50,7 @@
         }
 
         .bracket td span.s4:after {
-            content: 'Ursula';
+            content: 'Urszula';
         }
 
         .bracket td span.s5:after {
@@ -104,65 +104,65 @@
         /* Eight */
 
         .bracket td span.e1:after {
-            content: '-';
+            content: 'Jurek';
         }
 
         .bracket td span.e2:after {
-            content: '-';
+            content: 'Urszula';
         }
 
         .bracket td span.e3:after {
-            content: '-';
+            content: 'Wojtek';
         }
 
         .bracket td span.e4:after {
-            content: '-';
+            content: 'Maria';
         }
 
         .bracket td span.e5:after {
-            content: '-';
+            content: 'Alex';
         }
 
         .bracket td span.e6:after {
-            content: '-';
+            content: 'Mishmek';
         }
 
         .bracket td span.e7:after {
-            content: '-';
+            content: 'Ania';
         }
 
         .bracket td span.e8:after {
-            content: '-';
+            content: 'Martin / Max';
         }
 
         /* Four */
 
         .bracket td span.f1:after {
-            content: '-';
+            content: 'Urszula';
         }
 
         .bracket td span.f2:after {
-            content: '-';
+            content: 'Wojtek';
         }
 
         .bracket td span.f3:after {
-            content: '-';
+            content: 'Mishmek';
         }
 
         .bracket td span.f4:after {
-            content: '-';
+            content: 'Ania';
         }
 
         /* Two */
         .bracket td span.t1:after {
-            content: '-';
+            content: 'Wojtek';
         }
 
         .bracket td span.t2:after {
-            content: '-';
+            content: 'Mishmek';
         }
 
         /* Champ */
         .bracket td span.c1:after {
-            content: '-';
+            content: 'Mishmek';
         }
