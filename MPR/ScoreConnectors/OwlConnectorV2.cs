@@ -184,8 +184,7 @@ namespace MPR.ScoreConnectors
 
         public static readonly int[] WeeksToSkip =
         {
-            6, 7, // Weeks skipped due to COVID-19
-            13    // Not sure why, but no games this week
+            6, 7 // Weeks skipped due to COVID-19
         }; 
 
         public const int LastOwlWeek = 27;
