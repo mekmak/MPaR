@@ -163,169 +163,97 @@ namespace MPR.ScoreConnectors
                     return;
                 }
 
-                List<Week> currentWeeks = await GetNearestWeeks();
+                List<Week> currentWeeks;
+                try
+                {
+                    currentWeeks = await FetchLatestWeeks();
+                }
+                catch
+                {
+                    currentWeeks = new List<Week>();
+                }
+
                 Interlocked.Exchange(ref _currentWeeks, currentWeeks);
                 await Task.Delay(TimeSpan.FromSeconds(10), token);
             }
         }
 
-        private async Task<List<Week>> GetNearestWeeks()
+        private enum Direction
+        {
+            Forward,
+            Back
+        }
+
+        private static async Task<List<Week>> FetchLatestWeeks()
+        {
+            int owlWeek = GetCurrentOwlWeek();
+            var backTask = FetchWeeks(owlWeek - 1, 1, Direction.Back);
+            var forwardTask = FetchWeeks(owlWeek, 2, Direction.Forward);
+            var weeks = await Task.WhenAll(backTask, forwardTask);
+            return weeks.SelectMany(w => w).ToList();
+        }
+
+        private static int GetCurrentOwlWeek()
+        {
+            int currentWeek = CultureInfo.CurrentUICulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Saturday);
+            return currentWeek - 6; // Tribal knowledge
+        }
+
+        private static async Task<List<Week>> FetchWeeks(int weekNumber, int numberOfWeeks, Direction direction)
+        {
+            Func<int, int> incrementer;
+            switch (direction)
+            {
+                case Direction.Forward:
+                    incrementer = i => i + 1;
+                    break;
+                case Direction.Back:
+                    incrementer = i => i - 1;
+                    break;
+                default:
+                    throw new ArgumentException($"Unhandled fetch direction '{direction}");
+            }
+
+            int nullWeeksEncountered = 0;
+            var weeks = new List<Week>();
+
+            while (weeks.Count < numberOfWeeks && nullWeeksEncountered < 3)
+            {
+                if (weekNumber < 1)
+                {
+                    break;
+                }
+
+                Week week = await FetchWeek(weekNumber) ?? await FetchWeek(weekNumber); // retry once
+                if (week != null)
+                {
+                    weeks.Add(week);
+                }
+                else
+                {
+                    nullWeeksEncountered++;
+                }
+
+                weekNumber = incrementer(weekNumber);
+            }
+
+            return weeks;
+        }
+
+        private static async Task<Week> FetchWeek(int week)
         {
             try
             {
-                List<Schedule> schedules = await FetchLatestSchedules();
-                return schedules.Select(s => s.Content.Week).ToList();
+                Schedule schedule = await FetchSchedule(week);
+                return schedule?.Content?.Week;
             }
             catch
             {
-                return new List<Week>();
+                return null;
             }
         }
 
-        public static readonly int[] WeeksToSkip =
-        {
-            6, 7 // Weeks skipped due to COVID-19
-        }; 
-
-        public const int LastOwlWeek = 27;
-
-        private async Task<List<Schedule>> FetchLatestSchedules()
-        {
-            int currentWeek = CultureInfo.CurrentUICulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Saturday);
-            int owlWeek = currentWeek - 6; // Tribal knowledge
-
-            int[] weeksToDisplay = GetWeeksToFetch(owlWeek, 3, LastOwlWeek, WeeksToSkip);
-            List<Task<Schedule>> scheduleTasks = weeksToDisplay.Select(FetchSchedule).ToList();
-            var schedules = await Task.WhenAll(scheduleTasks);
-            return schedules.ToList();
-        }
-        
-        /// <summary>
-        /// Returns which weeks to display, skipping weeks that had no games
-        /// </summary>
-        public int[] GetWeeksToFetch(int owlWeek, int numOfWeeksToDisplay, int lastWeek, IEnumerable<int> weeksToSkipIn)
-        {
-            if (numOfWeeksToDisplay < 1)
-            {
-                return new int[0];
-            }
-
-            var weeksToSkip = new HashSet<int>(weeksToSkipIn);
-
-            if (numOfWeeksToDisplay > lastWeek)
-            {
-                numOfWeeksToDisplay = lastWeek;
-            }
-
-            // We want 'this' week to be in the 'middle'
-            int middleIndex = numOfWeeksToDisplay / 2;
-            int firstWeekToDisplay = owlWeek - middleIndex;
-            if (numOfWeeksToDisplay % 2 == 0)
-            {
-                // If there is an odd number of weeks to display, we have an even amount on each side
-                // Otherwise, show more upcoming games than finished games
-                firstWeekToDisplay++;
-                middleIndex--;
-            }
-
-            // If it's still the beginning, just show the first x weeks
-            if (firstWeekToDisplay < 1)
-            {
-                firstWeekToDisplay = 1;
-            }
-
-            // If it's near the end, show the last x weeks
-            if (firstWeekToDisplay + numOfWeeksToDisplay > lastWeek)
-            {
-                firstWeekToDisplay = lastWeek - numOfWeeksToDisplay + 1;
-            }
-
-            
-            var weeks = new LinkedList<int>();
-
-            int backSkipCount = 0;
-            int missingBehind = 0;
-            for (int index = middleIndex - 1; index >= 0; index--)
-            {
-                int week = firstWeekToDisplay + index - backSkipCount;
-                while (weeksToSkip.Contains(week))
-                {
-                    backSkipCount++;
-                    week--;
-                }
-
-                if (week > 0)
-                {
-                    weeks.AddFirst(week);
-                }
-                else
-                {
-                    missingBehind++;
-                }
-            }
-
-            int frontSkipCount = 0;
-            int missingInFront = 0;
-            for(int index = middleIndex; index < numOfWeeksToDisplay; index++)
-            {
-                int week = firstWeekToDisplay + index + frontSkipCount;
-                while (weeksToSkip.Contains(week))
-                {
-                    frontSkipCount++;
-                    week++;
-                }
-
-                if (week <= lastWeek)
-                {
-                    weeks.AddLast(week);
-                }
-                else
-                {
-                    missingInFront++;
-                }
-            }
-
-            if (missingBehind > 0 ^ missingInFront > 0)
-            {
-                if (missingBehind > 0)
-                {
-                    int nextValue = weeks.Last.Value + 1;
-                    while (weeks.Count < numOfWeeksToDisplay && missingBehind > 0 && nextValue <= lastWeek)
-                    {
-                        if (weeksToSkip.Contains(nextValue))
-                        {
-                            nextValue++;
-                            continue;
-                        }
-
-                        weeks.AddLast(nextValue);
-                        nextValue++;
-                        missingBehind--;
-                    }
-                }
-
-                if (missingInFront > 0)
-                {
-                    int nextValue = weeks.First.Value - 1;
-                    while (weeks.Count < numOfWeeksToDisplay && missingInFront > 0 && nextValue > 0)
-                    {
-                        if (weeksToSkip.Contains(nextValue))
-                        {
-                            nextValue--;
-                            continue;
-                        }
-
-                        weeks.AddFirst(nextValue);
-                        nextValue--;
-                        missingBehind--;
-                    }
-                }
-            }
-
-            return weeks.ToArray();
-        }
-
-        private async Task<Schedule> FetchSchedule(int weekNumber)
+        private static async Task<Schedule> FetchSchedule(int weekNumber)
         {
             try
             {
