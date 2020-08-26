@@ -9,7 +9,7 @@ namespace Mekmak.EndpointTester
     {
         static void Main(string[] args)
         {
-            for (int weekNumber = 12; weekNumber <= 12; weekNumber++)
+            for (int weekNumber = 1; weekNumber <= 1; weekNumber++)
             {
                 string schedule = DownloadGames(weekNumber).Result;
                 File.WriteAllText($".\\response{weekNumber}.json", schedule);
@@ -21,14 +21,19 @@ namespace Mekmak.EndpointTester
         {
             var uri = new Uri($"https://wzavfvwgfk.execute-api.us-east-2.amazonaws.com/production/owl/paginator/schedule?stage=regular_season&season=2020&locale=en-us&page={weekNumber}");
             using var request = new HttpRequestMessage(HttpMethod.Get, uri);
-            request.Headers.Add("Referer", "https://overwatchleague.com/en-us/schedule?stage=regular_season");
-
+            //request.Headers.Add("Referer", "https://overwatchleague.com/en-us/schedule?stage=regular_season");
+                                            //https://overwatchleague.com/en-us/2020-playoffs?stage=regular_season&week=1
+            request.Headers.Add("Referer", "https://overwatchleague.com/en-us/2020-playoffs?stage=regular_season&week=1");
+            request.Headers.Add("x-origin", "overwatchleague.com");
+            
             using var httpClient = new HttpClient();
             var response = await httpClient.SendAsync(request);
             var responseString = await response.Content.ReadAsStringAsync();
 
             return responseString;
         }
+
+        
 
     }
 }

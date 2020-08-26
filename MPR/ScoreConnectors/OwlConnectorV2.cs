@@ -32,7 +32,11 @@ namespace MPR.ScoreConnectors
         public List<OwlGame> GetGames(int clientOffset)
         {
             var currentWeeks = new List<Week>(_currentWeeks);
-            return currentWeeks.SelectMany(w => ToGames(w, clientOffset)).ToList();
+            return currentWeeks
+                .OrderBy(w => w.WeekName.Contains("Playoffs") ? 1 : 0)
+                .ThenBy(w => w.WeekNumber)
+                .SelectMany(w => ToGames(w, clientOffset))
+                .ToList();
         }
 
         #region UI 
@@ -44,7 +48,11 @@ namespace MPR.ScoreConnectors
 
         private OwlGame ToGame(Match match, Week week, int clientOffset)
         {
-            var game = new OwlGame { Week = week.WeekNumber };
+            var game = new OwlGame
+            {
+                WeekName = week.WeekName,
+                WeekNumber = week.WeekNumber
+            };
 
             var homeTeam = new Team(match.Competitors.Count > 0 ? match.Competitors[0] : null);
             var awayTeam = new Team(match.Competitors.Count > 1 ? match.Competitors[1] : null);
@@ -186,29 +194,75 @@ namespace MPR.ScoreConnectors
 
         private static async Task<List<Week>> FetchLatestWeeks()
         {
-            int owlWeek = GetCurrentOwlWeek();
-            var backTask = FetchWeeks(owlWeek - 1, 1, Direction.Back);
+            WeekNumber owlWeek = GetCurrentOwlWeek();
+            var backTask = FetchWeeks(GetPreviousWeek(owlWeek), 1, Direction.Back);
             var forwardTask = FetchWeeks(owlWeek, 2, Direction.Forward);
             var weeks = await Task.WhenAll(backTask, forwardTask);
             return weeks.SelectMany(w => w).ToList();
         }
 
-        private static int GetCurrentOwlWeek()
+        private const int LastRegularSeasonWeek = 29;
+        private static WeekNumber GetCurrentOwlWeek()
         {
             int currentWeek = CultureInfo.CurrentUICulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Saturday);
-            return currentWeek - 6; // Tribal knowledge
+            int owlWeek = currentWeek - 6; // Tribal knowledge
+            return owlWeek <= LastRegularSeasonWeek 
+                ? WeekNumber.RegularSeason(owlWeek) 
+                : WeekNumber.Playoffs(owlWeek - LastRegularSeasonWeek);
         }
 
-        private static async Task<List<Week>> FetchWeeks(int weekNumber, int numberOfWeeks, Direction direction)
+        private static WeekNumber GetPreviousWeek(WeekNumber weekNumber)
         {
-            Func<int, int> incrementer;
+            switch (weekNumber.Type)
+            {
+                case WeekType.Playoffs:
+                {
+                    return weekNumber.Number > 1
+                        ? WeekNumber.Playoffs(weekNumber.Number - 1)
+                        : WeekNumber.RegularSeason(LastRegularSeasonWeek);
+                }
+                case WeekType.RegularSeason:
+                {
+                    return WeekNumber.RegularSeason(Math.Max(1, weekNumber.Number - 1));
+                }
+                default:
+                {
+                    throw new ArgumentException($"Cannot get previous week, unsupported week type '{weekNumber.Type}'");
+                }
+            }
+        }
+
+        private static WeekNumber GetNextWeek(WeekNumber weekNumber)
+        {
+            switch (weekNumber.Type)
+            {
+                case WeekType.Playoffs:
+                {
+                    return WeekNumber.Playoffs(weekNumber.Number + 1);
+                }
+                case WeekType.RegularSeason:
+                {
+                    return weekNumber.Number >= LastRegularSeasonWeek
+                        ? WeekNumber.Playoffs(1)
+                        : WeekNumber.RegularSeason(weekNumber.Number + 1);
+                }
+                default:
+                {
+                    throw new ArgumentException($"Cannot get next week, unsupported week type '{weekNumber.Type}'");
+                }
+            }
+        }
+
+        private static async Task<List<Week>> FetchWeeks(WeekNumber weekNumber, int numberOfWeeks, Direction direction)
+        {
+            Func<WeekNumber, WeekNumber> incrementer;
             switch (direction)
             {
                 case Direction.Forward:
-                    incrementer = i => i + 1;
+                    incrementer = GetNextWeek;
                     break;
                 case Direction.Back:
-                    incrementer = i => i - 1;
+                    incrementer = GetPreviousWeek;
                     break;
                 default:
                     throw new ArgumentException($"Unhandled fetch direction '{direction}");
@@ -219,7 +273,7 @@ namespace MPR.ScoreConnectors
 
             while (weeks.Count < numberOfWeeks && nullWeeksEncountered < 3)
             {
-                if (weekNumber < 1)
+                if (weekNumber.Number < 1)
                 {
                     break;
                 }
@@ -240,7 +294,7 @@ namespace MPR.ScoreConnectors
             return weeks;
         }
 
-        private static async Task<Week> FetchWeek(int week)
+        private static async Task<Week> FetchWeek(WeekNumber week)
         {
             try
             {
@@ -253,16 +307,18 @@ namespace MPR.ScoreConnectors
             }
         }
 
-        private static async Task<Schedule> FetchSchedule(int weekNumber)
+        private static async Task<Schedule> FetchSchedule(WeekNumber weekNumber)
         {
             try
             {
                 using (var httpClient = new HttpClient())
                 {
-                    var uri = new Uri($"https://wzavfvwgfk.execute-api.us-east-2.amazonaws.com/production/owl/paginator/schedule?stage=regular_season&season=2020&locale=en-us&page={weekNumber}");
+                                     
+                    var uri = new Uri(GetFetchUri(weekNumber));
                     using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
                     {
-                        request.Headers.Add("Referer", "https://overwatchleague.com/en-us/schedule?stage=regular_season");
+                        request.Headers.Add("Referer", GetFetchReferrer(weekNumber));
+                        request.Headers.Add("x-origin", "overwatchleague.com");
                         var response = await httpClient.SendAsync(request);
                         var responseString = await response.Content.ReadAsStringAsync();
                         var schedule = Schedule.FromJson(responseString);
@@ -278,7 +334,8 @@ namespace MPR.ScoreConnectors
                     {
                         Week = new Week
                         {
-                            WeekNumber = weekNumber,
+                            WeekName = "Week 1",
+                            WeekNumber = 1,
                             Events = new List<Event>
                             {
                                 new Event { Matches = new List<Match>()}
@@ -286,6 +343,56 @@ namespace MPR.ScoreConnectors
                         }
                     }
                 };
+            }
+        }
+
+        private static string GetFetchUri(WeekNumber weekNumber)
+        {
+            switch (weekNumber.Type)
+            {
+                case WeekType.Playoffs:
+                    return $"https://wzavfvwgfk.execute-api.us-east-2.amazonaws.com/production/owl/paginator/schedule?stage=regular_season&season=2020&locale=en-us&page={weekNumber.Number}&id=bltaea9843a2219186c";
+                case WeekType.RegularSeason:
+                    return $"https://wzavfvwgfk.execute-api.us-east-2.amazonaws.com/production/owl/paginator/schedule?stage=regular_season&season=2020&locale=en-us&page={weekNumber.Number}";
+                default:
+                    throw new ArgumentException($"Cannot get fetch call URI, unrecognized week type '{weekNumber.Type}'");
+            }
+        }
+
+        private static string GetFetchReferrer(WeekNumber weekNumber)
+        {
+            switch (weekNumber.Type)
+            {
+                case WeekType.Playoffs:
+                    return $"https://overwatchleague.com/en-us/2020-playoffs?stage=regular_season&week={weekNumber.Number}";
+                case WeekType.RegularSeason:
+                    return $"https://overwatchleague.com/en-us/schedule?stage=regular_season&week={weekNumber.Number}";
+                default:
+                    throw new ArgumentException($"Cannot get fetch call referrer, unrecognized week type '{weekNumber.Type}'");
+            }
+        }
+
+        private enum WeekType
+        {
+            RegularSeason,
+            Playoffs
+        }
+
+        private class WeekNumber
+        {
+            private WeekNumber() { }
+
+            public WeekType Type { get; private set; }
+            public int Number { get; private set; }
+
+            public static WeekNumber Playoffs(int weekNumber)
+            {
+                return new WeekNumber { Number = weekNumber, Type = WeekType.Playoffs };
+            }
+
+            public static WeekNumber RegularSeason(int weekNumber)
+            {
+                return new WeekNumber { Number = weekNumber, Type = WeekType.RegularSeason };
             }
         }
 

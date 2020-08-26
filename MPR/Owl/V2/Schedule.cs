@@ -23,6 +23,9 @@ namespace MPR.Owl.V2
 
     public class Week
     {
+        [JsonProperty("name")]
+        public string WeekName { get; set; }
+
         [JsonProperty("weekNumber")]
         public int WeekNumber { get;set; }
 

@@ -1,10 +1,10 @@
 ﻿@model List<MPR.Models.Games.OwlGame>
 <table class="table" id="example">
     <tbody>
-    @foreach (var week in Model.Select(m => m.Week).Distinct().OrderBy(w => w))
+    @foreach (var week in Model.Select(m => Tuple.Create(m.WeekNumber, m.WeekName)).Distinct())
     {
-        <tr><td colspan="5">Week @week</td></tr>
-        foreach (var game in Model.Where(m => m.Week == week))
+        <tr><td colspan="5">@week.Item2</td></tr>
+        foreach (var game in Model.Where(m => m.WeekNumber == week.Item1))
         {
             <tr>
                 @if (@game.AwayTeamWon)
