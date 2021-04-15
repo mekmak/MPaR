@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using MPR.Models.Games;
+using MPR.Extensions;
 using MPR.Owl.V2;
 
 namespace MPR.ScoreConnectors
@@ -36,6 +37,7 @@ namespace MPR.ScoreConnectors
                 .OrderBy(w => w.WeekName.Contains("Playoffs") ? 1 : 0)
                 .ThenBy(w => w.WeekNumber)
                 .SelectMany(w => ToGames(w, clientOffset))
+                .DistinctBy(g => g.Id)
                 .ToList();
         }
 
@@ -43,13 +45,14 @@ namespace MPR.ScoreConnectors
 
         private List<OwlGame> ToGames(Week week, int clientOffset)
         {
-            return week.Events.SelectMany(e => e.Matches.Select(m => ToGame(m, week, clientOffset))).ToList();
+            return week.Events.SelectMany(e => e.Matches).Select(m => ToGame(m, week, clientOffset)).ToList();
         }
 
         private OwlGame ToGame(Match match, Week week, int clientOffset)
         {
             var game = new OwlGame
             {
+                Id = match.Id,
                 WeekName = week.WeekName,
                 WeekNumber = week.WeekNumber
             };
