@@ -16,16 +16,16 @@
 }
 
     .bracket td.top {
-        border-bottom: solid black 1px;
+        border-bottom: solid gray 1px;
     }
 
     .bracket td.bottom {
-        border-bottom: solid black 1px;
-        border-right: solid black 1px;
+        border-bottom: solid gray 1px;
+        border-right: solid gray 1px;
     }
 
     .bracket td.gap {
-        border-right: solid black 1px;
+        border-right: solid gray 1px;
     }
 
     .bracket td span {

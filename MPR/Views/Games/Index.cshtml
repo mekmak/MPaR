@@ -2,29 +2,37 @@
     ViewBag.Title = "Games";
 }
 
-<div class="container">
-
-    <div class="row">
-        
-        <table class="table" id="example">
-            <tbody>
-            <tr>
-                <td>
-                    <label class="radio-inline"><input id="nflRadio" type="radio" name="sportType" value="nfl" onchange="loadPartialView()">NFL</label>
-                    <label class="radio-inline"><input id="nbaRadio" type="radio" name="sportType" value="nba" onchange="loadPartialView()">NBA</label>
-                    <label class="radio-inline"><input id="nhlRadio" type="radio" name="sportType" value="nhl" onchange="loadPartialView()">NHL</label>
-                    <label class="radio-inline"><input id="owlRadio" type="radio" name="sportType" value="owl" onchange="loadPartialView()" checked="checked">OWL</label>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="row">
-        <div id="games_partial"></div>
-    </div>
-    <div class="row">
-        <div id="last_update_time"></div>
-    </div>
+<div class="container-fluid">
+    <div class="container-fluid">
+        <div class="row justify-content-center p-3">
+            <div class="col-auto">
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-secondary">
+                        <input id="nflRadio" type="radio" name="sportType" value="nfl" onchange="loadPartialView()">NFL
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input id="nbaRadio" type="radio" name="sportType" value="nba" onchange="loadPartialView()">NBA
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input id="nhlRadio" type="radio" name="sportType" value="nhl" onchange="loadPartialView()">NHL
+                    </label>
+                    <label class="btn btn-secondary active">
+                        <input id="owlRadio" type="radio" name="sportType" value="owl" onchange="loadPartialView()" checked>OWL
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center pb-3">
+            <div class="col-auto">
+                <div id="last_update_time" class="text-secondary"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div id="games_partial"></div>
+            </div>
+        </div>
+    </div>    
 </div>
 
 <script>

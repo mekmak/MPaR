@@ -1,4 +1,5 @@
 ﻿@model List<MPR.Models.Games.OwlGame>
+
 <table class="table" id="example">
     <tbody>
     @foreach (var week in Model.Select(m => Tuple.Create(m.WeekNumber, m.WeekName)).Distinct())
@@ -9,21 +10,21 @@
             <tr>
                 @if (@game.AwayTeamWon)
                 {
-                    <td style="font-weight: bold"><a href="@game.AwayTeamLink">@game.AwayTeam</a></td>
+                    <td style="font-weight: bold"><a href="@game.AwayTeamLink" class="text-success">@game.AwayTeam</a></td>
                 }
                 else
                 {
-                    <td><a href="@game.AwayTeamLink">@game.AwayTeam</a></td>
+                    <td><a href="@game.AwayTeamLink" class="text-white">@game.AwayTeam</a></td>
                 }
                 <td>@game.AwayTeamScore</td>
 
                 @if (@game.HomeTeamWon)
                 {
-                    <td style="font-weight: bold"><a href="@game.HomeTeamLink">@game.HomeTeam</a></td>
+                    <td style="font-weight: bold"><a href="@game.HomeTeamLink" class="text-success">@game.HomeTeam</a></td>
                 }
                 else
                 {
-                    <td><a href="@game.HomeTeamLink">@game.HomeTeam</a></td>
+                    <td><a href="@game.HomeTeamLink" class="text-white">@game.HomeTeam</a></td>
                 }
                 <td>@game.HomeTeamScore</td>
 

@@ -11,8 +11,6 @@ namespace MPR.Controllers
         public ActionResult Index()
         {
             return View();
-        }
-
-        
+        }   
     }
 }
