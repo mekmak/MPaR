@@ -207,7 +207,7 @@ namespace MPR.ScoreConnectors
         private const int LastRegularSeasonWeek = 29;
         private static WeekNumber GetCurrentOwlWeek()
         {
-            int currentWeek = CultureInfo.CurrentUICulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Saturday);
+            int currentWeek = CultureInfo.CurrentUICulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Wednesday);
             int owlWeek = currentWeek - 15; // Tribal knowledge
             return owlWeek <= LastRegularSeasonWeek 
                 ? WeekNumber.RegularSeason(owlWeek) 
