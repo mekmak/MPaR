@@ -281,7 +281,7 @@ namespace MPR.ScoreConnectors
                     break;
                 }
 
-                Week week = await FetchWeek(weekNumber) ?? await FetchWeek(weekNumber); // retry once
+                Week week = await FetchWeek(weekNumber) ?? await FetchWeek(weekNumber) ?? await FetchWeek(weekNumber); // retry
                 if (week != null)
                 {
                     weeks.Add(week);
@@ -302,7 +302,8 @@ namespace MPR.ScoreConnectors
             try
             {
                 Schedule schedule = await FetchSchedule(week);
-                return schedule?.Content?.Week;
+                int? matchCount = schedule?.Content?.Week?.Events?.SelectMany(e => e.Matches).Count();
+                return matchCount.HasValue && matchCount.Value > 0 ? schedule.Content.Week : null;
             }
             catch
             {
