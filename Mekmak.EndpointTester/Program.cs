@@ -2,6 +2,8 @@
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using HtmlAgilityPack;
+using MPR.Owl.V2;
 
 namespace Mekmak.EndpointTester
 {
@@ -9,12 +11,16 @@ namespace Mekmak.EndpointTester
     {
         static void Main(string[] args)
         {
-            for (int weekNumber = 1; weekNumber <= 1; weekNumber++)
-            {
-                string schedule = DownloadGames(weekNumber).Result;
-                File.WriteAllText($".\\response{weekNumber}.json", schedule);
-                Console.WriteLine(schedule);
-            }
+            /* for (int weekNumber = 1; weekNumber <= 1; weekNumber++)
+             {
+                 string schedule = DownloadGames(weekNumber).Result;
+                 File.WriteAllText($".\\response{weekNumber}.json", schedule);
+                 Console.WriteLine(schedule);
+             }*/
+
+            string json = GetStandings().Result;
+            File.WriteAllText($".\\response_standings.json", json);
+            Console.WriteLine(json);
         }
 
         private static async Task<string> DownloadGames(int weekNumber)
@@ -33,7 +39,21 @@ namespace Mekmak.EndpointTester
             return responseString;
         }
 
-        
+        private static async Task<string> GetStandings()
+        {
+            var uri = new Uri("https://overwatchleague.com/en-us/standings");
+            using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+            using var client = new HttpClient();
+            var resp = await client.SendAsync(request);
+            var content = await resp.Content.ReadAsStringAsync();
+
+            var doc = new HtmlDocument();
+            doc.LoadHtml(content);
+
+            HtmlNode node = doc.GetElementbyId("__NEXT_DATA__");
+            var sr = StandingsResponse.FromJson(node.InnerText);
+            return "asdf";
+        }
 
     }
 }

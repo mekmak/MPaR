@@ -6,9 +6,10 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using MPR.Models.Games;
+using MPR.Models;
 using MPR.Extensions;
 using MPR.Owl.V2;
+using HtmlAgilityPack;
 
 namespace MPR.ScoreConnectors
 {
@@ -16,18 +17,25 @@ namespace MPR.ScoreConnectors
     {
         public static OwlConnectorV2 Instance = new OwlConnectorV2();
         private List<Week> _currentWeeks = new List<Week>();
+        private List<Owl.V2.Tournament> _tournaments = new List<Owl.V2.Tournament>();
 
         public void InitGameDownload(CancellationToken token)
         {
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
-            var thread = new Thread(() => UpdateGames(token))
+            new Thread(() => UpdateGames(token))
             {
                 Name = "Owl Game Pull V2",
                 Priority = ThreadPriority.Normal,
                 IsBackground = true
-            };
-            thread.Start();
+            }.Start();
+
+            new Thread(() => UpdateStandings(token))
+            {
+                Name = "Owl Standings Pull V2",
+                Priority = ThreadPriority.Normal,
+                IsBackground = true
+            }.Start();
         }
 
         public List<OwlGame> GetGames(int clientOffset)
@@ -39,6 +47,73 @@ namespace MPR.ScoreConnectors
                 .SelectMany(w => ToGames(w, clientOffset))
                 .DistinctBy(g => g.Id)
                 .ToList();
+        }
+
+        public List<Models.Tournament> GetTournaments()
+        {
+            var ts = new List<Owl.V2.Tournament>(_tournaments);
+            return ts.Select(Wrap).Where(t => t != null).ToList();
+        }
+
+        private Models.Tournament Wrap(Owl.V2.Tournament t)
+        {
+            if(t == null)
+            {
+                return null;
+            }
+
+            return new Models.Tournament
+            {
+                Name = t.Title,
+                Regions = t?.Regions.Select(Wrap).ToList() ?? new List<Models.Region>()
+            };
+        }
+
+        private Models.Region Wrap(Owl.V2.Region r)
+        {
+            bool madeIt = r.Teams.Any(t => t.Name == null);
+
+            var teams = new List<Models.Team>();            
+            foreach(var t in r.Teams)
+            {
+                if(t.Name == null)
+                {
+                    madeIt = false;
+                    continue;
+                }
+
+                teams.Add(new Models.Team
+                {
+                    Name = t.Name,
+                    Rank = t.Rank,
+                    Wins = t.Wins,
+                    Loses = t.Loses,
+                    MapDiff = t.MapDiff ?? "",
+                    Points = t.Points,
+                    WinLoss = t.WinLoss,
+                    MakesCutoff = madeIt
+                });
+            }
+
+            return new Models.Region
+            {
+                Name = r.Name,
+                Teams = teams ?? new List<Models.Team>()
+            };
+        }
+
+        private Models.Team Wrap(Owl.V2.Team t)
+        {
+            return new Models.Team
+            {
+                Name = t.Name,
+                Rank = t.Rank,
+                Wins = t.Wins,
+                Loses = t.Loses,
+                MapDiff = t.MapDiff ?? "",
+                Points = t.Points,
+                WinLoss = t.WinLoss
+            };
         }
 
         #region UI 
@@ -164,6 +239,51 @@ namespace MPR.ScoreConnectors
         #endregion
 
         #region Data Fetch
+
+        private async void UpdateStandings(CancellationToken token)
+        {
+            while(true)
+            {
+                if(token.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                List<Owl.V2.Tournament> tournaments;
+                try
+                {
+                    tournaments = await FetchLatestStandings();
+                }
+                catch
+                {
+                    tournaments = new List<Owl.V2.Tournament>();
+                }
+
+                Interlocked.Exchange(ref _tournaments, tournaments);
+                await Task.Delay(TimeSpan.FromMinutes(10), token);
+            }
+        }
+
+        private async Task<List<Owl.V2.Tournament>> FetchLatestStandings()
+        {
+            var uri = new Uri("https://overwatchleague.com/en-us/standings");
+            using(var request = new HttpRequestMessage(HttpMethod.Get, uri))
+            using (var client = new HttpClient())
+            {
+                var resp = await client.SendAsync(request);
+                var content = await resp.Content.ReadAsStringAsync();
+
+                var doc = new HtmlDocument();
+                doc.LoadHtml(content);
+
+                HtmlNode node = doc.GetElementbyId("__NEXT_DATA__");
+                var sr = StandingsResponse.FromJson(node.InnerText);
+
+                return sr?.Props?.PageProps?.Blocks?
+                    .Where(b => b.Standings != null)
+                    .SelectMany(b => b.Standings?.Tournaments).ToList() ?? new List<Owl.V2.Tournament>();
+            }        
+        }
 
         private async void UpdateGames(CancellationToken token)
         {
@@ -316,8 +436,7 @@ namespace MPR.ScoreConnectors
             try
             {
                 using (var httpClient = new HttpClient())
-                {
-                                     
+                {                                     
                     var uri = new Uri(GetFetchUri(weekNumber));
                     using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
                     {

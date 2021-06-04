@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using MPR.Models.Games;
+using MPR.Models;
 using MPR.Owl.V1;
 
 namespace MPR.ScoreConnectors

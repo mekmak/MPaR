@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
-using MPR.Models.Games;
+using MPR.Models;
 using MPR.ScoreConnectors;
 
 namespace MPR.Controllers
@@ -22,18 +22,17 @@ namespace MPR.Controllers
                 case SportType.Espn:
                     var espnGames = GetEspnGames(gameType);
                     return PartialView("_EspnGames", espnGames);
-                default:
-                    var owlGames = GetOwlGames(offset);
+                case SportType.Owl:
+                    var owlGames = OwlConnectorV2.Instance.GetGames(offset);
                     return PartialView("_OwlGames", owlGames);
-
+                case SportType.OwlSt:
+                    var st = OwlConnectorV2.Instance.GetTournaments();
+                    return PartialView("_OwlStandings", st);
+                default:
+                    return PartialView("_UnknownGame");
             }
         }
         
-        private List<OwlGame> GetOwlGames(int clientOffset)
-        {
-            return OwlConnectorV2.Instance.GetGames(clientOffset);
-        }
-
         private List<EspnGame> GetEspnGames(string gameType)
         {
             EspnScoreConnector.Sport sportType;
@@ -64,6 +63,11 @@ namespace MPR.Controllers
                 return SportType.Owl;
             }
 
+            if (gameType.Equals("owlSt"))
+            {
+                return SportType.OwlSt;
+            }
+
             return SportType.None;
         }
 
@@ -72,7 +76,8 @@ namespace MPR.Controllers
         {
             None,
             Espn,
-            Owl
+            Owl,
+            OwlSt
         }
     }
 }

@@ -1,0 +1,45 @@
+﻿@model List<MPR.Models.Tournament>
+
+<table class="table">
+    <tbody>
+        @foreach(var tourney in Model)
+        {
+            <tr><td colspan="6">@tourney.Name</td></tr>
+            foreach(var region in tourney.Regions)
+            {
+                <tr><td colspan="6">@region.Name</td></tr>
+                foreach(var team in region.Teams)
+                {
+                    <tr>
+                        @if (team.MakesCutoff)
+                        {
+                            <td class="text-success">@team.Name</td>
+                        }
+                        else
+                        {
+                            <td>@team.Name</td>
+                        }
+
+                        <td>@team.Wins-@team.Loses</td>
+                        <td>@team.Points</td>
+
+                        @if (team.MapDiff.Contains("+"))
+                        {
+                            <td class="text-success">@team.MapDiff</td>
+                        }
+                        else if (team.MapDiff.Contains("-"))
+                        {
+                            <td class="text-danger">@team.MapDiff</td>
+                        }
+                        else
+                        {
+                            <td>@team.MapDiff</td>
+                        }
+
+                        <td>@team.WinLoss</td>
+                    </tr>
+                }
+            }
+        }
+    </tbody>
+</table>

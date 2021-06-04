@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading;
 using System.Web;
-using MPR.Models.Games;
+using MPR.Models;
 using MPR.Rest;
 
 namespace MPR.ScoreConnectors

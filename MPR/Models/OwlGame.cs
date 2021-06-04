@@ -1,4 +1,4 @@
-﻿namespace MPR.Models.Games
+﻿namespace MPR.Models
 {
     public class OwlGame
     {
