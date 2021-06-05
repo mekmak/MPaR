@@ -12,7 +12,7 @@ namespace MPR.Controllers
         public ActionResult Index()
         {
             return View();
-        }
+        }        
 
         public ActionResult Games(string gameType, int offset = 0)
         {

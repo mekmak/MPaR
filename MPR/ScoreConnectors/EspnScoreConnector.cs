@@ -86,26 +86,35 @@ namespace MPR.ScoreConnectors
 
         public void InitGameDownload()
         {
-            var thread = new Thread(UpdateGames)
+            UpdateGames();
+            new Thread(() =>
+            {
+                while(true)
+                {
+                    UpdateGames();
+                    Thread.Sleep(10000);
+                }
+            })
             {
                 Name = "Espn EspnGame Pull",
                 Priority = ThreadPriority.Normal,
                 IsBackground = true
-            };
-            thread.Start();
+            }.Start();            
         }
 
         private void UpdateGames()
         {
-            while (true)
+            foreach (Sport sport in Enum.GetValues(typeof(Sport)).Cast<Sport>())
             {
-                foreach (Sport sport in Enum.GetValues(typeof(Sport)).Cast<Sport>())
+                try
                 {
                     List<EspnGame> games = DownloadGames(sport);
                     _gameCache.AddOrUpdate(sport, _ => games, (v1, v2) => games);
                 }
-
-                Thread.Sleep(10000);
+                catch
+                {
+                    // Ignore
+                }                
             }
         }
 

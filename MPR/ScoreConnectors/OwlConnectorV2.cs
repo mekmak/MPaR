@@ -23,20 +23,48 @@ namespace MPR.ScoreConnectors
         {
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
-            new Thread(() => UpdateGames(token))
+            UpdateGames(token).Wait();
+            new Thread(async () => 
+            {
+                while (true)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    await UpdateGames(token);
+                    await Task.Delay(TimeSpan.FromSeconds(10), token);
+                }
+            })
             {
                 Name = "Owl Game Pull V2",
                 Priority = ThreadPriority.Normal,
                 IsBackground = true
             }.Start();
 
-            new Thread(() => UpdateStandings(token))
+            UpdateStandings(token).Wait();
+            new Thread(async () =>
+            {
+                while (true)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    await UpdateStandings(token);
+                    await Task.Delay(TimeSpan.FromMinutes(10), token);
+                }
+            })
             {
                 Name = "Owl Standings Pull V2",
                 Priority = ThreadPriority.Normal,
                 IsBackground = true
             }.Start();
         }
+
+        #region UI 
 
         public List<OwlGame> GetGames(int clientOffset)
         {
@@ -57,7 +85,7 @@ namespace MPR.ScoreConnectors
 
         private Models.Tournament Wrap(Owl.V2.Tournament t)
         {
-            if(t == null)
+            if (t == null)
             {
                 return null;
             }
@@ -73,10 +101,10 @@ namespace MPR.ScoreConnectors
         {
             bool madeIt = r.Teams.Any(t => t.Name == null);
 
-            var teams = new List<Models.Team>();            
-            foreach(var t in r.Teams)
+            var teams = new List<Models.Team>();
+            foreach (var t in r.Teams)
             {
-                if(t.Name == null)
+                if (t.Name == null)
                 {
                     madeIt = false;
                     continue;
@@ -101,22 +129,6 @@ namespace MPR.ScoreConnectors
                 Teams = teams ?? new List<Models.Team>()
             };
         }
-
-        private Models.Team Wrap(Owl.V2.Team t)
-        {
-            return new Models.Team
-            {
-                Name = t.Name,
-                Rank = t.Rank,
-                Wins = t.Wins,
-                Loses = t.Loses,
-                MapDiff = t.MapDiff ?? "",
-                Points = t.Points,
-                WinLoss = t.WinLoss
-            };
-        }
-
-        #region UI 
 
         private List<OwlGame> ToGames(Week week, int clientOffset)
         {
@@ -240,37 +252,26 @@ namespace MPR.ScoreConnectors
 
         #region Data Fetch
 
-        private async void UpdateStandings(CancellationToken token)
+        private async Task UpdateStandings(CancellationToken token)
         {
-            while(true)
+            try
             {
-                if(token.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                List<Owl.V2.Tournament> tournaments;
-                try
-                {
-                    tournaments = await FetchLatestStandings();
-                }
-                catch
-                {
-                    tournaments = new List<Owl.V2.Tournament>();
-                }
-
+                List<Owl.V2.Tournament> tournaments = await FetchLatestStandings(token);
                 Interlocked.Exchange(ref _tournaments, tournaments);
-                await Task.Delay(TimeSpan.FromMinutes(10), token);
             }
+            catch
+            {
+                // Ignore
+            }            
         }
 
-        private async Task<List<Owl.V2.Tournament>> FetchLatestStandings()
+        private async Task<List<Owl.V2.Tournament>> FetchLatestStandings(CancellationToken token)
         {
             var uri = new Uri("https://overwatchleague.com/en-us/standings");
             using(var request = new HttpRequestMessage(HttpMethod.Get, uri))
             using (var client = new HttpClient())
             {
-                var resp = await client.SendAsync(request);
+                var resp = await client.SendAsync(request, token);
                 var content = await resp.Content.ReadAsStringAsync();
 
                 var doc = new HtmlDocument();
@@ -285,28 +286,17 @@ namespace MPR.ScoreConnectors
             }        
         }
 
-        private async void UpdateGames(CancellationToken token)
+        private async Task UpdateGames(CancellationToken token)
         {
-            while(true)
+            try
             {
-                if(token.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                List<Week> currentWeeks;
-                try
-                {
-                    currentWeeks = await FetchLatestWeeks();
-                }
-                catch
-                {
-                    currentWeeks = new List<Week>();
-                }
-
+                List<Week> currentWeeks = await FetchLatestWeeks(token);
                 Interlocked.Exchange(ref _currentWeeks, currentWeeks);
-                await Task.Delay(TimeSpan.FromSeconds(10), token);
             }
+            catch
+            {
+                // Ignore
+            }            
         }
 
         private enum Direction
@@ -315,11 +305,11 @@ namespace MPR.ScoreConnectors
             Back
         }
 
-        private static async Task<List<Week>> FetchLatestWeeks()
+        private static async Task<List<Week>> FetchLatestWeeks(CancellationToken token)
         {
             WeekNumber owlWeek = GetCurrentOwlWeek();
-            var backTask = FetchWeeks(GetPreviousWeek(owlWeek), 1, Direction.Back);
-            var forwardTask = FetchWeeks(owlWeek, 2, Direction.Forward);
+            var backTask = FetchWeeks(GetPreviousWeek(owlWeek), 1, Direction.Back, token);
+            var forwardTask = FetchWeeks(owlWeek, 2, Direction.Forward, token);
             var weeks = await Task.WhenAll(backTask, forwardTask);
             return weeks.SelectMany(w => w).ToList();
         }
@@ -376,7 +366,7 @@ namespace MPR.ScoreConnectors
             }
         }
 
-        private static async Task<List<Week>> FetchWeeks(WeekNumber weekNumber, int numberOfWeeks, Direction direction)
+        private static async Task<List<Week>> FetchWeeks(WeekNumber weekNumber, int numberOfWeeks, Direction direction, CancellationToken token)
         {
             Func<WeekNumber, WeekNumber> incrementer;
             switch (direction)
@@ -401,7 +391,7 @@ namespace MPR.ScoreConnectors
                     break;
                 }
 
-                Week week = await FetchWeek(weekNumber) ?? await FetchWeek(weekNumber) ?? await FetchWeek(weekNumber); // retry
+                Week week = await FetchWeek(weekNumber, token) ?? await FetchWeek(weekNumber, token) ?? await FetchWeek(weekNumber, token); // retry
                 if (week != null)
                 {
                     weeks.Add(week);
@@ -417,11 +407,11 @@ namespace MPR.ScoreConnectors
             return weeks;
         }
 
-        private static async Task<Week> FetchWeek(WeekNumber week)
+        private static async Task<Week> FetchWeek(WeekNumber week, CancellationToken token)
         {
             try
             {
-                Schedule schedule = await FetchSchedule(week);
+                Schedule schedule = await FetchSchedule(week, token);
                 int? matchCount = schedule?.Content?.Week?.Events?.SelectMany(e => e.Matches).Count();
                 return matchCount.HasValue && matchCount.Value > 0 ? schedule.Content.Week : null;
             }
@@ -431,7 +421,7 @@ namespace MPR.ScoreConnectors
             }
         }
 
-        private static async Task<Schedule> FetchSchedule(WeekNumber weekNumber)
+        private static async Task<Schedule> FetchSchedule(WeekNumber weekNumber, CancellationToken token)
         {
             try
             {
@@ -442,7 +432,7 @@ namespace MPR.ScoreConnectors
                     {
                         request.Headers.Add("Referer", GetFetchReferrer(weekNumber));
                         request.Headers.Add("x-origin", "overwatchleague.com");
-                        var response = await httpClient.SendAsync(request);
+                        var response = await httpClient.SendAsync(request, token);
                         var responseString = await response.Content.ReadAsStringAsync();
                         var schedule = Schedule.FromJson(responseString);
                         return schedule;

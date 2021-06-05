@@ -8,19 +8,19 @@
             <div class="col-auto">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                     <label class="btn btn-secondary">
-                        <input id="nflRadio" type="radio" name="sportType" value="nfl" onchange="loadPartialView()">NFL
+                        <input id="nflRadio" type="radio" name="sportType" value="nfl" onchange="showTab('nfl')">NFL
                     </label>
                     <label class="btn btn-secondary">
-                        <input id="nbaRadio" type="radio" name="sportType" value="nba" onchange="loadPartialView()">NBA
+                        <input id="nbaRadio" type="radio" name="sportType" value="nba" onchange="showTab('nba')">NBA
                     </label>
                     <label class="btn btn-secondary">
-                        <input id="nhlRadio" type="radio" name="sportType" value="nhl" onchange="loadPartialView()">NHL
+                        <input id="nhlRadio" type="radio" name="sportType" value="nhl" onchange="showTab('nhl')">NHL
                     </label>
                     <label class="btn btn-secondary active">
-                        <input id="owlRadio" type="radio" name="sportType" value="owl" onchange="loadPartialView()" checked>OWL Games
+                        <input id="owlRadio" type="radio" name="sportType" value="owl" onchange="showTab('owl')" checked>OWL Games
                     </label>
                     <label class="btn btn-secondary">
-                        <input id="owlStRadio" type="radio" name="sportType" value="owlSt" onchange="loadPartialView()">OWL Standings
+                        <input id="owlStRadio" type="radio" name="sportType" value="owlSt" onchange="showTab('owlSt')">OWL Standings
                     </label>
                 </div>
             </div>
@@ -32,53 +32,63 @@
         </div>
         <div class="row">
             <div class="col">
-                <div id="games_partial"></div>
+                <div id="nfl_games" class="d-none">
+                    @Html.Action("Games", "Games", new { gameType = "nfl", offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes })
+                </div>
+                <div id="nba_games" class="d-none">
+                    @Html.Action("Games", "Games", new { gameType = "nba", offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes })
+                </div>
+                <div id="nhl_games" class="d-none">
+                    @Html.Action("Games", "Games", new { gameType = "nhl", offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes })
+                </div>
+                <div id="owl_games">
+                    @Html.Action("Games", "Games", new { gameType = "owl", offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes })
+                </div>
+                <div id="owl_standings" class="d-none">
+                    @Html.Action("Games", "Games", new { gameType = "owlSt", offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes })
+                </div>
             </div>
         </div>
     </div>    
 </div>
 
 <script>
-    function loadPartialView() {
-        var offset = new Date().getTimezoneOffset();
-        $.ajax({
-            url: "@Url.Action("Games", "Games")" + "?gameType=" + getSelectedSportType() + "&offset=" + offset,
-            type: 'GET', // <-- make a async request by GET
-            dataType: 'html', // <-- to expect an html response
-            cache: false,
-            success: function(result) {
-                $('#games_partial').html(result);
-                var currentdate = new Date();
-                var hours = currentdate.getHours().toString();
-                if (hours.length === 1) {
-                    hours = "0" + hours;
-                }
+    function showTab(tabName) {
+        $("#nfl_games").addClass("d-none")
+        $("#nba_games").addClass("d-none")
+        $("#nhl_games").addClass("d-none")
+        $("#owl_games").addClass("d-none")
+        $("#owl_standings").addClass("d-none")
 
-                var minutes = currentdate.getMinutes().toString();
-                if (minutes.length === 1) {
-                    minutes = "0" + minutes;
-                }
-
-                var seconds = currentdate.getSeconds().toString();
-                if (seconds.length === 1) {
-                    seconds = "0" + seconds;
-                }
-
-                var datetime = "Last updated at: " + hours + ":"
-                                + minutes + ":"
-                                + seconds;
-                $('#last_update_time').html(datetime);
+        switch (tabName) {
+            case 'nfl': $("#nfl_games").removeClass("d-none"); break;
+            case 'nba': $("#nba_games").removeClass("d-none"); break;
+            case 'nhl': $("#nhl_games").removeClass("d-none"); break;
+            case 'owl': $("#owl_games").removeClass("d-none"); break;
+            case 'owlSt': $("#owl_standings").removeClass("d-none"); break;
         }
-    });
-    }
-
-    function getSelectedSportType() {
-        var sportType = $("input[name=sportType]:checked").val();
-        return sportType;
     }
 
     $(function () {
-        loadPartialView(); // first time
-        setInterval(loadPartialView, 5000);
+        var currentdate = new Date();
+        var hours = currentdate.getHours().toString();
+        if (hours.length === 1) {
+            hours = "0" + hours;
+        }
+
+        var minutes = currentdate.getMinutes().toString();
+        if (minutes.length === 1) {
+            minutes = "0" + minutes;
+        }
+
+        var seconds = currentdate.getSeconds().toString();
+        if (seconds.length === 1) {
+            seconds = "0" + seconds;
+        }
+
+        var datetime = "Last updated at: " + hours + ":"
+            + minutes + ":"
+            + seconds;
+        $('#last_update_time').html(datetime);
     });
 </script>
