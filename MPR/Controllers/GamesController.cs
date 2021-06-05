@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 using MPR.Models;
 using MPR.ScoreConnectors;
@@ -16,68 +17,37 @@ namespace MPR.Controllers
 
         public ActionResult Games(string gameType, int offset = 0)
         {
-            SportType sportType = GetSportType(gameType);
-            switch (sportType)
+            switch(gameType)
             {
-                case SportType.Espn:
-                    var espnGames = GetEspnGames(gameType);
-                    return PartialView("_EspnGames", espnGames);
-                case SportType.Owl:
+                case "meat":
+                    var meatSports = GetMeatSports();
+                    return PartialView("_EspnGames", meatSports);
+                case "owl":
                     var owlGames = OwlConnectorV2.Instance.GetGames(offset);
                     return PartialView("_OwlGames", owlGames);
-                case SportType.OwlSt:
+                case "owlSt":
                     var st = OwlConnectorV2.Instance.GetTournaments();
                     return PartialView("_OwlStandings", st);
                 default:
                     return PartialView("_UnknownGame");
             }
         }
-        
-        private List<EspnGame> GetEspnGames(string gameType)
+
+        private MeatSports GetMeatSports()
         {
-            EspnScoreConnector.Sport sportType;
-            if(!Enum.TryParse(gameType.ToLower(), out sportType))
+            var sports = new List<MeatSport>();
+            foreach(EspnScoreConnector.Sport s in Enum.GetValues(typeof(EspnScoreConnector.Sport)))
             {
-                sportType = EspnScoreConnector.Sport.nfl;
+                var games = EspnScoreConnector.Instance.GetGames(s);
+                if(!games.Any())
+                {
+                    continue;
+                }
+
+                sports.Add(new MeatSport { Name = s.ToString(), Games = games });
             }
 
-            List<EspnGame> games = EspnScoreConnector.Instance.GetGames(sportType);
-            return games;
-        }
-
-
-        private SportType GetSportType(string gameType)
-        {
-            if (string.IsNullOrWhiteSpace(gameType))
-            {
-                return SportType.None;
-            }
-
-            if (Enum.IsDefined(typeof(EspnScoreConnector.Sport), gameType))
-            {
-                return SportType.Espn;
-            }
-
-            if (gameType.Equals("owl"))
-            {
-                return SportType.Owl;
-            }
-
-            if (gameType.Equals("owlSt"))
-            {
-                return SportType.OwlSt;
-            }
-
-            return SportType.None;
-        }
-
-
-        private enum SportType
-        {
-            None,
-            Espn,
-            Owl,
-            OwlSt
+            return new MeatSports { Sports = sports };
         }
     }
 }

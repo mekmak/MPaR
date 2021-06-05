@@ -8,13 +8,7 @@
             <div class="col-auto">
                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                     <label class="btn btn-secondary">
-                        <input id="nflRadio" type="radio" name="sportType" value="nfl" onchange="showTab('nfl')">NFL
-                    </label>
-                    <label class="btn btn-secondary">
-                        <input id="nbaRadio" type="radio" name="sportType" value="nba" onchange="showTab('nba')">NBA
-                    </label>
-                    <label class="btn btn-secondary">
-                        <input id="nhlRadio" type="radio" name="sportType" value="nhl" onchange="showTab('nhl')">NHL
+                        <input id="meatSportsRadio" type="radio" name="sportType" value="meat" onchange="showTab('meat')">Meat Sports
                     </label>
                     <label class="btn btn-secondary active">
                         <input id="owlRadio" type="radio" name="sportType" value="owl" onchange="showTab('owl')" checked>OWL Games
@@ -32,14 +26,8 @@
         </div>
         <div class="row">
             <div class="col">
-                <div id="nfl_games" class="d-none">
-                    @Html.Action("Games", "Games", new { gameType = "nfl", offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes })
-                </div>
-                <div id="nba_games" class="d-none">
-                    @Html.Action("Games", "Games", new { gameType = "nba", offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes })
-                </div>
-                <div id="nhl_games" class="d-none">
-                    @Html.Action("Games", "Games", new { gameType = "nhl", offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes })
+                <div id="meat_sports" class="d-none">
+                    @Html.Action("Games", "Games", new { gameType = "meat", offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes })
                 </div>
                 <div id="owl_games">
                     @Html.Action("Games", "Games", new { gameType = "owl", offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes })
@@ -54,16 +42,12 @@
 
 <script>
     function showTab(tabName) {
-        $("#nfl_games").addClass("d-none")
-        $("#nba_games").addClass("d-none")
-        $("#nhl_games").addClass("d-none")
+        $("#meat_sports").addClass("d-none")
         $("#owl_games").addClass("d-none")
         $("#owl_standings").addClass("d-none")
 
         switch (tabName) {
-            case 'nfl': $("#nfl_games").removeClass("d-none"); break;
-            case 'nba': $("#nba_games").removeClass("d-none"); break;
-            case 'nhl': $("#nhl_games").removeClass("d-none"); break;
+            case 'meat': $("#meat_sports").removeClass("d-none"); break;
             case 'owl': $("#owl_games").removeClass("d-none"); break;
             case 'owlSt': $("#owl_standings").removeClass("d-none"); break;
         }

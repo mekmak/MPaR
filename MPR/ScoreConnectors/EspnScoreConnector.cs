@@ -54,15 +54,15 @@ namespace MPR.ScoreConnectors
 
         public enum Sport
         {
-            nfl,
-            mlb,
-            nba,
-            nhl
+            NFL,
+            MLB,
+            NBA,
+            NHL
         }
 
         private string GetEndPoint(Sport sport)
         {
-            return $@"http://sports.espn.go.com/{sport}/bottomline/scores";
+            return $@"http://sports.espn.go.com/{sport.ToString().ToLower()}/bottomline/scores";
         }
 
         private string GetCountKey(Sport sport)
@@ -144,8 +144,8 @@ namespace MPR.ScoreConnectors
                 string link = GetLink(sport, keyValues, gameNumber);
                 GameInfo gameInfo = GetGameInfo(sport, keyValues, gameNumber);
 
-                string homeTeam = sport == Sport.nfl ? TryShorten(gameInfo.HomeTeam) : gameInfo.HomeTeam;
-                string awayTeam = sport == Sport.nfl ? TryShorten(gameInfo.AwayTeam) : gameInfo.AwayTeam;
+                string homeTeam = sport == Sport.NFL ? TryShorten(gameInfo.HomeTeam) : gameInfo.HomeTeam;
+                string awayTeam = sport == Sport.NFL ? TryShorten(gameInfo.AwayTeam) : gameInfo.AwayTeam;
 
                 var game = new EspnGame
                 {

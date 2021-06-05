@@ -1,32 +1,36 @@
-﻿@model List<MPR.Models.EspnGame>
+﻿@model MPR.Models.MeatSports
 
 <table class="table" id="example">
     <tbody>
-        @foreach (var game in Model)
+        @foreach (var sport in Model.Sports)
         {
-        <tr>
-            <td>@game.AwayTeam</td>
-            @if (@game.NotifyAway)
+            <tr><td colspan="5" class="text-success text-capitalize font-weight-bold">@sport.Name</td></tr>
+            foreach (var game in sport.Games)
             {
-                <td style="font-weight: bold" class="text-success">@game.AwayTeamScore</td>
-            }
-            else
-            {
-                <td>@game.AwayTeamScore</td>
-            }
+                <tr>
+                    <td class="text-left">@game.AwayTeam</td>
+                    @if (@game.NotifyAway)
+                    {
+                        <td style="font-weight: bold" class="text-success">@game.AwayTeamScore</td>
+                    }
+                    else
+                    {
+                        <td>@game.AwayTeamScore</td>
+                    }
 
-            <td>@game.HomeTeam</td>
-            @if (@game.NotifyHome)
-            {
-                <td style="font-weight: bold" class="text-success">@game.HomeTeamScore</td>
-            }
-            else
-            {
-                <td>@game.HomeTeamScore</td>
-            }
+                    <td class="text-left">@game.HomeTeam</td>
+                    @if (@game.NotifyHome)
+                    {
+                        <td style="font-weight: bold" class="text-success">@game.HomeTeamScore</td>
+                    }
+                    else
+                    {
+                        <td>@game.HomeTeamScore</td>
+                    }
 
-            <td><a href="@game.TimeLink">@game.Time</a></td>
-        </tr>
+                    <td><a href="@game.TimeLink">@game.Time</a></td>
+                </tr>
+            }
         }
     </tbody>
 </table>

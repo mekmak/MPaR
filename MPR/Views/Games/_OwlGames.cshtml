@@ -4,7 +4,7 @@
     <tbody>
         @foreach (var week in Model.Select(m => Tuple.Create(m.WeekNumber, m.WeekName)).Distinct())
         {
-            <tr><td colspan="5">@week.Item2</td></tr>
+            <tr><td colspan="5" class="font-weight-bold">@week.Item2</td></tr>
             foreach (var game in Model.Where(m => m.WeekNumber == week.Item1))
             {
                 <tr>

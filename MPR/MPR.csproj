@@ -131,6 +131,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\EspnGame.cs" />
+    <Compile Include="Models\MeatSports.cs" />
     <Compile Include="Models\OverwatchLeague.cs" />
     <Compile Include="Models\OwlGame.cs" />
     <Compile Include="Models\OwlStandings.cs" />
