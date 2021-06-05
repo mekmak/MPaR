@@ -2,9 +2,9 @@
 
 namespace MPR.Models
 {
-    public class Tournament
+    public class Standings
     {
-        public string Name { get; set; }
+        public string TournamentName { get; set; }
         public List<Region> Regions { get; set; }
     }
 

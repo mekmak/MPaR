@@ -26,15 +26,9 @@
         </div>
         <div class="row">
             <div class="col">
-                <div id="meat_sports" class="d-none">
-                    @Html.Action("Games", "Games", new { gameType = "meat", offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes })
-                </div>
-                <div id="owl_games">
-                    @Html.Action("Games", "Games", new { gameType = "owl", offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes })
-                </div>
-                <div id="owl_standings" class="d-none">
-                    @Html.Action("Games", "Games", new { gameType = "owlSt", offset = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes })
-                </div>
+                <div id="meat_sports" class="d-none"></div>
+                <div id="owl_games"></div>
+                <div id="owl_standings" class="d-none"></div>
             </div>
         </div>
     </div>    
@@ -55,6 +49,12 @@
 
     $(function () {
         var currentdate = new Date();
+        var offest = currentdate.getTimezoneOffset();
+
+        $('#meat_sports').load('@Url.Action("Games", "Games")' + "?gameType=meat&offset=" + offest)
+        $('#owl_games').load('@Url.Action("Games", "Games")' + "?gameType=owl&offset=" + offest)
+        $('#owl_standings').load('@Url.Action("Games", "Games")' + "?gameType=owlSt&offset=" + offest)
+
         var hours = currentdate.getHours().toString();
         if (hours.length === 1) {
             hours = "0" + hours;

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace MPR.Owl.V2
@@ -80,5 +78,8 @@ namespace MPR.Owl.V2
 
         [JsonProperty("mapwlt")]
         public string WinLoss { get; set; }
+
+        [JsonProperty("mp")]
+        public int MapsPlayed { get; set; }
     }
 }

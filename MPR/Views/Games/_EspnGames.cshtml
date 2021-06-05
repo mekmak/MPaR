@@ -4,7 +4,7 @@
     <tbody>
         @foreach (var sport in Model.Sports)
         {
-            <tr><td colspan="5" class="text-success text-capitalize font-weight-bold">@sport.Name</td></tr>
+            <tr><td colspan="5" class="text-capitalize font-weight-bold">@sport.Name</td></tr>
             foreach (var game in sport.Games)
             {
                 <tr>

@@ -17,7 +17,7 @@ namespace MPR.ScoreConnectors
     {
         public static OwlConnectorV2 Instance = new OwlConnectorV2();
         private List<Week> _currentWeeks = new List<Week>();
-        private List<Owl.V2.Tournament> _tournaments = new List<Owl.V2.Tournament>();
+        private List<Tournament> _tournaments = new List<Tournament>();
 
         public void InitGameDownload(CancellationToken token)
         {
@@ -77,22 +77,34 @@ namespace MPR.ScoreConnectors
                 .ToList();
         }
 
-        public List<Models.Tournament> GetTournaments()
+        public List<Models.Standings> GetStandings()
         {
-            var ts = new List<Owl.V2.Tournament>(_tournaments);
-            return ts.Select(Wrap).Where(t => t != null).ToList();
+            var tournaments = new List<Tournament>(_tournaments);
+            var standings = tournaments
+                // Don't want to display qualifiers that haven't started yet
+                .Where(tr => tr.Regions.Any(r => r.Teams.Any(t => t.MapsPlayed > 0)))
+                .Select(Wrap)
+                .Where(s => s != null)                
+                .ToList();
+
+            // Some black magic -- the api we hit returns the regular season standings
+            // and then all qualifiers in chronological order, but we want to display
+            // the season standings and then the most recent qualifiers instead
+            var ordered = new List<Models.Standings>(standings.Count){ standings[0] };
+            ordered.AddRange(standings.Skip(1).Reverse());
+            return ordered;
         }
 
-        private Models.Tournament Wrap(Owl.V2.Tournament t)
+        private Models.Standings Wrap(Tournament t)
         {
             if (t == null)
             {
                 return null;
             }
 
-            return new Models.Tournament
+            return new Models.Standings
             {
-                Name = t.Title,
+                TournamentName = t.Title,
                 Regions = t?.Regions.Select(Wrap).ToList() ?? new List<Models.Region>()
             };
         }
@@ -256,7 +268,7 @@ namespace MPR.ScoreConnectors
         {
             try
             {
-                List<Owl.V2.Tournament> tournaments = await FetchLatestStandings(token);
+                List<Tournament> tournaments = await FetchLatestStandings(token);
                 Interlocked.Exchange(ref _tournaments, tournaments);
             }
             catch
@@ -282,7 +294,7 @@ namespace MPR.ScoreConnectors
 
                 return sr?.Props?.PageProps?.Blocks?
                     .Where(b => b.Standings != null)
-                    .SelectMany(b => b.Standings?.Tournaments).ToList() ?? new List<Owl.V2.Tournament>();
+                    .SelectMany(b => b.Standings?.Tournaments).ToList() ?? new List<Tournament>();
             }        
         }
 

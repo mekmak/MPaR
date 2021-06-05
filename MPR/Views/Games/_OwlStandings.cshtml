@@ -1,16 +1,26 @@
-﻿@model List<MPR.Models.Tournament>
+﻿@model List<MPR.Models.Standings>
 
 <table class="table">
     <tbody>
         @foreach(var tourney in Model)
         {
-            <tr><td colspan="6">@tourney.Name</td></tr>
+            <tr><td colspan="6" class="font-weight-bold">@tourney.TournamentName</td></tr>
             foreach(var region in tourney.Regions)
             {
-                <tr><td colspan="6">@region.Name</td></tr>
+                bool showRegionName = true;
                 foreach(var team in region.Teams)
                 {
                     <tr>
+                        @if(showRegionName)
+                        {
+                            <td class="text-secondary">@region.Name</td>
+                            showRegionName = false;
+                        }
+                        else
+                        {
+                            <td/>
+                        }
+
                         @if (team.MakesCutoff)
                         {
                             <td class="text-success">@team.Name</td>

@@ -20,13 +20,13 @@ namespace MPR.Controllers
             switch(gameType)
             {
                 case "meat":
-                    var meatSports = GetMeatSports();
+                    MeatSports meatSports = GetMeatSports();
                     return PartialView("_EspnGames", meatSports);
                 case "owl":
-                    var owlGames = OwlConnectorV2.Instance.GetGames(offset);
+                    List<OwlGame> owlGames = OwlConnectorV2.Instance.GetGames(offset);
                     return PartialView("_OwlGames", owlGames);
                 case "owlSt":
-                    var st = OwlConnectorV2.Instance.GetTournaments();
+                    List<Standings> st = OwlConnectorV2.Instance.GetStandings();
                     return PartialView("_OwlStandings", st);
                 default:
                     return PartialView("_UnknownGame");
