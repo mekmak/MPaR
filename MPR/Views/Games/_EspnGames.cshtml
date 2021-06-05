@@ -8,20 +8,38 @@
             foreach (var game in sport.Games)
             {
                 <tr>
-                    <td class="text-left">@game.AwayTeam</td>
+                    @if(game.AwayTeamWon)
+                    {
+                        <td class="text-left text-success font-weight-bold">@game.AwayTeam</td>
+                    }
+                    else
+                    {
+                        <td class="text-left">@game.AwayTeam</td>
+                    }
+
+                    
                     @if (@game.NotifyAway)
                     {
-                        <td style="font-weight: bold" class="text-success">@game.AwayTeamScore</td>
+                        <td class="text-success font-weight-bold">@game.AwayTeamScore</td>
                     }
                     else
                     {
                         <td>@game.AwayTeamScore</td>
                     }
 
-                    <td class="text-left">@game.HomeTeam</td>
+                    @if(game.HomeTeamWon)
+                    {
+                        <td class="text-left text-success font-weight-bold">@game.HomeTeam</td>
+                    }
+                    else
+                    {
+                        <td class="text-left">@game.HomeTeam</td>
+                    }
+
+                    
                     @if (@game.NotifyHome)
                     {
-                        <td style="font-weight: bold" class="text-success">@game.HomeTeamScore</td>
+                        <td class="text-success font-weight-bold">@game.HomeTeamScore</td>
                     }
                     else
                     {
