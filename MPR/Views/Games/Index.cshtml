@@ -47,14 +47,16 @@
         }
     }
 
-    $(function () {
-        var currentdate = new Date();
-        var offest = currentdate.getTimezoneOffset();
-
+    function reloadGames() {
+        var offest = new Date().getTimezoneOffset();
         $('#meat_sports').load('@Url.Action("Games", "Games")' + "?gameType=meat&offset=" + offest)
         $('#owl_games').load('@Url.Action("Games", "Games")' + "?gameType=owl&offset=" + offest)
         $('#owl_standings').load('@Url.Action("Games", "Games")' + "?gameType=owlSt&offset=" + offest)
+        refreshLastUpdated()
+    }
 
+    function refreshLastUpdated() {
+        var currentdate = new Date();
         var hours = currentdate.getHours().toString();
         if (hours.length === 1) {
             hours = "0" + hours;
@@ -70,9 +72,12 @@
             seconds = "0" + seconds;
         }
 
-        var datetime = "Last updated at: " + hours + ":"
-            + minutes + ":"
-            + seconds;
+        var datetime = "Last updated at: " + hours + ":" + minutes + ":" + seconds;
         $('#last_update_time').html(datetime);
+    }
+
+    $(function () {
+        reloadGames();        
+        setInterval(reloadGames, 5000)
     });
 </script>
