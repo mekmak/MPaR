@@ -24,5 +24,6 @@ namespace MPR.Models
         public int Points { get; set; }
         public string WinLoss { get; set; }
         public bool MakesCutoff { get; set; }
+        public string TeamUrl { get; set; }
     }
 }

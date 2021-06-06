@@ -5,9 +5,7 @@
         public string Id { get; set; }
 
         public string HomeTeam { get; set; }
-        public string HomeTeamLink { get; set; }
         public string AwayTeam { get; set; }
-        public string AwayTeamLink { get; set; }
 
         public bool AwayTeamWon { get; set; }
         public bool HomeTeamWon { get; set; }

@@ -81,5 +81,8 @@ namespace MPR.Owl.V2
 
         [JsonProperty("mp")]
         public int MapsPlayed { get; set; }
+
+        [JsonProperty("teamUrl")]
+        public string TeamUrl { get; set; }
     }
 }

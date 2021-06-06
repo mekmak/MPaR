@@ -131,7 +131,8 @@ namespace MPR.ScoreConnectors
                     MapDiff = t.MapDiff ?? "",
                     Points = t.Points,
                     WinLoss = t.WinLoss,
-                    MakesCutoff = madeIt
+                    MakesCutoff = madeIt,
+                    TeamUrl = t.TeamUrl
                 });
             }
 
@@ -160,9 +161,7 @@ namespace MPR.ScoreConnectors
             var awayTeam = new Team(match.Competitors.Count > 1 ? match.Competitors[1] : null);
 
             game.HomeTeam = homeTeam.Name;
-            game.HomeTeamLink = homeTeam.Link;
             game.AwayTeam = awayTeam.Name;
-            game.AwayTeamLink = awayTeam.Link;
 
             if (match.Scores != null && match.Scores.Any())
             {
@@ -253,11 +252,9 @@ namespace MPR.ScoreConnectors
             public Team(Competitor competitor)
             {
                 Name = competitor == null ? "---" : competitor.AbbreviatedName;
-                Link = "https://overwatchleague.com/en-us/teams/";
             }
 
             public string Name { get; }
-            public string Link { get; }
         }
 
         #endregion

@@ -23,11 +23,11 @@
 
                         @if (team.MakesCutoff)
                         {
-                            <td class="text-success">@team.Name</td>
+                            <td><a href="@team.TeamUrl" class="text-success">@team.Name</a></td>
                         }
                         else
                         {
-                            <td>@team.Name</td>
+                            <td><a href="@team.TeamUrl" class="text-white">@team.Name</a></td>
                         }
 
                         <td>@team.Wins-@team.Loses</td>

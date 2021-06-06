@@ -10,21 +10,21 @@
                 <tr>
                     @if (@game.AwayTeamWon)
                     {
-                        <td style="font-weight: bold"><a href="@game.AwayTeamLink" class="text-success">@game.AwayTeam</a></td>
+                        <td class="text-success font-weight-bold">@game.AwayTeam</td>
                     }
                     else
                     {
-                        <td><a href="@game.AwayTeamLink" class="text-white">@game.AwayTeam</a></td>
+                        <td>@game.AwayTeam</td>
                     }
                     <td>@game.AwayTeamScore</td>
 
                     @if (@game.HomeTeamWon)
                     {
-                        <td style="font-weight: bold"><a href="@game.HomeTeamLink" class="text-success">@game.HomeTeam</a></td>
+                        <td class="text-success font-weight-bold">@game.HomeTeam</td>
                     }
                     else
                     {
-                        <td><a href="@game.HomeTeamLink" class="text-white">@game.HomeTeam</a></td>
+                        <td>@game.HomeTeam</td>
                     }
                     <td>@game.HomeTeamScore</td>
 

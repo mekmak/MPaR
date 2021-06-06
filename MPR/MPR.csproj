@@ -139,7 +139,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rest\RestClient.cs" />
     <Compile Include="ScoreConnectors\EspnScoreConnector.cs" />
-    <Compile Include="ScoreConnectors\OwlConnectorV1.cs" />
     <Compile Include="ScoreConnectors\OwlConnectorV2.cs" />
   </ItemGroup>
   <ItemGroup>
