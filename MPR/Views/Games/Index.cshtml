@@ -6,15 +6,15 @@
     <div class="container-fluid">
         <div class="row justify-content-center p-3">
             <div class="col-auto">
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <div class="btn-group btn-group-toggle" id="game_tab_buttons" data-toggle="buttons">
                     <label class="btn btn-secondary">
-                        <input id="meatSportsRadio" type="radio" name="sportType" value="meat" onchange="showTab('meat')">Meat Sports
+                        <input id="meatSportsRadio" name="sport-type" type="radio" data-sport-type="meat">Meat Sports
                     </label>
                     <label class="btn btn-secondary active">
-                        <input id="owlRadio" type="radio" name="sportType" value="owl" onchange="showTab('owl')" checked>OWL Games
+                        <input id="owlRadio" name="sport-type" type="radio" data-sport-type="owl">OWL Games
                     </label>
                     <label class="btn btn-secondary">
-                        <input id="owlStRadio" type="radio" name="sportType" value="owlSt" onchange="showTab('owlSt')">OWL Standings
+                        <input id="owlStRadio" name="sport-type" type="radio" data-sport-type="owlSt">OWL Standings
                     </label>
                 </div>
             </div>
@@ -25,33 +25,27 @@
             </div>
         </div>
         <div class="row">
-            <div class="col">
-                <div id="meat_sports" class="d-none"></div>
-                <div id="owl_games"></div>
-                <div id="owl_standings" class="d-none"></div>
+            <div class="col" id="game_tabs">
+                <div data-sport-type="meat" class="d-none"></div>
+                <div data-sport-type="owl" ></div>
+                <div data-sport-type="owlSt" class="d-none"></div>
             </div>
         </div>
     </div>    
 </div>
 
 <script>
-    function showTab(tabName) {
-        $("#meat_sports").addClass("d-none")
-        $("#owl_games").addClass("d-none")
-        $("#owl_standings").addClass("d-none")
-
-        switch (tabName) {
-            case 'meat': $("#meat_sports").removeClass("d-none"); break;
-            case 'owl': $("#owl_games").removeClass("d-none"); break;
-            case 'owlSt': $("#owl_standings").removeClass("d-none"); break;
-        }
+    function showTab(sportType) {
+        $('#game_tabs div').addClass("d-none")
+        $(`#game_tabs div[data-sport-type=${sportType}]`).removeClass("d-none")
     }
 
     function reloadGames() {
         var offest = new Date().getTimezoneOffset();
-        $('#meat_sports').load('@Url.Action("Games", "Games")' + "?gameType=meat&offset=" + offest)
-        $('#owl_games').load('@Url.Action("Games", "Games")' + "?gameType=owl&offset=" + offest)
-        $('#owl_standings').load('@Url.Action("Games", "Games")' + "?gameType=owlSt&offset=" + offest)
+        $('#game_tabs div').each((_, ele) => {
+            var st = $(ele).data('sport-type')
+            $(ele).load('@Url.Action("Games", "Games")' + `?gameType=${st}&offset=${offest}`)
+        })        
         refreshLastUpdated()
     }
 
@@ -72,12 +66,30 @@
             seconds = "0" + seconds;
         }
 
-        var datetime = "Last updated at: " + hours + ":" + minutes + ":" + seconds;
-        $('#last_update_time').html(datetime);
+        $('#last_update_time').html(`Last updated at: ${hours}:${minutes}:${seconds}`);
+    }
+
+    function registerSwipes() {
+        new Hammer(document.getElementById('game_tabs')).on("swipeleft swiperight", ev => {
+            var active = $('#game_tab_buttons label.active')
+            var next = ev.type === 'swiperight' ? active.prev() : active.next()
+            if (next.length) {
+                next.button().click()
+            }
+        });
     }
 
     $(function () {
-        reloadGames();        
+        $('#game_tab_buttons input').each((_, ele) => {
+            $(ele).change(() => showTab($(ele).data('sport-type')))
+        })
+
+        var isMobile = 'ontouchstart' in document.documentElement && /mobi/i.test(navigator.userAgent);
+        if (isMobile) {
+            registerSwipes()
+        }
+        
+        reloadGames();
         setInterval(reloadGames, 5000)
     });
 </script>

@@ -23,6 +23,9 @@ namespace MPR
                       "~/Scripts/bootstrap.js",
                       "~/Scripts/respond.js"));
 
+            bundles.Add(new ScriptBundle("~/bundles/hammerjs").Include(
+                      "~/Scripts/hammer.min.js"));
+
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootswatch/cyborg/bootstrap.css",
                       "~/Content/site.css"));
