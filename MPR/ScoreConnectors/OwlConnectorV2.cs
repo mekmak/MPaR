@@ -77,6 +77,15 @@ namespace MPR.ScoreConnectors
                 .ToList();
         }
 
+        private static readonly Dictionary<string, int> _tournamentIndexes = new Dictionary<string, int>
+        {
+            {"2021 Regular Season", 0},
+            {"Countdown Cup: Qualifiers", 1},
+            {"Summer Showdown: Qualifiers", 2},
+            {"June Joust: Qualifiers", 3},
+            {"May Melee Qualifiers", 4},
+        };
+
         public List<Models.Standings> GetStandings()
         {
             var tournaments = new List<Tournament>(_tournaments);
@@ -84,14 +93,10 @@ namespace MPR.ScoreConnectors
                 // Don't want to display qualifiers that haven't started yet
                 .Where(tr => tr.Regions.Any(r => r.Teams.Any(t => t.MapsPlayed > 0)))
                 .Select(Wrap)
-                .Where(s => s != null)                
+                .Where(s => s != null) 
                 .ToList();
 
-            // Some black magic -- the api we hit returns the regular season standings
-            // and then all qualifiers in chronological order, but we want to display
-            // the season standings and then the most recent qualifiers instead
-            var ordered = new List<Models.Standings>(standings.Count){ standings[0] };
-            ordered.AddRange(standings.Skip(1).Reverse());
+            List<Models.Standings> ordered = standings.OrderBy(t => _tournamentIndexes.TryGetValue(t.TournamentName, out var index) ? index : int.MaxValue).ToList();
             return ordered;
         }
 
