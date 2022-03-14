@@ -168,13 +168,10 @@ namespace MPR.ScoreConnectors
             game.HomeTeam = homeTeam.Name;
             game.AwayTeam = awayTeam.Name;
 
-            if (match.Scores != null && match.Scores.Any())
-            {
-                game.HomeTeamScore = GetMatchScore(match, 0);
-                game.HomeTeamWon = ShouldNotify(match, 0);
-                game.AwayTeamScore = GetMatchScore(match, 1);
-                game.AwayTeamWon = ShouldNotify(match, 1);
-            }
+            game.HomeTeamScore = GetMatchScore(match, 0);
+            game.HomeTeamWon = ShouldNotify(match, 0);
+            game.AwayTeamScore = GetMatchScore(match, 1);
+            game.AwayTeamWon = ShouldNotify(match, 1);
 
             game.Time = GetTime(match, clientOffset);
             game.TimeLink = $"https://overwatchleague.com/en-us/match/{match.Id}";
@@ -185,7 +182,7 @@ namespace MPR.ScoreConnectors
 
         private bool ShouldNotify(Match match, int i)
         {
-            if (!MatchOver(match))
+            if (!MatchOver(match) || !ScoresAvailable(match))
             {
                 return false;
             }
@@ -196,17 +193,12 @@ namespace MPR.ScoreConnectors
 
         private string GetMatchScore(Match m, int index)
         {
-            if (MatchPending(m))
+            if (!ScoresAvailable(m))
             {
                 return "-";
             }
 
             string score = m.Scores[index].ToString();
-            if (MatchOver(m))
-            {
-                return score;
-            }
-
             return score;
         }
 
@@ -239,7 +231,7 @@ namespace MPR.ScoreConnectors
 
         private static bool MatchLive(Match m)
         {
-            return m.IsLive;
+            return m.Status.Equals("LIVE");
         }
 
         private static bool MatchOver(Match m)
@@ -249,7 +241,17 @@ namespace MPR.ScoreConnectors
 
         private static bool MatchPending(Match m)
         {
-            return !MatchLive(m) && !MatchOver(m);
+            return m.Status.Equals("PENDING");
+        }
+
+        private static bool ScoresAvailable(Match m)
+        {
+            if(MatchPending(m))
+            {
+                return false;
+            }
+
+            return m?.Scores.Any() ?? false;
         }
 
         private class Team
@@ -332,7 +334,8 @@ namespace MPR.ScoreConnectors
         private static WeekNumber GetCurrentOwlWeek()
         {
             int currentWeek = CultureInfo.CurrentUICulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Wednesday);
-            int owlWeek = currentWeek - 15; // Tribal knowledge
+            int owlWeek = Math.Max(1, currentWeek - 15); // Tribal knowledge
+
             return owlWeek <= LastRegularSeasonWeek 
                 ? WeekNumber.RegularSeason(owlWeek) 
                 : WeekNumber.Playoffs(owlWeek - LastRegularSeasonWeek);
@@ -480,7 +483,7 @@ namespace MPR.ScoreConnectors
                 case WeekType.Playoffs:
                     return $"https://wzavfvwgfk.execute-api.us-east-2.amazonaws.com/production/owl/paginator/schedule?stage=regular_season&season=2020&locale=en-us&page={weekNumber.Number}&id=bltaea9843a2219186c";
                 case WeekType.RegularSeason:
-                    return $"https://wzavfvwgfk.execute-api.us-east-2.amazonaws.com/production/owl/paginator/schedule?stage=regular_season&season=2020&locale=en-us&page={weekNumber.Number}";
+                    return $"https://pk0yccosw3.execute-api.us-east-2.amazonaws.com/production/v2/content-types/schedule/blt78de204ce428f00c/week/{weekNumber.Number}?locale=en-us";
                 default:
                     throw new ArgumentException($"Cannot get fetch call URI, unrecognized week type '{weekNumber.Type}'");
             }
