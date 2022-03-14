@@ -6,7 +6,7 @@ namespace MPR.Owl.V2
 {
     public class Schedule
     {
-        [JsonProperty("content")]
+        [JsonProperty("data")]
         public Content Content { get; set; }
 
         public static Schedule FromJson(string response)
@@ -53,9 +53,6 @@ namespace MPR.Owl.V2
         [JsonProperty("status")]
         public string Status {get;set;}
 
-        [JsonProperty("live")]
-        public bool IsLive {get;set;}
-
         [JsonProperty("scores")]
         public List<int> Scores {get;set;}
 
@@ -64,6 +61,9 @@ namespace MPR.Owl.V2
 
         [JsonProperty("endDate")]
         public long? EndDateUnix {get;set;}
+
+        [JsonProperty("isEncore")]
+        public bool IsEncore { get; set; }
 
         [JsonProperty("competitors")]
         public List<Competitor> Competitors {get;set;}
