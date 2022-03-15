@@ -62,6 +62,9 @@ namespace MPR.Owl.V2
         [JsonProperty("endDate")]
         public long? EndDateUnix {get;set;}
 
+        [JsonProperty("encoreDate")]
+        public long? EncoreDateUnix { get; set; }
+
         [JsonProperty("isEncore")]
         public bool IsEncore { get; set; }
 

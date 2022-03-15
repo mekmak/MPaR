@@ -30,6 +30,12 @@
 
                     <td>
                         <a href="@game.TimeLink">@game.Time</a>
+
+                        @if(game.EncoreTime != null)
+                        {
+                            <span> / </span> <a href="@game.EncoreLink">@game.EncoreTime</a>
+                        }
+
                         @if (game.LiveLink != null)
                         {
                             <span> | </span><a href="@game.LiveLink">Watch</a>

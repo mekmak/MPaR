@@ -150,7 +150,10 @@ namespace MPR.ScoreConnectors
 
         private List<OwlGame> ToGames(Week week, int clientOffset)
         {
-            return week.Events.SelectMany(e => e.Matches).Select(m => ToGame(m, week, clientOffset)).ToList();
+            return week.Events.SelectMany(e => e.Matches)
+                .Where(m => !m.IsEncore)
+                .Select(m => ToGame(m, week, clientOffset))
+                .ToList();
         }
 
         private OwlGame ToGame(Match match, Week week, int clientOffset)
@@ -173,8 +176,42 @@ namespace MPR.ScoreConnectors
             game.AwayTeamScore = GetMatchScore(match, 1);
             game.AwayTeamWon = ShouldNotify(match, 1);
 
-            game.Time = GetTime(match, clientOffset);
+            string GetTime(Match m)
+            {
+                if (MatchLive(m))
+                {
+                    return "Live";
+                }
+
+                if (MatchOver(m))
+                {
+                    return "Final";
+                }
+
+                if (!m.StartDateUnix.HasValue)
+                {
+                    return "Unknown";
+                }
+
+                return GetClientTime(m.StartDateUnix.Value, clientOffset).ToString("ddd dd, HH:mm");
+            }
+
+            game.Time = GetTime(match);
             game.TimeLink = $"https://overwatchleague.com/en-us/match/{match.Id}";
+
+            Match encore = week.Events.SelectMany(e => e.Matches).Where(m => m.IsEncore && m.Id == match.Id).FirstOrDefault();
+            if(encore != null && encore.EncoreDateUnix.HasValue && match.StartDateUnix.HasValue)
+            {
+                DateTime gameDate = GetClientTime(match.StartDateUnix.Value, clientOffset);
+                DateTime encoreDate = GetClientTime(encore.EncoreDateUnix.Value, clientOffset);
+
+                game.EncoreTime = encoreDate.Date.Equals(gameDate.Date)
+                    ? encoreDate.ToString("HH:mm")
+                    : encoreDate.ToString("ddd dd, HH:mm");
+
+                game.EncoreLink = $"https://overwatchleague.com/en-us/match/{match.Id}/encore";
+            }
+
             game.LiveLink = MatchLive(match) ? "https://www.youtube.com/overwatchleague" : null;
 
             return game;
@@ -200,26 +237,6 @@ namespace MPR.ScoreConnectors
 
             string score = m.Scores[index].ToString();
             return score;
-        }
-
-        private string GetTime(Match m, int clientOffset)
-        {
-            if(MatchLive(m))
-            {
-                return "Live";
-            }
-
-            if (!m.StartDateUnix.HasValue)
-            {
-                return "Unknown";
-            }
-
-            if(MatchOver(m))
-            {
-                return "Final";
-            }
-
-            return GetClientTime(m.StartDateUnix.Value, clientOffset).ToString("ddd dd, HH:mm");
         }
 
         private DateTime GetClientTime(long dateMs, int clientOffset)

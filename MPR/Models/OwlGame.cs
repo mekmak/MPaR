@@ -1,4 +1,6 @@
-﻿namespace MPR.Models
+﻿using System.Collections.Generic;
+
+namespace MPR.Models
 {
     public class OwlGame
     {
@@ -15,6 +17,9 @@
 
         public string Time { get; set; }
         public string TimeLink { get; set; }
+
+        public string EncoreTime { get; set; }
+        public string EncoreLink { get; set; }
 
         public string LiveLink { get; set; }
 
