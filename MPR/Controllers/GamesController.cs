@@ -28,6 +28,9 @@ namespace MPR.Controllers
                 case "owlSt":
                     List<Standings> st = OwlConnectorV2.Instance.GetStandings();
                     return PartialView("_OwlStandings", st);
+                case "ncaa":
+                    NcaaBracket b = NcaaScoreConnector.Instance.GetBracket(offset);
+                    return PartialView("_NcaaGames", b);
                 default:
                     return PartialView("_UnknownGame");
             }

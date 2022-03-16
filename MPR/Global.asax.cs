@@ -17,6 +17,7 @@ namespace MPR
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             EspnScoreConnector.Instance.InitGameDownload();
             OwlConnectorV2.Instance.InitGameDownload(_tokenSource.Token);
+            NcaaScoreConnector.Instance.Init(_tokenSource.Token);
         }
 
         protected void Application_End()

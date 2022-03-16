@@ -1,0 +1,65 @@
+﻿@model MPR.Models.NcaaBracket
+
+<table class="table">
+    <tbody>
+        @foreach (var round in Model.Rounds.OrderBy(r => r.Number))
+        {
+            <tr><td colspan="5" class="font-weight-bold">@round.Name</td></tr>
+            foreach (var game in Model.Games.Where(g => g.RoundNumber == round.Number).OrderBy(g => g.StartTime))
+            {
+                <tr>
+                    @if (@game.TeamOne.Winner)
+                    {
+                        <td class="text-success font-weight-bold">@game.TeamOne.Name</td>
+                    }
+                    else
+                    {
+                        <td>@game.TeamOne.Name</td>
+                    }
+
+                    @if(game.TeamOne.Score == -1)
+                    {
+                        <td><span>-</span></td>
+                    }
+                    else
+                    {
+                        <td>@game.TeamOne.Score</td>
+                    }
+
+                    @if (@game.TeamTwo.Winner)
+                    {
+                        <td class="text-success font-weight-bold">@game.TeamTwo.Name</td>
+                    }
+                    else
+                    {
+                        <td>@game.TeamTwo.Name</td>
+                    }
+
+                    @if(game.TeamTwo.Score == -1)
+                    {
+                        <td><span>-</span></td>
+                    }
+                    else
+                    {
+                        <td>@game.TeamTwo.Score</td>
+                    }                    
+
+                    <td>
+                        @if (game.State == "I")
+                        {
+                            <span>@game.Period @game.Clock </span>
+                        }
+                        else if (game.State == "F")
+                        {
+                            <span>Final</span>
+                        }
+                        else
+                        {
+                            @game.StartTime.ToString("ddd dd, HH:mm")
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

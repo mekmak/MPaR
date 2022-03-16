@@ -130,15 +130,17 @@
     </Compile>
     <Compile Include="Models\EspnGame.cs" />
     <Compile Include="Models\MeatSports.cs" />
-    <Compile Include="Models\OverwatchLeague.cs" />
+    <Compile Include="Models\NcaaGame.cs" />
     <Compile Include="Models\OwlGame.cs" />
     <Compile Include="Models\OwlStandings.cs" />
+    <Compile Include="NCAA\Bracket.cs" />
     <Compile Include="Owl\V1\Schedule.cs" />
     <Compile Include="Owl\V2\Schedule.cs" />
     <Compile Include="Owl\V2\Standings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rest\RestClient.cs" />
     <Compile Include="ScoreConnectors\EspnScoreConnector.cs" />
+    <Compile Include="ScoreConnectors\NcaaScoreConnector.cs" />
     <Compile Include="ScoreConnectors\OwlConnectorV2.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -380,6 +382,7 @@
     <Content Include="Scripts\popper-utils.js.map" />
     <Content Include="Views\Games\_UnknownGame.cshtml" />
     <Content Include="Views\Games\_OwlStandings.cshtml" />
+    <Content Include="Views\Games\_NcaaGames.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
