@@ -2,7 +2,7 @@
 
 <table class="table">
     <tbody>
-        @foreach (var round in Model.Rounds.OrderBy(r => r.Number))
+        @foreach (var round in Model.Rounds.OrderByDescending(r => r.Number))
         {
             <tr><td colspan="5" class="font-weight-bold">@round.Name</td></tr>
             foreach (var game in Model.Games.Where(g => g.RoundNumber == round.Number).OrderBy(g => g.StartTime))

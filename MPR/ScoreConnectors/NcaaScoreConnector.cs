@@ -42,10 +42,17 @@ namespace MPR.ScoreConnectors
         public NcaaBracket GetBracket(int clientOffset)
         {
             var bracket = _currentBracket;
+
+            var games = bracket.Data.Games.Select(g => Wrap(g, clientOffset)).ToList();
+
+            // We only want to show rounds where there are games where we know at least one of the teams
+            var activeRounds = new HashSet<int>(games.Where(g => g.TeamOne.Name != "-" || g.TeamTwo.Name != "-").Select(g => g.RoundNumber));
+            var rounds = bracket.Data.Tournaments.First().Rounds.Where(r => activeRounds.Contains(r.Number)).Select(Wrap).ToList();
+
             return new NcaaBracket
             {
-                Rounds = bracket.Data.Tournaments.First().Rounds.Select(Wrap).ToList(),
-                Games = bracket.Data.Games.Select(g => Wrap(g, clientOffset)).ToList()
+                Rounds = rounds,
+                Games = games
             };
         }
 
