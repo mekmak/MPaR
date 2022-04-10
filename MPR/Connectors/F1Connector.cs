@@ -132,7 +132,6 @@ namespace MPR.Connectors
                         ?.Sports.First()
                         ?.Leagues.First()
                         ?.Events ?? new List<Event>())
-                    //.Where(e => e != null)
                     .ToList();
 
                 // If we have some events stored from the last pull, but did not get any back
