@@ -10,10 +10,10 @@
                     <label class="btn btn-secondary">
                         <input id="meatSportsRadio" name="sport-type" type="radio" data-sport-type="meat">Meat Sports
                     </label>
-                    <label class="btn btn-secondary active">
-                        <input id="ncaaRadio" name="sport-type" type="radio" data-sport-type="ncaa">NCAA
-                    </label>
                     <label class="btn btn-secondary">
+                        <input id="f1Radio" name="sport-type" type="radio" data-sport-type="f1">F1
+                    </label>
+                    <label class="btn btn-secondary active">
                         <input id="owlRadio" name="sport-type" type="radio" data-sport-type="owl">OWL Games
                     </label>
                     <label class="btn btn-secondary">
@@ -29,9 +29,9 @@
         </div>
         <div class="row">
             <div class="col" id="game_tabs">
-                <div data-sport-type="ncaa"></div>
                 <div data-sport-type="meat" class="d-none"></div>
-                <div data-sport-type="owl" class="d-none"></div>
+                <div data-sport-type="f1" class="d-none"></div>
+                <div data-sport-type="owl"></div>
                 <div data-sport-type="owlSt" class="d-none"></div>
             </div>
         </div>
@@ -40,32 +40,32 @@
 
 <script>
     function showTab(sportType) {
-        $('#game_tabs div').addClass("d-none")
-        $(`#game_tabs div[data-sport-type=${sportType}]`).removeClass("d-none")
+        $('#game_tabs div').addClass("d-none");
+        $(`#game_tabs div[data-sport-type=${sportType}]`).removeClass("d-none");
     }
 
     function reloadGames() {
-        var offest = new Date().getTimezoneOffset();
+        var offset = new Date().getTimezoneOffset();
         $('#game_tabs div').each((_, ele) => {
-            var st = $(ele).data('sport-type')
-            $(ele).load('@Url.Action("Games", "Games")' + `?gameType=${st}&offset=${offest}`)
-        })        
-        refreshLastUpdated()
+            var st = $(ele).data('sport-type');
+            $(ele).load('@Url.Action("Games", "Games")' + `?gameType=${st}&offset=${offset}`);
+        });
+        refreshLastUpdated();
     }
 
     function refreshLastUpdated() {
-        var currentdate = new Date();
-        var hours = currentdate.getHours().toString();
+        var currentDate = new Date();
+        var hours = currentDate.getHours().toString();
         if (hours.length === 1) {
             hours = "0" + hours;
         }
 
-        var minutes = currentdate.getMinutes().toString();
+        var minutes = currentDate.getMinutes().toString();
         if (minutes.length === 1) {
             minutes = "0" + minutes;
         }
 
-        var seconds = currentdate.getSeconds().toString();
+        var seconds = currentDate.getSeconds().toString();
         if (seconds.length === 1) {
             seconds = "0" + seconds;
         }
@@ -75,25 +75,25 @@
 
     function registerSwipes() {
         new Hammer(document.getElementById('game_tabs')).on("swipeleft swiperight", ev => {
-            var active = $('#game_tab_buttons label.active')
-            var next = ev.type === 'swiperight' ? active.prev() : active.next()
+            var active = $('#game_tab_buttons label.active');
+            var next = ev.type === 'swiperight' ? active.prev() : active.next();
             if (next.length) {
-                next.button().click()
+                next.button().click();
             }
         });
     }
 
     $(function () {
         $('#game_tab_buttons input').each((_, ele) => {
-            $(ele).change(() => showTab($(ele).data('sport-type')))
-        })
+            $(ele).change(() => showTab($(ele).data('sport-type')));
+        });
 
         var isMobile = 'ontouchstart' in document.documentElement && /mobi/i.test(navigator.userAgent);
         if (isMobile) {
-            registerSwipes()
+            registerSwipes();
         }
         
         reloadGames();
-        setInterval(reloadGames, 5000)
+        setInterval(reloadGames, 5000);
     });
 </script>

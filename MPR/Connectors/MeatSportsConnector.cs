@@ -3,14 +3,15 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using MPR.Models;
-using MPR.Rest;
 
-namespace MPR.ScoreConnectors
+namespace MPR.Connectors
 {
-    public class EspnScoreConnector
+    public class MeatSportsConnector : Connector
     {
         private readonly Dictionary<string, string> _shortNameMap = new Dictionary<string, string>
         {
@@ -47,7 +48,7 @@ namespace MPR.ScoreConnectors
             {"Indianapolis", "IND" }
         };
 
-        private readonly ConcurrentDictionary<Sport, List<EspnGame>> _gameCache = new ConcurrentDictionary<Sport, List<EspnGame>>();
+        private readonly ConcurrentDictionary<Sport, List<MeatSportGame>> _gameCache = new ConcurrentDictionary<Sport, List<MeatSportGame>>();
         private readonly Dictionary<string, Tuple<string, string>> _scoreCache = new Dictionary<string, Tuple<string, string>>();
 
         #region Sport
@@ -82,33 +83,28 @@ namespace MPR.ScoreConnectors
 
         #endregion
 
-        public static EspnScoreConnector Instance = new EspnScoreConnector();
+        public static MeatSportsConnector Instance = new MeatSportsConnector();
 
-        public void InitGameDownload()
+        public void Init(CancellationToken token)
         {
-            UpdateGames();
-            new Thread(() =>
+            var pulls = new[]
             {
-                while(true)
+                new Pull
                 {
-                    UpdateGames();
-                    Thread.Sleep(10000);
+                    Name = "Meat Sports Games", Task = UpdateGames
                 }
-            })
-            {
-                Name = "Espn EspnGame Pull",
-                Priority = ThreadPriority.Normal,
-                IsBackground = true
-            }.Start();            
+            };
+
+            StartPulls(token, pulls);      
         }
 
-        private void UpdateGames()
+        private async Task UpdateGames(CancellationToken token)
         {
             foreach (Sport sport in Enum.GetValues(typeof(Sport)).Cast<Sport>())
             {
                 try
                 {
-                    List<EspnGame> games = DownloadGames(sport);
+                    List<MeatSportGame> games = await DownloadGames(token, sport);
                     _gameCache.AddOrUpdate(sport, _ => games, (v1, v2) => games);
                 }
                 catch
@@ -118,26 +114,25 @@ namespace MPR.ScoreConnectors
             }
         }
 
-        public List<EspnGame> GetGames(Sport sport)
+        public List<MeatSportGame> GetGames(Sport sport)
         {
-            List<EspnGame> games;
+            List<MeatSportGame> games;
             if(_gameCache.TryGetValue(sport, out games))
             {
                 return games;
             }
 
-            return new List<EspnGame>();
+            return new List<MeatSportGame>();
         }
 
-        private List<EspnGame> DownloadGames(Sport sport)
+        private async Task<List<MeatSportGame>> DownloadGames(CancellationToken token, Sport sport)
         {
-            var client = new RestClient(GetEndPoint(sport));
-            string requestResponse = client.MakeRequest();
+            string requestResponse = await FetchScores(token, sport);
 
             NameValueCollection keyValues = HttpUtility.ParseQueryString(requestResponse);
 
             int gameCount = GetCount(sport, keyValues);
-            var games = new List<EspnGame>();
+            var games = new List<MeatSportGame>();
             for (int gameNumber = 1; gameNumber <= gameCount; gameNumber++)
             {
                 string score = GetScore(sport, keyValues, gameNumber);
@@ -147,7 +142,7 @@ namespace MPR.ScoreConnectors
                 string homeTeam = sport == Sport.NFL ? TryShorten(gameInfo.HomeTeam) : gameInfo.HomeTeam;
                 string awayTeam = sport == Sport.NFL ? TryShorten(gameInfo.AwayTeam) : gameInfo.AwayTeam;
 
-                var game = new EspnGame
+                var game = new MeatSportGame
                 {
                     HomeTeam = homeTeam,
                     HomeTeamScore = gameInfo.HomeTeamScore,
@@ -165,31 +160,42 @@ namespace MPR.ScoreConnectors
             return games;
         }
 
+        private async Task<string> FetchScores(CancellationToken token, Sport sport)
+        {
+            using (var httpClient = new HttpClient())
+            {                                     
+                var uri = new Uri(GetEndPoint(sport));
+                using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
+                {
+                    var response = await httpClient.SendAsync(request, token);
+                    return await response.Content.ReadAsStringAsync();
+                }
+            }
+        }
+
         private string TryShorten(string teamName)
         {
-            string shortened;
-            return !_shortNameMap.TryGetValue(teamName.Trim(), out shortened) ? teamName : shortened;
+            return !_shortNameMap.TryGetValue(teamName.Trim(), out var shortened) ? teamName : shortened;
         }
         
-        private void SetShouldNotify(Sport sport, EspnGame espnGame)
+        private void SetShouldNotify(Sport sport, MeatSportGame meatGame)
         {
-            string gameKey = $"{sport}.{espnGame.HomeTeam}.{espnGame.AwayTeam}";
+            string gameKey = $"{sport}.{meatGame.HomeTeam}.{meatGame.AwayTeam}";
 
             if (_scoreCache.ContainsKey(gameKey))
             {
-                if (!espnGame.HomeTeamScore.Equals(_scoreCache[gameKey].Item1))
+                if (!meatGame.HomeTeamScore.Equals(_scoreCache[gameKey].Item1))
                 {
-                    espnGame.NotifyHome = true;
+                    meatGame.NotifyHome = true;
                 }
 
-                if (!espnGame.AwayTeamScore.Equals(_scoreCache[gameKey].Item2))
+                if (!meatGame.AwayTeamScore.Equals(_scoreCache[gameKey].Item2))
                 {
-                    espnGame.NotifyAway = true;
+                    meatGame.NotifyAway = true;
                 }
             }
 
-
-            _scoreCache[gameKey] = new Tuple<string, string>(espnGame.HomeTeamScore, espnGame.AwayTeamScore);
+            _scoreCache[gameKey] = new Tuple<string, string>(meatGame.HomeTeamScore, meatGame.AwayTeamScore);
         }
 
         private int GetCount(Sport sport, NameValueCollection collection)
@@ -257,8 +263,7 @@ namespace MPR.ScoreConnectors
 
                 foreach (string split in splits)
                 {
-                    int teamScore = 0;
-                    if (int.TryParse(split, out teamScore))
+                    if (int.TryParse(split, out int teamScore))
                     {
                         if (awayTeamSet)
                         {

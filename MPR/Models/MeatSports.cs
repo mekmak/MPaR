@@ -13,6 +13,6 @@ namespace MPR.Models
     public class MeatSport
     {
         public string Name { get; set; }
-        public List<EspnGame> Games { get; set; }
+        public List<MeatSportGame> Games { get; set; }
     }
 }

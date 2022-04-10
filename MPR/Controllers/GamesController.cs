@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using MPR.Connectors;
 using MPR.Models;
-using MPR.ScoreConnectors;
 
 namespace MPR.Controllers
 {
@@ -21,7 +21,7 @@ namespace MPR.Controllers
             {
                 case "meat":
                     MeatSports meatSports = GetMeatSports();
-                    return PartialView("_EspnGames", meatSports);
+                    return PartialView("_MeatSportsGames", meatSports);
                 case "owl":
                     List<OwlGame> owlGames = OwlConnectorV2.Instance.GetGames(offset);
                     return PartialView("_OwlGames", owlGames);
@@ -29,8 +29,11 @@ namespace MPR.Controllers
                     List<Standings> st = OwlConnectorV2.Instance.GetStandings();
                     return PartialView("_OwlStandings", st);
                 case "ncaa":
-                    NcaaBracket b = NcaaScoreConnector.Instance.GetBracket(offset);
+                    NcaaBracket b = NcaaConnector.Instance.GetBracket(offset);
                     return PartialView("_NcaaGames", b);
+                case "f1":
+                    F1Schedule f1s = F1Connector.Instance.GetSchedule(offset);
+                    return PartialView("_F1Schedule", f1s);
                 default:
                     return PartialView("_UnknownGame");
             }
@@ -39,9 +42,9 @@ namespace MPR.Controllers
         private MeatSports GetMeatSports()
         {
             var sports = new List<MeatSport>();
-            foreach(EspnScoreConnector.Sport s in Enum.GetValues(typeof(EspnScoreConnector.Sport)))
+            foreach(MeatSportsConnector.Sport s in Enum.GetValues(typeof(MeatSportsConnector.Sport)))
             {
-                var games = EspnScoreConnector.Instance.GetGames(s);
+                var games = MeatSportsConnector.Instance.GetGames(s);
                 if(!games.Any())
                 {
                     continue;
