@@ -1,0 +1,18 @@
+﻿@model MPR.Models.F1Schedule
+
+<table class="table">
+    <tbody>
+        @foreach (var race in Model.Races.OrderBy(e => e.Order))
+        {
+            <tr><td colspan="3" class="font-weight-bold"><a href="@race.Link">@race.Name</a></td></tr>
+            foreach (var ev in race.Events)
+            {
+                <tr>
+                    <td>@ev.Name</td>
+                    <td>@ev.StartDate.ToString("MMM dd (ddd), HH:mm")</td>
+                    <td>@ev.Status</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

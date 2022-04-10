@@ -2,7 +2,7 @@
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
-using MPR.ScoreConnectors;
+using MPR.Connectors;
 
 namespace MPR
 {
@@ -15,9 +15,13 @@ namespace MPR
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
-            EspnScoreConnector.Instance.InitGameDownload();
-            OwlConnectorV2.Instance.InitGameDownload(_tokenSource.Token);
-            NcaaScoreConnector.Instance.Init(_tokenSource.Token);
+
+            MeatSportsConnector.Instance.Init(_tokenSource.Token);
+            OwlConnectorV2.Instance.Init(_tokenSource.Token);
+            F1Connector.Instance.Init(_tokenSource.Token);
+
+            // Till next year..
+            // NcaaConnector.Instance.Init(_tokenSource.Token);
         }
 
         protected void Application_End()

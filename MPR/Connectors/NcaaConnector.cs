@@ -1,42 +1,33 @@
-﻿using MPR.Models;
-using MPR.NCAA;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using MPR.Models;
+using MPR.NCAA;
 
-namespace MPR.ScoreConnectors
+namespace MPR.Connectors
 {
-    public class NcaaScoreConnector
+    public class NcaaConnector : Connector
     {
-        public static NcaaScoreConnector Instance = new NcaaScoreConnector();
+        public static NcaaConnector Instance = new NcaaConnector();
         private Bracket _currentBracket = new Bracket();
 
         public void Init(CancellationToken token)
         {
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-            UpdateGames(token).Wait();
-            new Thread(async () =>
-            {
-                while (true)
-                {
-                    if (token.IsCancellationRequested)
-                    {
-                        return;
-                    }
 
-                    await UpdateGames(token);
-                    await Task.Delay(TimeSpan.FromSeconds(10), token);
-                }
-            })
+            var pulls = new[]
             {
-                Name = "Ncaa Game Pull",
-                Priority = ThreadPriority.Normal,
-                IsBackground = true
-            }.Start();
+                new Pull
+                {
+                    Name = "NCAA Games", Task = UpdateGames
+                }
+            };
+
+            StartPulls(token, pulls);
         }
 
         public NcaaBracket GetBracket(int clientOffset)
