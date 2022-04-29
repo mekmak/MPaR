@@ -42,21 +42,23 @@ namespace MPR.Connectors
         public List<Models.OwlGame> GetGames(int clientOffset)
         {
             var currentWeeks = new List<Week>(_currentWeeks);
-            return currentWeeks
+            var games = currentWeeks
                 .OrderBy(w => w.WeekName.Contains("Playoffs") ? 1 : 0)
                 .ThenBy(w => w.WeekNumber)
                 .SelectMany(w => ToGames(w, clientOffset))
                 .DistinctBy(g => g.Id)
                 .ToList();
+
+            return games;
         }
 
         private static readonly Dictionary<string, int> TournamentIndexes = new Dictionary<string, int>
         {
-            {"2021 Regular Season", 0},
-            {"Countdown Cup: Qualifiers", 1},
-            {"Summer Showdown: Qualifiers", 2},
-            {"June Joust: Qualifiers", 3},
-            {"May Melee Qualifiers", 4},
+            {"2022 Regular Season", 0},
+            {"Countdown Cup Qualifiers", 1},
+            {"Summer Showdown Qualifiers", 2},
+            {"Midseason Madness Qualifiers", 3},
+            {"Kickoff Clash Qualifiers", 4},
         };
 
         public List<Models.Standings> GetStandings()
@@ -64,7 +66,7 @@ namespace MPR.Connectors
             var tournaments = new List<Tournament>(_tournaments);
             var standings = tournaments
                 // Don't want to display qualifiers that haven't started yet
-                .Where(tr => tr.Regions.Any(r => r.Teams.Any(t => t.MapsPlayed > 0)))
+                .Where(tr => tr.Title.Contains("Regular Season") || tr.Regions.Any(r => r.Teams.Any(t => t.MapsPlayed > 0)))
                 .Select(Wrap)
                 .Where(s => s != null) 
                 .ToList();
