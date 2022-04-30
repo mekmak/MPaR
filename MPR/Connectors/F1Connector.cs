@@ -35,24 +35,42 @@ namespace MPR.Connectors
         {
             var races = new Dictionary<string, Models.Race>();
 
-            int counter = 1;
-            foreach (var e in _currentEvents.OrderBy(e => e.DateUtc))
+            int completedCounter = 1;
+            int upcomingCounter = int.MinValue + 1;
+
+            foreach (var currentEvent in _currentEvents.OrderBy(e => e.DateUtc))
             {
-                if (!races.TryGetValue(e.Name, out var race))
+                if (!races.TryGetValue(currentEvent.Name, out var race))
                 {
+                    bool isComplete = _currentEvents
+                        .Where(e => e.Name.Equals(currentEvent.Name))
+                        .All(e => e.Summary.Equals("Final"));
+
+                    // We want to first show all events that haven't finished yet,
+                    // then all events that already finished
+                    int order = isComplete
+                        ? completedCounter++
+                        : upcomingCounter++;
+
                     race = new Race
                     {
-                        Order = counter++,
-                        Name = e.Name,
+                        Order = order,
+                        Name = currentEvent.Name,
                         Events = new List<Models.Event>(),
-                        Link = e.Link
+                        Link = currentEvent.Link
                     };
 
-                    races[e.Name] = race;
+                    races[currentEvent.Name] = race;
                 }
 
-                race.Events.Add(Wrap(e, clientOffset));
+                race.Events.Add(Wrap(currentEvent, clientOffset));
             }
+
+            // We want to show the last event that complete first
+            var lastCompleted = races.Values
+                .OrderByDescending(r => r.Order)
+                .First();
+            lastCompleted.Order = int.MinValue;
 
             return new F1Schedule { Races = races.Values.ToList() };
         }
