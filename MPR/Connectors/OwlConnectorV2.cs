@@ -21,7 +21,7 @@ namespace MPR.Connectors
         public void Init(CancellationToken token)
         {
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-
+            
             var pulls = new[]
             {
                 new Pull
@@ -326,7 +326,7 @@ namespace MPR.Connectors
         private static WeekNumber GetCurrentOwlWeek()
         {
             int currentWeek = CultureInfo.CurrentUICulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Wednesday);
-            int owlWeek = Math.Max(1, currentWeek - 17); // Tribal knowledge
+            int owlWeek = Math.Max(1, currentWeek - 18);
 
             return owlWeek <= LastRegularSeasonWeek 
                 ? WeekNumber.RegularSeason(owlWeek) 
