@@ -34,6 +34,9 @@ namespace MPR.Controllers
                 case "f1":
                     F1Schedule f1s = F1Connector.Instance.GetSchedule(offset);
                     return PartialView("_F1Schedule", f1s);
+                case "f1St":
+                    var f1Standings = F1Connector.Instance.GetStandings();
+                    return PartialView("_F1Standings", f1Standings);
                 default:
                     return PartialView("_UnknownGame");
             }

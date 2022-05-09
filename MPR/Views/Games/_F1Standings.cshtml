@@ -1,0 +1,30 @@
+﻿@model MPR.Models.F1Standings
+
+<table class="table">
+    <tbody>
+        <tr><td colspan="4" class="font-weight-bold">Constructors</td></tr>
+
+        @foreach (var team in Model.TeamStandings.OrderBy(t => t.Position))
+        {
+            <tr>
+                <td>@team.Position</td>
+                <td class="text-success">@team.Points</td>
+                <td colspan="2" class="text-left">@team.Name</td>
+            </tr>
+        }
+
+        <tr><td colspan="4" class="font-weight-bold">Drivers</td></tr>
+        @foreach (var driver in Model.DriverStandings.OrderBy(t => t.Position))
+        {
+            <tr>
+                <td>@driver.Position</td>
+                <td class="text-success">@driver.Points</td>
+                <td>
+                    <span>@driver.Name</span>
+                    <span class="text-muted">(@driver.Nationality)</span>
+                </td>
+                <td class="text-left">@driver.Car</td>
+            </tr>
+        }
+    </tbody>
+</table>

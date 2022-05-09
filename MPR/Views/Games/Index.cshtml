@@ -8,16 +8,19 @@
             <div class="col-auto">
                 <div class="btn-group btn-group-toggle" id="game_tab_buttons" data-toggle="buttons">
                     <label class="btn btn-secondary">
-                        <input id="meatSportsRadio" name="sport-type" type="radio" data-sport-type="meat">Meat Sports
+                        <input id="meatSportsRadio" name="sport-type" type="radio" data-sport-type="meat">Meat
                     </label>
                     <label class="btn btn-secondary">
-                        <input id="f1Radio" name="sport-type" type="radio" data-sport-type="f1">F1
+                        <input id="f1Radio" name="sport-type" type="radio" data-sport-type="f1">F1/R
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input id="f1StRadio" name="sport-type" type="radio" data-sport-type="f1St">F1/S
                     </label>
                     <label class="btn btn-secondary active">
-                        <input id="owlRadio" name="sport-type" type="radio" data-sport-type="owl">OWL Games
+                        <input id="owlRadio" name="sport-type" type="radio" data-sport-type="owl" >OWL/G
                     </label>
                     <label class="btn btn-secondary">
-                        <input id="owlStRadio" name="sport-type" type="radio" data-sport-type="owlSt">OWL Standings
+                        <input id="owlStRadio" name="sport-type" type="radio" data-sport-type="owlSt">OWL/S
                     </label>
                 </div>
             </div>
@@ -31,6 +34,7 @@
             <div class="col" id="game_tabs">
                 <div data-sport-type="meat" class="d-none"></div>
                 <div data-sport-type="f1" class="d-none"></div>
+                <div data-sport-type="f1St" class="d-none"></div>
                 <div data-sport-type="owl"></div>
                 <div data-sport-type="owlSt" class="d-none"></div>
             </div>

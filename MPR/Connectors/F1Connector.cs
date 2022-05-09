@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using HtmlAgilityPack;
 using MPR.F1;
 using MPR.Models;
 using Event = MPR.F1.Event;
@@ -15,6 +16,8 @@ namespace MPR.Connectors
     {
         public static F1Connector Instance = new F1Connector();
         private List<Event> _currentEvents = new List<Event>();
+        private F1TeamStandings _currentTeamStandings = new F1TeamStandings();
+        private F1DriverStandings _currentDriverStandings = new F1DriverStandings();
 
         public void Init(CancellationToken token)
         {
@@ -25,10 +28,51 @@ namespace MPR.Connectors
                 new Pull
                 {
                     Name = "F1 Schedule", Task = UpdateScoreBoard
+                },
+                new Pull
+                {
+                    Name = "F1 Team Standings", Task = UpdateTeamStandings
+                },
+                new Pull
+                {
+                    Name = "F1 Driver Standings", Task = UpdateDriverStandings
                 }
             };
 
             StartPulls(token, pulls);
+        }
+
+        public Models.F1Standings GetStandings()
+        {
+            var teams = _currentTeamStandings.Teams.Select(Wrap).ToList();
+            var drivers = _currentDriverStandings.Drivers.Select(Wrap).ToList();
+            return new Models.F1Standings 
+            { 
+                TeamStandings = teams,
+                DriverStandings = drivers
+            };
+        }
+
+        private Models.F1Team Wrap(F1.F1Team team)
+        {
+            return new Models.F1Team
+            {
+                Name = team.Name,
+                Points = team.Points,
+                Position = team.Position,
+            };
+        }
+
+        private Models.F1Driver Wrap(F1.F1Driver driver)
+        {
+            return new Models.F1Driver
+            {
+                Name = driver.Name,
+                Points = driver.Points,
+                Position= driver.Position,
+                Nationality = driver.Nationality,
+                Car = driver.Car
+            };
         }
 
         public Models.F1Schedule GetSchedule(int clientOffset)
@@ -132,6 +176,22 @@ namespace MPR.Connectors
             "20221118", // Abu Dhabi
         };
 
+        private async Task UpdateTeamStandings(CancellationToken token)
+        {
+            var standings = await FetchTeamStandings(token);
+            _currentTeamStandings = _currentTeamStandings.Teams.Any()
+                ? standings.Teams.Any() ? standings : _currentTeamStandings
+                : standings;
+        }
+
+         private async Task UpdateDriverStandings(CancellationToken token)
+        {
+            var standings = await FetchDriverStandings(token);
+            _currentDriverStandings = _currentDriverStandings.Drivers.Any()
+                ? standings.Drivers.Any() ? standings : _currentDriverStandings
+                : standings;
+        }
+
         private async Task UpdateScoreBoard(CancellationToken token)
         {
             var boardTasks = RaceDates
@@ -181,6 +241,126 @@ namespace MPR.Connectors
             {
                 return null;
             }
+        }
+    
+        private async Task<F1.F1TeamStandings> FetchTeamStandings(CancellationToken token)
+        {
+            try
+            {
+                var uri = new Uri("https://www.formula1.com/en/results/jcr:content/resultsarchive.html/2022/team.html");
+                using (var httpClient = new HttpClient())
+                using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
+                {                    
+                    var response = await httpClient.SendAsync(request, token);
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    var standings = ParseF1TeamStandings(responseString);
+                    return standings;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private F1.F1TeamStandings ParseF1TeamStandings(string html)
+        {
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            List<F1.F1Team> teams = doc.DocumentNode
+                .DescendantsWithClass("resultsarchive-table").Single()
+                .DescendantsOfType("tbody").Single()
+                .DescendantsOfType("tr")
+                .Select(ParseF1Team)
+                .Where(t => t != null)
+                .ToList();
+
+            return new F1TeamStandings { Teams = teams };
+        }
+
+        private F1.F1Team ParseF1Team(HtmlNode teamNode)
+        {
+            try
+            {
+                var tds = teamNode.DescendantsOfType("td").ToList();
+
+                int position = int.Parse(tds[1].InnerText);
+                string team = tds[2].DescendantsOfType("a").Single().InnerText;
+                int points = int.Parse(tds[3].InnerText);
+
+                return new F1.F1Team { Name = team, Points = points, Position = position };
+            }
+            catch (Exception)
+            {
+                return null;
+            }            
+        }
+
+        private async Task<F1.F1DriverStandings> FetchDriverStandings(CancellationToken token)
+        {
+            try
+            {
+                var uri = new Uri("https://www.formula1.com/en/results/jcr:content/resultsarchive.html/2022/drivers.html");
+                using (var httpClient = new HttpClient())
+                using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
+                {                    
+                    var response = await httpClient.SendAsync(request, token);
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    var standings = ParseF1DriverStandings(responseString);
+                    return standings;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private F1.F1DriverStandings ParseF1DriverStandings(string html)
+        {
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            List<F1.F1Driver> drivers = doc.DocumentNode
+                .DescendantsWithClass("resultsarchive-table").Single()
+                .DescendantsOfType("tbody").Single()
+                .DescendantsOfType("tr")
+                .Select(ParseF1Driver)
+                .Where(t => t != null)
+                .ToList();
+
+            return new F1DriverStandings { Drivers = drivers };
+        }
+
+        private F1.F1Driver ParseF1Driver(HtmlNode driverNode)
+        {
+            try
+            {
+                var tds = driverNode.DescendantsOfType("td").ToList();
+
+                int position = int.Parse(tds[1].InnerText);
+                string team = tds[2]
+                    .DescendantsOfType("a").Single()
+                    .DescendantsWithClass("hide-for-desktop").Single()
+                    .InnerText;
+                string nationality = tds[3].InnerText;
+                string car = tds[4].DescendantsOfType("a").Single().InnerText;
+                int points = int.Parse(tds[5].InnerText);
+
+                return new F1.F1Driver 
+                { 
+                    Name = team, 
+                    Points = points, 
+                    Position = position,
+                    Car = car,
+                    Nationality = nationality
+                };
+            }
+            catch (Exception)
+            {
+                return null;
+            }    
         }
     }
 }

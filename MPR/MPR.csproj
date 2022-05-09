@@ -126,11 +126,15 @@
     <Compile Include="Controllers\GamesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="F1\F1DriverStandings.cs" />
     <Compile Include="F1\F1ScoreBoard.cs" />
+    <Compile Include="F1\F1TeamStandings.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="HTML\HtmlExtensions.cs" />
     <Compile Include="Models\F1Schedule.cs" />
+    <Compile Include="Models\F1Standings.cs" />
     <Compile Include="Models\MeatSportGame.cs" />
     <Compile Include="Models\MeatSports.cs" />
     <Compile Include="Models\NcaaGame.cs" />
@@ -387,6 +391,7 @@
     <Content Include="Views\Games\_OwlStandings.cshtml" />
     <Content Include="Views\Games\_NcaaGames.cshtml" />
     <Content Include="Views\Games\_F1Schedule.cshtml" />
+    <Content Include="Views\Games\_F1Standings.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
