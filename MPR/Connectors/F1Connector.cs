@@ -53,6 +53,20 @@ namespace MPR.Connectors
             };
         }
 
+        private static readonly Dictionary<string,string> TeamShortNames = new Dictionary<string, string>
+        {
+            {"Red Bull Racing RBPT", "Red Bull"},
+            {"Ferrari", "Ferrari"},
+            {"Mercedes", "Mercedes"},
+            {"McLaren Mercedes", "McLaren"},
+            {"Alfa Romeo Ferrari", "Alfa Romeo"},
+            {"Alpine Renault", "Alpine"},
+            {"AlphaTauri RBPT", "AlphaTauri"},
+            {"Haas Ferrari", "Haas"},
+            {"Aston Martin Aramco Mercedes", "Aston Martin"},
+            {"Williams Mercedes", "Williams"}
+        };
+
         private Models.F1Team Wrap(F1.F1Team team)
         {
             return new Models.F1Team
@@ -71,7 +85,7 @@ namespace MPR.Connectors
                 Points = driver.Points,
                 Position= driver.Position,
                 Nationality = driver.Nationality,
-                Car = driver.Car
+                Car = TeamShortNames.TryGetValue(driver.Car, out var shortName) ? shortName : driver.Car
             };
         }
 
