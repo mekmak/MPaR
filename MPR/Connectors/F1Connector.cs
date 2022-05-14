@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using MPR.F1;
+using MPR.HTML;
 using MPR.Models;
 using Event = MPR.F1.Event;
 

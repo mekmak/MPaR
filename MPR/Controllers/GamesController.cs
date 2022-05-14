@@ -23,10 +23,10 @@ namespace MPR.Controllers
                     MeatSports meatSports = GetMeatSports();
                     return PartialView("_MeatSportsGames", meatSports);
                 case "owl":
-                    List<OwlGame> owlGames = OwlConnectorV2.Instance.GetGames(offset);
+                    List<OwlGame> owlGames = OwlConnector.Instance.GetGames(offset);
                     return PartialView("_OwlGames", owlGames);
                 case "owlSt":
-                    List<Standings> st = OwlConnectorV2.Instance.GetStandings();
+                    List<Standings> st = OwlConnector.Instance.GetStandings();
                     return PartialView("_OwlStandings", st);
                 case "ncaa":
                     NcaaBracket b = NcaaConnector.Instance.GetBracket(offset);

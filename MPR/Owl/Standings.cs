@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace MPR.Owl.V2
+namespace MPR.Owl
 {
     public class StandingsResponse
     {

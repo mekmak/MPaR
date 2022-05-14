@@ -8,13 +8,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using MPR.Extensions;
-using MPR.Owl.V2;
+using MPR.Owl;
 
 namespace MPR.Connectors
 {
-    public class OwlConnectorV2 : Connector
+    public class OwlConnector : Connector
     {
-        public static OwlConnectorV2 Instance = new OwlConnectorV2();
+        public static OwlConnector Instance = new OwlConnector();
         private List<Week> _currentWeeks = new List<Week>();
         private List<Tournament> _tournaments = new List<Tournament>();
 
@@ -223,7 +223,7 @@ namespace MPR.Connectors
 
         private static bool MatchLive(Match m)
         {
-            return m.Status.Equals("LIVE");
+            return m.Status.Equals("IN_PROGRESS");
         }
 
         private static bool MatchOver(Match m)
@@ -250,7 +250,7 @@ namespace MPR.Connectors
         {
             public Team(Competitor competitor)
             {
-                Name = competitor == null ? "---" : competitor.AbbreviatedName;
+                Name = competitor?.AbbreviatedName ?? "---";
             }
 
             public string Name { get; }

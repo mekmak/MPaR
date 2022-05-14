@@ -3,7 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
-using MPR.Owl.V2;
+using MPR.Owl;
 
 namespace Mekmak.EndpointTester
 {
