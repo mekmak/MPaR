@@ -90,6 +90,12 @@ namespace MPR.Connectors
             };
         }
 
+        private static readonly HashSet<string> CompleteRaceSummaries = new HashSet<string> { "Final", "Canceled" };
+        private bool IsComplete(Event e)
+        {
+            return CompleteRaceSummaries.Contains(e.Summary);
+        }
+
         public Models.F1Schedule GetSchedule(int clientOffset)
         {
             var races = new Dictionary<string, Models.Race>();
@@ -103,7 +109,7 @@ namespace MPR.Connectors
                 {
                     bool isComplete = _currentEvents
                         .Where(e => e.Name.Equals(currentEvent.Name))
-                        .All(e => e.Summary.Equals("Final"));
+                        .All(IsComplete);
 
                     // We want to first show all events that haven't finished yet,
                     // then all events that already finished
