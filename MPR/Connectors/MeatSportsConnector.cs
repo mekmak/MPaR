@@ -13,7 +13,21 @@ namespace MPR.Connectors
 {
     public class MeatSportsConnector : Connector
     {
-        private readonly Dictionary<string, string> _shortNameMap = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> NhlShortNames = new Dictionary<string, string>();
+
+        private static readonly Dictionary<string, string> MlbShortNames = new Dictionary<string, string>
+        {
+            {"Chicago Cubs", "Cubs"},
+            {"Chicago Sox", "CHI Soxs"},
+            {"San Francisco", "SF Giants"}
+        };
+
+        private static readonly Dictionary<string, string> NbaShortNames = new Dictionary<string, string>
+        {
+            {"Golden State", "Warriors"}
+        };
+
+        private static readonly Dictionary<string, string> NflShortNames = new Dictionary<string, string>
         {
             {"Kansas City", "KC"},
             {"Oakland", "OAK"},
@@ -46,6 +60,14 @@ namespace MPR.Connectors
             {"Houston", "HOU"},
             {"Jacksonville", "JAX" },
             {"Indianapolis", "IND" }
+        };
+
+        private static readonly Dictionary<Sport, Dictionary<string, string>> NamesBySport = new Dictionary<Sport, Dictionary<string, string>>
+        {
+            {Sport.NFL, NflShortNames},
+            {Sport.MLB, MlbShortNames},
+            {Sport.NBA, NbaShortNames},
+            {Sport.NHL, NhlShortNames}
         };
 
         private readonly ConcurrentDictionary<Sport, List<MeatSportGame>> _gameCache = new ConcurrentDictionary<Sport, List<MeatSportGame>>();
@@ -116,13 +138,7 @@ namespace MPR.Connectors
 
         public List<MeatSportGame> GetGames(Sport sport)
         {
-            List<MeatSportGame> games;
-            if(_gameCache.TryGetValue(sport, out games))
-            {
-                return games;
-            }
-
-            return new List<MeatSportGame>();
+            return _gameCache.TryGetValue(sport, out var games) ? games : new List<MeatSportGame>();
         }
 
         private async Task<List<MeatSportGame>> DownloadGames(CancellationToken token, Sport sport)
@@ -139,8 +155,8 @@ namespace MPR.Connectors
                 string link = GetLink(sport, keyValues, gameNumber);
                 GameInfo gameInfo = GetGameInfo(sport, keyValues, gameNumber);
 
-                string homeTeam = sport == Sport.NFL ? TryShorten(gameInfo.HomeTeam) : gameInfo.HomeTeam;
-                string awayTeam = sport == Sport.NFL ? TryShorten(gameInfo.AwayTeam) : gameInfo.AwayTeam;
+                string homeTeam = GetShortName(sport, gameInfo.HomeTeam);
+                string awayTeam = GetShortName(sport, gameInfo.AwayTeam);
 
                 var game = new MeatSportGame
                 {
@@ -160,6 +176,14 @@ namespace MPR.Connectors
             return games;
         }
 
+        private string GetShortName(Sport sport, string name)
+        {
+            name = name.Trim();
+            var shortNames = NamesBySport.TryGetValue(sport, out var n) ? n : new Dictionary<string, string>();
+            string shortName = shortNames.TryGetValue(name, out var sn) ? sn : name;
+            return shortName;
+        }
+
         private async Task<string> FetchScores(CancellationToken token, Sport sport)
         {
             using (var httpClient = new HttpClient())
@@ -173,11 +197,6 @@ namespace MPR.Connectors
             }
         }
 
-        private string TryShorten(string teamName)
-        {
-            return !_shortNameMap.TryGetValue(teamName.Trim(), out var shortened) ? teamName : shortened;
-        }
-        
         private void SetShouldNotify(Sport sport, MeatSportGame meatGame)
         {
             string gameKey = $"{sport}.{meatGame.HomeTeam}.{meatGame.AwayTeam}";
