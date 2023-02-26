@@ -131,11 +131,15 @@ namespace MPR.Connectors
                 race.Events.Add(Wrap(currentEvent, clientOffset));
             }
 
-            // We want to show the last event that complete first
-            var lastCompleted = races.Values
-                .OrderByDescending(r => r.Order)
-                .First();
-            lastCompleted.Order = int.MinValue;
+            if (completedCounter > 1)
+            {
+                // We want to show the last event that completed first,
+                // assuming that there is at least one completed event
+                var lastCompleted = races.Values
+                    .OrderByDescending(r => r.Order)
+                    .First();
+                lastCompleted.Order = int.MinValue;
+            }
 
             return new F1Schedule { Races = races.Values.ToList() };
         }
@@ -172,29 +176,29 @@ namespace MPR.Connectors
 
         private static readonly string[] RaceDates =
         {
-            "20220320", // Bahrain
-            "20220325", // Saudi
-            "20220408", // Australian
-            "20220422", // Emilia Romagna
-            "20220506", // Miami
-            "20220520", // Spanish
-            "20220527", // Monaco
-            "20220610", // Azerbaijan
-            "20220617", // Canadian
-            "20220701", // British
-            "20220708", // Austrian
-            "20220722", // French
-            "20220729", // Hungarian
-            "20220826", // Belgian 
-            "20220902", // Dutch
-            "20220909", // Italian
-            "20220923", // Russian
-            "20220930", // Singapore
-            "20221007", // Japanese
-            "20221021", // United States
-            "20221028", // Mexico City
-            "20221111", // Sao Paulo
-            "20221118", // Abu Dhabi
+            "20230303", // Bahrain
+            "20230317", // Saudi
+            "20230331", // Australian
+            "20230428", // Azerbaijan
+            "20230505", // Miami
+            "20230519", // Italian
+            "20230526", // Monaco
+            "20230602", // Spanish
+            "20230616", // Canada
+            "20230630", // Austrian
+            "20230707", // British
+            "20230721", // Hungarian 
+            "20230728", // Belgian
+            "20230825", // Dutch
+            "20230901", // Monza
+            "20230915", // Singapore
+            "20230922", // Japanese 
+            "20231006", // Qatar
+            "20231020", // US
+            "20231027", // Mexico
+            "20231103", // Brazil
+            "20231117", // Las Vegas BABY
+            "20231124", // Abu Dhabi
         };
 
         private async Task UpdateTeamStandings(CancellationToken token)
@@ -228,8 +232,8 @@ namespace MPR.Connectors
 
                 var events = bts.Result
                     .SelectMany(sb => sb
-                        ?.Sports.First()
-                        ?.Leagues.First()
+                        ?.Sports?.First()
+                        ?.Leagues?.First()
                         ?.Events ?? new List<Event>())
                     .ToList();
 
@@ -268,7 +272,7 @@ namespace MPR.Connectors
         {
             try
             {
-                var uri = new Uri("https://www.formula1.com/en/results/jcr:content/resultsarchive.html/2022/team.html");
+                var uri = new Uri("https://www.formula1.com/en/results/jcr:content/resultsarchive.html/2023/team.html");
                 using (var httpClient = new HttpClient())
                 using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
                 {                    
@@ -280,7 +284,7 @@ namespace MPR.Connectors
             }
             catch
             {
-                return null;
+                return new F1TeamStandings();
             }
         }
 
@@ -322,7 +326,7 @@ namespace MPR.Connectors
         {
             try
             {
-                var uri = new Uri("https://www.formula1.com/en/results/jcr:content/resultsarchive.html/2022/drivers.html");
+                var uri = new Uri("https://www.formula1.com/en/results/jcr:content/resultsarchive.html/2023/drivers.html");
                 using (var httpClient = new HttpClient())
                 using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
                 {                    
@@ -334,7 +338,7 @@ namespace MPR.Connectors
             }
             catch
             {
-                return null;
+                return new F1DriverStandings();
             }
         }
 
