@@ -56,13 +56,13 @@ namespace MPR.Connectors
 
         private static readonly Dictionary<string,string> TeamShortNames = new Dictionary<string, string>
         {
-            {"Red Bull Racing RBPT", "Red Bull"},
+            {"Red Bull Racing Honda RBPT", "Red Bull"},
             {"Ferrari", "Ferrari"},
             {"Mercedes", "Mercedes"},
             {"McLaren Mercedes", "McLaren"},
             {"Alfa Romeo Ferrari", "Alfa Romeo"},
             {"Alpine Renault", "Alpine"},
-            {"AlphaTauri RBPT", "AlphaTauri"},
+            {"AlphaTauri Honda RBPT", "AlphaTauri"},
             {"Haas Ferrari", "Haas"},
             {"Aston Martin Aramco Mercedes", "Aston Martin"},
             {"Williams Mercedes", "Williams"}
