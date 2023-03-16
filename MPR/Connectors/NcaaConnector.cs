@@ -126,7 +126,7 @@ namespace MPR.Connectors
             {
                 using (var httpClient = new HttpClient())
                 {
-                    var uri = new Uri("https://sdataprod.ncaa.com/?operationName=scores_bracket_web&variables={\"seasonYear\":2021}&extensions={\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"f21cac8420a55a7d190f2f686a441e2507d8fb80f25eac5c91131ddd9df588da\"}}");
+                    var uri = new Uri("https://sdataprod.ncaa.com/?operationName=scores_bracket_web&variables={\"seasonYear\":2022}&extensions={\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"f21cac8420a55a7d190f2f686a441e2507d8fb80f25eac5c91131ddd9df588da\"}}");
                     using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
                     {
                         var response = await httpClient.SendAsync(request, token);

@@ -11,17 +11,20 @@
                         <input id="meatSportsRadio" name="sport-type" type="radio" data-sport-type="meat">Meat
                     </label>
                     <label class="btn btn-secondary active">
+                        <input id="ncaaRadio" name="sport-type" type="radio" data-sport-type="ncaa">NCAA
+                    </label>
+	                <label class="btn btn-secondary">
                         <input id="f1Radio" name="sport-type" type="radio" data-sport-type="f1">F1/R
                     </label>
-                    <label class="btn btn-secondary">
-                        <input id="f1StRadio" name="sport-type" type="radio" data-sport-type="f1St">F1/S
-                    </label>
-                    <label class="btn btn-secondary">
+	                <label class="btn btn-secondary">
+		                <input id="f1StRadio" name="sport-type" type="radio" data-sport-type="f1St">F1/S
+	                </label>
+	                @*<label class="btn btn-secondary">
                         <input id="owlRadio" name="sport-type" type="radio" data-sport-type="owl" >OWL/G
                     </label>
                     <label class="btn btn-secondary">
                         <input id="owlStRadio" name="sport-type" type="radio" data-sport-type="owlSt">OWL/S
-                    </label>
+                    </label>*@
                 </div>
             </div>
         </div>
@@ -33,10 +36,11 @@
         <div class="row">
             <div class="col" id="game_tabs">
                 <div data-sport-type="meat" class="d-none"></div>
-                <div data-sport-type="f1"></div>
-                <div data-sport-type="f1St" class="d-none"></div>
-                <div data-sport-type="owl" class="d-none"></div>
-                <div data-sport-type="owlSt" class="d-none"></div>
+                <div data-sport-type="f1" class="d-none"></div>
+	            <div data-sport-type="f1St" class="d-none"></div>
+	            <div data-sport-type="ncaa"></div>
+                @*<div data-sport-type="owl" class="d-none"></div>
+                <div data-sport-type="owlSt" class="d-none"></div>*@
             </div>
         </div>
     </div>    
