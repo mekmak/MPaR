@@ -326,7 +326,7 @@ namespace MPR.Connectors
         private static WeekNumber GetCurrentOwlWeek()
         {
             int currentWeek = CultureInfo.CurrentUICulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Wednesday);
-            int owlWeek = Math.Max(1, currentWeek - 18);
+            int owlWeek = Math.Max(1, currentWeek - 17);
 
             return owlWeek <= LastRegularSeasonWeek 
                 ? WeekNumber.RegularSeason(owlWeek) 
@@ -475,7 +475,7 @@ namespace MPR.Connectors
                 case WeekType.Playoffs:
                     return $"https://wzavfvwgfk.execute-api.us-east-2.amazonaws.com/production/owl/paginator/schedule?stage=regular_season&season=2020&locale=en-us&page={weekNumber.Number}&id=bltaea9843a2219186c";
                 case WeekType.RegularSeason:
-                    return $"https://pk0yccosw3.execute-api.us-east-2.amazonaws.com/production/v2/content-types/schedule/blt78de204ce428f00c/week/{weekNumber.Number}?locale=en-us";
+                    return $"https://pk0yccosw3.execute-api.us-east-2.amazonaws.com/production/v2/content-types/schedule/blt27f16f110b3363f7/week/{weekNumber.Number}?locale=en-us";
                 default:
                     throw new ArgumentException($"Cannot get fetch call URI, unrecognized week type '{weekNumber.Type}'");
             }
