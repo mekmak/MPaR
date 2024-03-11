@@ -49,7 +49,8 @@
 <script>
     function showTab(sportType) {
         $('#game_tabs div').addClass("d-none");
-        $(`#game_tabs div[data-sport-type=${sportType}]`).removeClass("d-none").addClass("");
+        $(`#game_tabs div[data-sport-type=${sportType}]`).removeClass("d-none");
+
         $('#game_tab_buttons label input').each((_, ele) => {
             $(ele).parent().removeClass('active')
         });
