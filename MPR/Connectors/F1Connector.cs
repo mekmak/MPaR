@@ -176,29 +176,30 @@ namespace MPR.Connectors
 
         private static readonly string[] RaceDates =
         {
-            "20230303", // Bahrain
-            "20230317", // Saudi
-            "20230331", // Australian
-            "20230428", // Azerbaijan
-            "20230505", // Miami
-            "20230519", // Italian
-            "20230526", // Monaco
-            "20230602", // Spanish
-            "20230616", // Canada
-            "20230630", // Austrian
-            "20230707", // British
-            "20230721", // Hungarian 
-            "20230728", // Belgian
-            "20230825", // Dutch
-            "20230901", // Monza
-            "20230915", // Singapore
-            "20230922", // Japanese 
-            "20231006", // Qatar
-            "20231020", // US
-            "20231027", // Mexico
-            "20231103", // Brazil
-            "20231117", // Las Vegas BABY
-            "20231124", // Abu Dhabi
+            "20240301", // Bahrain
+            "20240309", // Saudi
+            "20240324", // Australian
+            "20240407", // Japan
+            "20240421", // China
+            "20240505", // Miami
+            "20240519", // Italy
+            "20240526", // Monaco
+            "20240609", // Canada
+            "20240623", // Spain
+            "20240630", // Austria
+            "20240707", // Silverstone
+            "20240721", // Hungary
+            "20240728", // Spa
+            "20240825", // Zandvoort
+            "20240901", // Monza
+            "20240915", // Baku
+            "20240922", // Singapore
+            "20241020", // Cota
+            "20241027", // Mexico
+            "20241103", // Brazil
+            "20241124", // Las Vegas BABY
+            "20241201", // Qatar
+            "20241208", // Abu Dhabi
         };
 
         private async Task UpdateTeamStandings(CancellationToken token)
@@ -272,7 +273,7 @@ namespace MPR.Connectors
         {
             try
             {
-                var uri = new Uri("https://www.formula1.com/en/results/jcr:content/resultsarchive.html/2023/team.html");
+                var uri = new Uri("https://www.formula1.com/en/results/jcr:content/resultsarchive.html/2024/team.html");
                 using (var httpClient = new HttpClient())
                 using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
                 {                    
@@ -326,7 +327,7 @@ namespace MPR.Connectors
         {
             try
             {
-                var uri = new Uri("https://www.formula1.com/en/results/jcr:content/resultsarchive.html/2023/drivers.html");
+                var uri = new Uri("https://www.formula1.com/en/results/jcr:content/resultsarchive.html/2024/drivers.html");
                 using (var httpClient = new HttpClient())
                 using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
                 {                    

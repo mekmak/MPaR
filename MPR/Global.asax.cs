@@ -17,7 +17,7 @@ namespace MPR
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             MeatSportsConnector.Instance.Init(_tokenSource.Token);
-            OwlConnector.Instance.Init(_tokenSource.Token);
+            //OwlConnector.Instance.Init(_tokenSource.Token);
             F1Connector.Instance.Init(_tokenSource.Token);
             //NcaaConnector.Instance.Init(_tokenSource.Token);
         }
