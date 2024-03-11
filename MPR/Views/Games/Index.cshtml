@@ -13,7 +13,7 @@
                     @*<label class="btn btn-secondary active">
                         <input id="ncaaRadio" name="sport-type" type="radio" data-sport-type="ncaa">NCAA
                     </label>*@
-	                <label class="btn btn-secondary active">
+	                <label class="btn btn-secondary">
                         <input id="f1Radio" name="sport-type" type="radio" data-sport-type="f1">F1 Races
                     </label>
 	                <label class="btn btn-secondary">
@@ -36,7 +36,7 @@
         <div class="row">
             <div class="col" id="game_tabs">
                 <div data-sport-type="meat" class="d-none"></div>
-                <div data-sport-type="f1"></div>
+                <div data-sport-type="f1" class="d-none"></div>
 	            <div data-sport-type="f1St" class="d-none"></div>
 	            @*<div data-sport-type="ncaa"></div>*@
                 @*<div data-sport-type="owl"></div>
@@ -50,6 +50,11 @@
     function showTab(sportType) {
         $('#game_tabs div').addClass("d-none");
         $(`#game_tabs div[data-sport-type=${sportType}]`).removeClass("d-none");
+
+        $('#game_tab_buttons label input').each((_, ele) => {
+            $(ele).parent().removeClass('active')
+        });
+        $(`#game_tab_buttons label input[data-sport-type=${sportType}]`).parent().addClass('active');
     }
 
     function reloadGames() {
@@ -102,6 +107,7 @@
         }
         
         reloadGames();
+        showTab('f1');
         setInterval(reloadGames, 5000);
     });
 </script>
