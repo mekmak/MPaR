@@ -54,15 +54,20 @@ namespace MPR.Connectors
             };
         }
 
+        private static readonly Dictionary<string,string> TeamLongNames = new Dictionary<string, string>
+        {
+            {"RB Honda RBPT", "Visa CashApp RBPT"},
+        };
+
         private static readonly Dictionary<string,string> TeamShortNames = new Dictionary<string, string>
         {
             {"Red Bull Racing Honda RBPT", "Red Bull"},
             {"Ferrari", "Ferrari"},
             {"Mercedes", "Mercedes"},
             {"McLaren Mercedes", "McLaren"},
-            {"Alfa Romeo Ferrari", "Alfa Romeo"},
+            {"Kick Sauber Ferrari", "Kick Sauber"},
             {"Alpine Renault", "Alpine"},
-            {"AlphaTauri Honda RBPT", "AlphaTauri"},
+            {"RB Honda RBPT", "Visa CashApp"},
             {"Haas Ferrari", "Haas"},
             {"Aston Martin Aramco Mercedes", "Aston Martin"},
             {"Williams Mercedes", "Williams"}
@@ -72,7 +77,7 @@ namespace MPR.Connectors
         {
             return new Models.F1Team
             {
-                Name = team.Name,
+                Name = TeamLongNames.TryGetValue(team.Name, out var name) ? name : team.Name,
                 Points = team.Points,
                 Position = team.Position,
             };
