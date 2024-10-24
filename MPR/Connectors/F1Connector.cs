@@ -300,7 +300,7 @@ namespace MPR.Connectors
             doc.LoadHtml(html);
 
             List<F1.F1Team> teams = doc.DocumentNode
-                .DescendantsWithClass("resultsarchive-table").Single()
+                .DescendantsWithClass("f1-table-with-data").Single()
                 .DescendantsOfType("tbody").Single()
                 .DescendantsOfType("tr")
                 .Select(ParseF1Team)
@@ -316,9 +316,9 @@ namespace MPR.Connectors
             {
                 var tds = teamNode.DescendantsOfType("td").ToList();
 
-                int position = int.Parse(tds[1].InnerText);
-                string team = tds[2].DescendantsOfType("a").Single().InnerText;
-                int points = int.Parse(tds[3].InnerText);
+                int position = int.Parse(tds[0].InnerText);
+                string team = tds[1].DescendantsOfType("a").Single().InnerText;
+                int points = int.Parse(tds[2].InnerText);
 
                 return new F1.F1Team { Name = team, Points = points, Position = position };
             }
@@ -354,7 +354,7 @@ namespace MPR.Connectors
             doc.LoadHtml(html);
 
             List<F1.F1Driver> drivers = doc.DocumentNode
-                .DescendantsWithClass("resultsarchive-table").Single()
+                .DescendantsWithClass("f1-table-with-data").Single()
                 .DescendantsOfType("tbody").Single()
                 .DescendantsOfType("tr")
                 .Select(ParseF1Driver)
@@ -370,14 +370,14 @@ namespace MPR.Connectors
             {
                 var tds = driverNode.DescendantsOfType("td").ToList();
 
-                int position = int.Parse(tds[1].InnerText);
-                string team = tds[2]
+                int position = int.Parse(tds[0].InnerText);
+                string team = tds[1]
                     .DescendantsOfType("a").Single()
-                    .DescendantsWithClass("hide-for-desktop").Single()
+                    .DescendantsWithClass("tablet:hidden").Single()
                     .InnerText;
-                string nationality = tds[3].InnerText;
-                string car = tds[4].DescendantsOfType("a").Single().InnerText;
-                int points = int.Parse(tds[5].InnerText);
+                string nationality = tds[2].InnerText;
+                string car = tds[3].DescendantsOfType("a").Single().InnerText;
+                int points = int.Parse(tds[4].InnerText);
 
                 return new F1.F1Driver 
                 { 
