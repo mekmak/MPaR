@@ -3,12 +3,34 @@
 <table class="table">
     <tbody>
         <tr><td colspan="4" class="font-weight-bold">Constructors</td></tr>
-
         @foreach (var team in Model.TeamStandings.OrderBy(t => t.Position))
         {
             <tr>
                 <td>@team.Position</td>
                 <td class="text-success">@team.Points</td>
+                <td colspan="2" class="text-left">@team.Name</td>
+            </tr>
+        }
+
+        <tr><td colspan="4" class="font-weight-bold">REAL Constructors</td></tr>
+        @foreach (var team in Model.RealTeamStandings.OrderBy(t => t.Position))
+        {
+            <tr>
+                <td>
+                    <span>@team.Position</span>
+                    @if (team.PositionsMoved > 0)
+                    {
+                        <span class="text-success">&nbsp;(+@team.PositionsMoved)</span>
+                    }
+                    else if (team.PositionsMoved < 0)
+                    {
+                <span class="text-danger">&nbsp;(@team.PositionsMoved)</span>
+                    }
+                </td>
+                <td>
+                    <span class="text-success">@team.Points</span>
+                    <span class="text-muted">&nbsp;(@team.FakePoints / +@team.PointsDiff)</span>
+                </td>
                 <td colspan="2" class="text-left">@team.Name</td>
             </tr>
         }
@@ -21,8 +43,37 @@
                 <td class="text-success">@driver.Points</td>
                 <td>
                     <span>@driver.Name</span>
-                    <span class="text-muted">(@driver.Nationality)</span>
+                    <span class="text-muted">&nbsp;(@driver.Nationality)</span>
                 </td>
+                <td class="text-left">@driver.Car</td>
+            </tr>
+        }
+
+        <tr><td colspan="4" class="font-weight-bold">REAL Drivers</td></tr>
+        @foreach (var driver in Model.RealDriverStandings.OrderBy(t => t.Position))
+        {
+            <tr>
+                <td>
+                    <span>@driver.Position</span>
+                    @if (driver.PositionsMoved > 0)
+                    {
+                        <span class="text-success">&nbsp;(+@driver.PositionsMoved)</span>
+                    }
+                    else if (driver.PositionsMoved < 0)
+                    {
+                <span class="text-danger">&nbsp;(@driver.PositionsMoved)</span>
+                    }
+                </td>
+                <td>
+                    <span class="text-success">@driver.Points</span>
+                    <span class="text-muted">&nbsp;(@driver.FakePoints / +@driver.PointsDiff)</span>
+                </td>
+                <td>
+                    <span>@driver.Name</span>
+                    <span class="text-muted">&nbsp;(@driver.Nationality)</span>
+                </td>
+
+
                 <td class="text-left">@driver.Car</td>
             </tr>
         }
