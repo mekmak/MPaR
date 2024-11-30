@@ -47,6 +47,29 @@ namespace MPR.F1
         [JsonProperty("competitionType")]
         public CompetitionType Type { get; set; }
 
+        [JsonProperty("competitors")]
+        public List<Competitor> Competitors { get; set; }
+    }
+
+    public class Competitor
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("place")]
+        public int Place { get; set; }
+
+        [JsonProperty("score")]
+        public int Score { get; set; }
+
+        [JsonProperty("vehicle")]
+        public Vehicle Vehicle { get; set; }
+    }
+
+    public class Vehicle
+    {
+        [JsonProperty("manufacturer")]
+        public string Manufacturer { get; set; }
     }
 
     public class CompetitionType

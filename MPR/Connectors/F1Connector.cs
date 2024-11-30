@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
@@ -19,6 +20,8 @@ namespace MPR.Connectors
         private List<Event> _currentEvents = new List<Event>();
         private F1TeamStandings _currentTeamStandings = new F1TeamStandings();
         private F1DriverStandings _currentDriverStandings = new F1DriverStandings();
+        private F1RealDriverStandings _currentRealDriverStandings = new F1RealDriverStandings();
+        private F1RealTeamStandings _currentRealTeamStandings = new F1RealTeamStandings();
 
         public void Init(CancellationToken token)
         {
@@ -46,11 +49,15 @@ namespace MPR.Connectors
         public Models.F1Standings GetStandings()
         {
             var teams = _currentTeamStandings.Teams.Select(Wrap).ToList();
+            var realTeams = _currentRealTeamStandings.Teams.Select(Wrap).ToList();
             var drivers = _currentDriverStandings.Drivers.Select(Wrap).ToList();
+            var realDrivers = _currentRealDriverStandings.Drivers.Select(Wrap).ToList();
             return new Models.F1Standings 
             { 
                 TeamStandings = teams,
-                DriverStandings = drivers
+                DriverStandings = drivers,
+                RealDriverStandings = realDrivers,
+                RealTeamStandings = realTeams
             };
         }
 
@@ -83,6 +90,20 @@ namespace MPR.Connectors
             };
         }
 
+        private Models.RealF1Team Wrap(F1.RealF1Team team)
+        {
+            return new Models.RealF1Team
+            {
+                Name = TeamLongNames.TryGetValue(team.Name, out var name) ? name : team.Name,
+                Points = team.Points,
+                Position = team.Position,
+                FakePoints = team.FakePoints,
+                FakePosition = team.FakePosition,
+                PositionsMoved = team.PositionsMoved,
+                PointsDiff = team.PointsDiff
+            };
+        }
+
         private Models.F1Driver Wrap(F1.F1Driver driver)
         {
             return new Models.F1Driver
@@ -95,10 +116,32 @@ namespace MPR.Connectors
             };
         }
 
+        private Models.RealF1Driver Wrap(F1.RealF1Driver driver)
+        {
+            return new Models.RealF1Driver
+            {
+                Name = driver.Name,
+                Position = driver.Position,
+                FakePosition = driver.FakePosition,
+                PositionsMoved = driver.PositionsMoved,
+                Points = driver.Points,
+                FakePoints = driver.FakePoints,
+                PointsDiff = driver.PointsDiff,
+                Nationality = driver.Nationality,
+                Car = TeamShortNames.TryGetValue(driver.Car, out var shortName) ? shortName : driver.Car
+            };
+        }
+
         private static readonly HashSet<string> CompleteRaceSummaries = new HashSet<string> { "Final", "Canceled" };
         private bool IsComplete(Event e)
         {
             return CompleteRaceSummaries.Contains(e.Summary);
+        }
+
+        private static readonly HashSet<string> PointsScoringCompetitionTypes = new HashSet<string> { "Sprint Race", "Race" };
+        private bool IsPointsScoring(Event e)
+        {
+            return PointsScoringCompetitionTypes.Contains(e.Type.Name);
         }
 
         public Models.F1Schedule GetSchedule(int clientOffset)
@@ -215,12 +258,139 @@ namespace MPR.Connectors
                 : standings;
         }
 
-         private async Task UpdateDriverStandings(CancellationToken token)
+        private async Task UpdateDriverStandings(CancellationToken token)
         {
             var standings = await FetchDriverStandings(token);
             _currentDriverStandings = _currentDriverStandings.Drivers.Any()
                 ? standings.Drivers.Any() ? standings : _currentDriverStandings
                 : standings;
+
+            _currentRealDriverStandings = CalculateRealDriverStandings(_currentDriverStandings, _currentEvents);
+            _currentRealTeamStandings = CalculateRealTeamStandings(_currentRealDriverStandings, _currentTeamStandings);
+        }
+
+        private F1RealTeamStandings CalculateRealTeamStandings(F1RealDriverStandings driverStandings, F1TeamStandings fakeTeamStandings)
+        {
+            var teamToPoints = new Dictionary<string, double>();
+            foreach(var driver in driverStandings.Drivers)
+            {
+                if(!teamToPoints.ContainsKey(driver.Car))
+                {
+                    teamToPoints[driver.Car] = 0;
+                }
+
+                teamToPoints[driver.Car] += driver.Points;
+            }
+
+            var realTeams = new List<F1.RealF1Team>();
+            foreach (F1.F1Team team in fakeTeamStandings.Teams)
+            {
+                var realPoints = teamToPoints.TryGetValue(team.Name, out double points) ? Math.Round(points, 2) : -1;
+                var pointsDiff = Math.Round(realPoints == -1 ? 0 : realPoints - team.Points, 2);
+                realTeams.Add(new F1.RealF1Team
+                {
+                    Name = team.Name,
+                    FakePoints = team.Points,
+                    FakePosition = team.Position,
+                    PointsDiff = pointsDiff,
+                    Points = realPoints,
+                    Position = -1,
+                    PositionsMoved = 0
+                });                
+            }
+
+            realTeams = realTeams.OrderByDescending(t => t.Points != -1 ? t.Points : t.FakePoints).ToList();
+            for(int i = 0; i < realTeams.Count; i++)
+            {
+                var realPosition = i + 1;
+                realTeams[i].Position = realPosition;
+                realTeams[i].PositionsMoved = realTeams[i].FakePosition - realPosition;
+            }
+
+            return new F1RealTeamStandings { Teams = realTeams };
+        }
+
+        private static readonly Dictionary<int, double> RealPositionPoints = new Dictionary<int, double>
+        {
+            {1, 25},
+            {2, 18},
+            {3, 15},
+            {4, 12},
+            {5, 10},
+            {6, 8},
+            {7, 6},
+            {8, 4},
+            {9, 2},
+            {10, 1},
+            {11, 0.8},
+            {12, 0.6},
+            {13, 0.5},
+            {14, 0.4},
+            {15, 0.3},
+            {16, 0.2},
+            {17, 0.15},
+            {18, 0.10},
+            {19, 0.05},
+            {20, 0}
+        };
+        private double CalculateRealPositionPoints(int position)
+        {
+            return RealPositionPoints.TryGetValue(position, out double value) ? value : 0;
+        }
+
+        private static readonly Dictionary<string, string> EnglishDammit = new Dictionary<string, string>
+        {
+            {"Sergio Pérez", "Sergio Perez"},
+            {"Nico Hülkenberg", "Nico Hulkenberg"}
+        };
+
+        private F1RealDriverStandings CalculateRealDriverStandings(F1DriverStandings fakeStandings, List<Event> races)
+        {
+            var nameToPoints = new Dictionary<string, double>();
+            List<Event> relevantRaces = races.Where(r => IsComplete(r) && IsPointsScoring(r)).ToList();
+            foreach(var race in relevantRaces)
+            {
+                foreach(var competitor in race.Competitors)
+                {
+                    var englishPlease = EnglishDammit.TryGetValue(competitor.Name, out var correctName) ? correctName : competitor.Name;
+                    if(!nameToPoints.ContainsKey(englishPlease))
+                    {
+                        nameToPoints[englishPlease] = 0.0;
+                    }
+
+                    nameToPoints[englishPlease] += CalculateRealPositionPoints(competitor.Place);
+                }
+            }
+
+            var realDrivers = new List<F1.RealF1Driver>();
+            foreach(F1.F1Driver driver in fakeStandings.Drivers)
+            {
+                var realPoints = nameToPoints.TryGetValue(driver.FullName, out double points) ? Math.Round(points, 2) : -1;
+                var pointsDiff = Math.Round(realPoints == -1 ? 0 : realPoints - driver.Points, 2);
+                var realDriver = new F1.RealF1Driver
+                {
+                    Name = driver.Name,
+                    FakePoints = driver.Points,
+                    FakePosition = driver.Position,
+                    Points = realPoints,
+                    PointsDiff = pointsDiff,
+                    Nationality = driver.Nationality,
+                    Car = driver.Car,
+                    PositionsMoved = -1,
+                    Position = -1,
+                };
+                realDrivers.Add(realDriver);
+            }
+
+            realDrivers = realDrivers.OrderByDescending(r => r.Points != -1 ? r.Points : r.FakePoints).ToList();
+            for(int i = 0; i < realDrivers.Count; i++)
+            {
+                var realPosition = i + 1;
+                realDrivers[i].Position = realPosition;
+                realDrivers[i].PositionsMoved = realDrivers[i].FakePosition - realPosition;
+            }
+
+            return new F1RealDriverStandings { Drivers = realDrivers };
         }
 
         private async Task UpdateScoreBoard(CancellationToken token)
@@ -371,17 +541,20 @@ namespace MPR.Connectors
                 var tds = driverNode.DescendantsOfType("td").ToList();
 
                 int position = int.Parse(tds[0].InnerText);
-                string team = tds[1]
+                string name = tds[1]
                     .DescendantsOfType("a").Single()
                     .DescendantsWithClass("tablet:hidden").Single()
                     .InnerText;
+                string fullName = tds[1].InnerText.Substring(0, tds[1].InnerText.Length - 3).Replace("&nbsp"," ");
+                string cleanFullName = Regex.Replace(fullName, "[\u00A0]", " ");
                 string nationality = tds[2].InnerText;
                 string car = tds[3].DescendantsOfType("a").Single().InnerText;
                 int points = int.Parse(tds[4].InnerText);
 
                 return new F1.F1Driver 
                 { 
-                    Name = team, 
+                    Name = name, 
+                    FullName = cleanFullName,
                     Points = points, 
                     Position = position,
                     Car = car,
