@@ -427,9 +427,7 @@ namespace MPR.Connectors
             var realDrivers = new List<F1.RealF1Driver>();
             foreach(F1.F1Driver driver in fakeStandings.Drivers)
             {
-                var fakePoints = nameToFakePoints.TryGetValue(driver.FullName, out double fpoints) ? Math.Round(fpoints, 2) : -1;
-                var fastestLapPoints = driver.Points - fakePoints;
-                var realPoints = fastestLapPoints + (nameToPoints.TryGetValue(driver.FullName, out double points) ? Math.Round(points, 2) : -1);
+                var realPoints = nameToPoints.TryGetValue(driver.FullName, out double points) ? Math.Round(points, 2) : -1;
                 var pointsDiff = Math.Round(realPoints == -1 ? 0 : realPoints - driver.Points, 2);
                 var realDriver = new F1.RealF1Driver
                 {
