@@ -63,7 +63,7 @@ namespace MPR.Connectors
 
         private static readonly Dictionary<string,string> TeamLongNames = new Dictionary<string, string>
         {
-            {"RB Honda RBPT", "Visa CashApp RBPT"},
+            {"Racing Bulls Honda RBPT", "Visa CashApp Honda RBPT"},
         };
 
         private static readonly Dictionary<string,string> TeamShortNames = new Dictionary<string, string>
@@ -74,7 +74,7 @@ namespace MPR.Connectors
             {"McLaren Mercedes", "McLaren"},
             {"Kick Sauber Ferrari", "Kick Sauber"},
             {"Alpine Renault", "Alpine"},
-            {"RB Honda RBPT", "Visa CashApp"},
+            {"Racing Bulls Honda RBPT", "Visa CashApp"},
             {"Haas Ferrari", "Haas"},
             {"Aston Martin Aramco Mercedes", "Aston Martin"},
             {"Williams Mercedes", "Williams"}
@@ -224,30 +224,30 @@ namespace MPR.Connectors
 
         private static readonly string[] RaceDates =
         {
-            "20240301", // Bahrain
-            "20240309", // Saudi
-            "20240324", // Australian
-            "20240407", // Japan
-            "20240421", // China
-            "20240505", // Miami
-            "20240519", // Italy
-            "20240526", // Monaco
-            "20240609", // Canada
-            "20240623", // Spain
-            "20240630", // Austria
-            "20240707", // Silverstone
-            "20240721", // Hungary
-            "20240728", // Spa
-            "20240825", // Zandvoort
-            "20240901", // Monza
-            "20240915", // Baku
-            "20240922", // Singapore
-            "20241020", // Cota
-            "20241027", // Mexico
-            "20241103", // Brazil
-            "20241124", // Las Vegas BABY
-            "20241201", // Qatar
-            "20241208", // Abu Dhabi
+            "20250316", // Australia
+            "20250323", // China
+            "20250406", // Japan
+            "20250413", // Bahrain
+            "20250420", // Saudi Arabia
+            "20250504", // Miami
+            "20250518", // Imola
+            "20250525", // Monaco
+            "20250601", // Spain
+            "20250615", // Canada
+            "20250629", // Austria
+            "20250706", // Silverstone
+            "20250727", // Belgium
+            "20250803", // Hungary
+            "20250831", // Netherlands
+            "20250907", // Monza
+            "20250921", // Baku
+            "20251005", // Singapore
+            "20251019", // COTA
+            "20251026", // Mexico
+            "20251109", // Brazil
+            "20251122", // Vegas
+            "20251130", // Qatar
+            "20251207", // Abu Dhabi
         };
 
         private async Task UpdateTeamStandings(CancellationToken token)
@@ -396,7 +396,6 @@ namespace MPR.Connectors
 
         private static readonly Dictionary<string, string> EnglishDammit = new Dictionary<string, string>
         {
-            {"Sergio Pérez", "Sergio Perez"},
             {"Nico Hülkenberg", "Nico Hulkenberg"}
         };
 
@@ -513,7 +512,7 @@ namespace MPR.Connectors
         {
             try
             {
-                var uri = new Uri("https://www.formula1.com/en/results/jcr:content/resultsarchive.html/2024/team.html");
+                var uri = new Uri("https://www.formula1.com/en/results/2025/team");
                 using (var httpClient = new HttpClient())
                 using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
                 {                    
@@ -567,7 +566,7 @@ namespace MPR.Connectors
         {
             try
             {
-                var uri = new Uri("https://www.formula1.com/en/results/jcr:content/resultsarchive.html/2024/drivers.html");
+                var uri = new Uri("https://www.formula1.com/en/results/2025/drivers");
                 using (var httpClient = new HttpClient())
                 using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
                 {                    
