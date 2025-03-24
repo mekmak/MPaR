@@ -396,7 +396,8 @@ namespace MPR.Connectors
 
         private static readonly Dictionary<string, string> EnglishDammit = new Dictionary<string, string>
         {
-            {"Nico Hülkenberg", "Nico Hulkenberg"}
+            {"Nico Hülkenberg", "Nico Hulkenberg"},
+            {"Andrea Kimi Antonelli", "Kimi Antonelli"}
         };
 
         private F1RealDriverStandings CalculateRealDriverStandings(F1DriverStandings fakeStandings, List<Event> races)
