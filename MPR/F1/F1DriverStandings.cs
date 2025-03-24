@@ -34,7 +34,7 @@ namespace MPR.F1
         public List<RealF1Driver> Drivers {get;set;}
     }
 
-    [DebuggerDisplay("{FullName}")]
+    [DebuggerDisplay("{Name}")]
     public class RealF1Driver
     {
         public string Name {get;set;}
