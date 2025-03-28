@@ -94,7 +94,7 @@ namespace MPR.Connectors
         {
             return new Models.RealF1Team
             {
-                Name = TeamLongNames.TryGetValue(team.Name, out var name) ? name : team.Name,
+                Name = TeamShortNames.TryGetValue(team.Name, out var name) ? name : team.Name,
                 Points = team.Points,
                 Position = team.Position,
                 FakePoints = team.FakePoints,
