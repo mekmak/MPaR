@@ -11,7 +11,10 @@
                 <td colspan="2" class="text-left">@team.Name</td>
             </tr>
         }
-
+    </tbody>
+</table>
+<table class="table">
+    <tbody>
         <tr><td colspan="4" class="font-weight-bold">REAL Constructors</td></tr>
         @foreach (var team in Model.RealTeamStandings.OrderBy(t => t.Position))
         {
@@ -24,17 +27,20 @@
                     }
                     else if (team.PositionsMoved < 0)
                     {
-                <span class="text-danger">&nbsp;(@team.PositionsMoved)</span>
+                        <span class="text-danger">&nbsp;(@team.PositionsMoved)</span>
                     }
                 </td>
                 <td>
                     <span class="text-success">@team.Points</span>
-                    <span class="text-muted">&nbsp;(@team.FakePoints / @team.PointsDiff)</span>
+                    <span class="text-muted">&nbsp;(+@team.PointsDiff)</span>
                 </td>
                 <td colspan="2" class="text-left">@team.Name</td>
             </tr>
         }
-
+    </tbody>
+</table>
+<table class="table">
+    <tbody>
         <tr><td colspan="4" class="font-weight-bold">Drivers</td></tr>
         @foreach (var driver in Model.DriverStandings.OrderBy(t => t.Position))
         {
@@ -48,7 +54,10 @@
                 <td class="text-left">@driver.Car</td>
             </tr>
         }
-
+    </tbody>
+</table>
+<table class="table">
+    <tbody>
         <tr><td colspan="4" class="font-weight-bold">REAL Drivers</td></tr>
         @foreach (var driver in Model.RealDriverStandings.OrderBy(t => t.Position))
         {
@@ -61,19 +70,16 @@
                     }
                     else if (driver.PositionsMoved < 0)
                     {
-                <span class="text-danger">&nbsp;(@driver.PositionsMoved)</span>
+                        <span class="text-danger">&nbsp;(@driver.PositionsMoved)</span>
                     }
                 </td>
                 <td>
                     <span class="text-success">@driver.Points</span>
-                    <span class="text-muted">&nbsp;(@driver.FakePoints / @driver.PointsDiff)</span>
+                    <span class="text-muted">&nbsp;(+@driver.PointsDiff)</span>
                 </td>
                 <td>
                     <span>@driver.Name</span>
-                    <span class="text-muted">&nbsp;(@driver.Nationality)</span>
                 </td>
-
-
                 <td class="text-left">@driver.Car</td>
             </tr>
         }
