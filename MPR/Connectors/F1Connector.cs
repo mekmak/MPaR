@@ -606,7 +606,7 @@ namespace MPR.Connectors
                 int position = int.Parse(tds[0].InnerText);
                 string name = tds[1]
                     .DescendantsOfType("a").Single()
-                    .DescendantsWithClass("tablet:hidden").Single()
+                    .DescendantsWithClass("md:hidden").Single()
                     .InnerText;
                 string fullName = tds[1].InnerText.Substring(0, tds[1].InnerText.Length - 3).Replace("&nbsp"," ");
                 string cleanFullName = Regex.Replace(fullName, "[\u00A0]", " ");
