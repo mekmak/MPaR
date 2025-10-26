@@ -6,6 +6,11 @@ namespace MPR.HTML
 {
     public static class HtmlExtensions
     {
+        public static IEnumerable<HtmlNode> DescendantsWithId(this HtmlNode node, string id)
+        {
+            return node.Descendants().Where(d => d.Id == id);
+        }
+
         public static IEnumerable<HtmlNode> DescendantsWithClass(this HtmlNode node, string className)
         {
             return node.Descendants().Where(d => d.HasClass(className));
