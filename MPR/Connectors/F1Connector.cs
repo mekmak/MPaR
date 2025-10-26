@@ -533,7 +533,7 @@ namespace MPR.Connectors
             doc.LoadHtml(html);
 
             List<F1.F1Team> teams = doc.DocumentNode
-                .DescendantsWithClass("f1-table-with-data").Single()
+                .DescendantsWithId("results-table").Single()
                 .DescendantsOfType("tbody").Single()
                 .DescendantsOfType("tr")
                 .Select(ParseF1Team)
@@ -587,7 +587,7 @@ namespace MPR.Connectors
             doc.LoadHtml(html);
 
             List<F1.F1Driver> drivers = doc.DocumentNode
-                .DescendantsWithClass("f1-table-with-data").Single()
+                .DescendantsWithId("results-table").Single()
                 .DescendantsOfType("tbody").Single()
                 .DescendantsOfType("tr")
                 .Select(ParseF1Driver)
