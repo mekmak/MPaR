@@ -4,6 +4,8 @@ namespace MPR.Models
 {
     public class F1Standings
     {
+        public string TeamStandingsLink { get; set; }
+        public string DriverStandingsLink { get; set; }
         public List<F1Team> TeamStandings {get;set;}
         public List<RealF1Team> RealTeamStandings {get;set;}
         public List<F1Driver> DriverStandings {get;set;}

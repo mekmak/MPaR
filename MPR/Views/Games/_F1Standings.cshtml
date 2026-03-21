@@ -1,8 +1,8 @@
-﻿@model MPR.Models.F1Standings
+@model MPR.Models.F1Standings
 
 <table class="table">
     <tbody>
-        <tr><td colspan="4" class="font-weight-bold">Constructors</td></tr>
+        <tr><td colspan="4" class="font-weight-bold"><a href="@Model.TeamStandingsLink">Constructors</a></td></tr>
         @foreach (var team in Model.TeamStandings.OrderBy(t => t.Position))
         {
             <tr>
@@ -11,28 +11,40 @@
                 <td colspan="2" class="text-left">@team.Name</td>
             </tr>
         }
-    </tbody>
-</table>
-<table class="table">
-    <tbody>
-        <tr><td colspan="4" class="font-weight-bold">REAL Constructors</td></tr>
+
+        <tr><td colspan="4" class="font-weight-bold"><a href="@Model.TeamStandingsLink">REAL Constructors</a></td></tr>
         @foreach (var team in Model.RealTeamStandings.OrderBy(t => t.Position))
         {
             <tr>
                 <td>
-                    <span>@team.Position</span>
-                    @if (team.PositionsMoved > 0)
-                    {
-                        <span class="text-success">&nbsp;(+@team.PositionsMoved)</span>
-                    }
-                    else if (team.PositionsMoved < 0)
-                    {
-                        <span class="text-danger">&nbsp;(@team.PositionsMoved)</span>
-                    }
+                    <span class="delta-cell">
+                        <span class="delta-value">@team.Position</span>
+                        <span class="delta-pill-slot">
+                            @if (team.PositionsMoved > 0)
+                            {
+                                <span class="delta-pill delta-up">&#9650; @team.PositionsMoved</span>
+                            }
+                            else if (team.PositionsMoved < 0)
+                            {
+                                <span class="delta-pill delta-down">&#9660; @Math.Abs(team.PositionsMoved)</span>
+                            }
+                        </span>
+                    </span>
                 </td>
-                <td>
-                    <span class="text-success">@team.Points</span>
-                    <span class="text-muted">&nbsp;(+@team.PointsDiff)</span>
+                <td class="text-success">
+                    <span class="delta-cell">
+                        <span class="delta-value">@team.Points</span>
+                        <span class="delta-pill-slot">
+                            @if (team.PointsDiff > 0)
+                            {
+                                <span class="delta-pill delta-up">+@team.PointsDiff</span>
+                            }
+                            else if (team.PointsDiff < 0)
+                            {
+                                <span class="delta-pill delta-down">@team.PointsDiff</span>
+                            }
+                        </span>
+                    </span>
                 </td>
                 <td colspan="2" class="text-left">@team.Name</td>
             </tr>
@@ -41,7 +53,7 @@
 </table>
 <table class="table">
     <tbody>
-        <tr><td colspan="4" class="font-weight-bold">Drivers</td></tr>
+        <tr><td colspan="4" class="font-weight-bold"><a href="@Model.DriverStandingsLink">Drivers</a></td></tr>
         @foreach (var driver in Model.DriverStandings.OrderBy(t => t.Position))
         {
             <tr>
@@ -51,36 +63,49 @@
                     <span>@driver.Name</span>
                     <span class="text-muted">&nbsp;(@driver.Nationality)</span>
                 </td>
-                <td class="text-left">@driver.Car</td>
+                <td class="text-left team-name">@driver.Car</td>
             </tr>
         }
-    </tbody>
-</table>
-<table class="table">
-    <tbody>
-        <tr><td colspan="4" class="font-weight-bold">REAL Drivers</td></tr>
+
+        <tr><td colspan="4" class="font-weight-bold"><a href="@Model.DriverStandingsLink">REAL Drivers</a></td></tr>
         @foreach (var driver in Model.RealDriverStandings.OrderBy(t => t.Position))
         {
             <tr>
                 <td>
-                    <span>@driver.Position</span>
-                    @if (driver.PositionsMoved > 0)
-                    {
-                        <span class="text-success">&nbsp;(+@driver.PositionsMoved)</span>
-                    }
-                    else if (driver.PositionsMoved < 0)
-                    {
-                        <span class="text-danger">&nbsp;(@driver.PositionsMoved)</span>
-                    }
+                    <span class="delta-cell">
+                        <span class="delta-value">@driver.Position</span>
+                        <span class="delta-pill-slot">
+                            @if (driver.PositionsMoved > 0)
+                            {
+                                <span class="delta-pill delta-up">&#9650; @driver.PositionsMoved</span>
+                            }
+                            else if (driver.PositionsMoved < 0)
+                            {
+                                <span class="delta-pill delta-down">&#9660; @Math.Abs(driver.PositionsMoved)</span>
+                            }
+                        </span>
+                    </span>
                 </td>
-                <td>
-                    <span class="text-success">@driver.Points</span>
-                    <span class="text-muted">&nbsp;(+@driver.PointsDiff)</span>
+                <td class="text-success">
+                    <span class="delta-cell">
+                        <span class="delta-value">@driver.Points</span>
+                        <span class="delta-pill-slot">
+                            @if (driver.PointsDiff > 0)
+                            {
+                                <span class="delta-pill delta-up">+@driver.PointsDiff</span>
+                            }
+                            else if (driver.PointsDiff < 0)
+                            {
+                                <span class="delta-pill delta-down">@driver.PointsDiff</span>
+                            }
+                        </span>
+                    </span>
                 </td>
                 <td>
                     <span>@driver.Name</span>
+                    <span class="text-muted">&nbsp;(@driver.Nationality)</span>
                 </td>
-                <td class="text-left">@driver.Car</td>
+                <td class="text-left team-name">@driver.Car</td>
             </tr>
         }
     </tbody>

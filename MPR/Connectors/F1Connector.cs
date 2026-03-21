@@ -52,12 +52,14 @@ namespace MPR.Connectors
             var realTeams = _currentRealTeamStandings.Teams.Select(Wrap).ToList();
             var drivers = _currentDriverStandings.Drivers.Select(Wrap).ToList();
             var realDrivers = _currentRealDriverStandings.Drivers.Select(Wrap).ToList();
-            return new Models.F1Standings 
-            { 
+            return new Models.F1Standings
+            {
                 TeamStandings = teams,
                 DriverStandings = drivers,
                 RealDriverStandings = realDrivers,
-                RealTeamStandings = realTeams
+                RealTeamStandings = realTeams,
+                TeamStandingsLink = "https://www.formula1.com/en/results/2026/team",
+                DriverStandingsLink = "https://www.formula1.com/en/results/2026/drivers"
             };
         }
 
