@@ -316,6 +316,11 @@ td {
 }
 
 /* --- Tab Content Transitions --- */
+#game_tabs {
+    position: relative;
+    overflow: hidden;
+}
+
 #game_tabs > div {
     transition: opacity 0.15s ease, visibility 0.15s ease;
 }
