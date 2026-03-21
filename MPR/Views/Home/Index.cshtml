@@ -1,29 +1,27 @@
-﻿@{
+@{
     ViewBag.Title = "MPaR";
 }
 
-<p/>
+<div class="container mpar-randomizer">
 
-<div class="container">
-
-    <div class="row" align="right">
-        <button id="addBtn" type="button" class="btn btn-outline-primary">Add</button>
-        <button id="splitBtn" type="button" class="btn btn-outline-primary">Split</button>
-        <button style="margin: 0 0 0 5px;" id="doItBtn" type="button" class="btn btn-primary">Do It</button>
+    <div class="row mt-4">
+        <div class="col d-flex justify-content-end">
+            <button id="addBtn" type="button" class="btn btn-outline-primary">Add</button>
+            <button id="splitBtn" type="button" class="btn btn-outline-primary">Split</button>
+            <button id="doItBtn" type="button" class="btn btn-primary">Do It</button>
+        </div>
     </div>
 
-    <p/>
-
-    <div class="row">
+    <div class="row mt-3">
         <div id="trm_alert" class="alert alert-danger alert-dismissable collapse">
-            <a class="close" onclick="$('#trm_alert').hide()">×</a>
+            <a class="close" onclick="$('#trm_alert').hide()">&times;</a>
             Percentages need to add up to 100. Total is [<span id="trm_alert_value"></span>]. Decimals are ignored.
         </div>
     </div>
 
     <div class="row">
         <div id="trm_success" class="alert alert-success alert-dismissable collapse">
-            <a class="close" onclick="$('#trm_success').hide()">×</a>
+            <a class="close" onclick="$('#trm_success').hide()">&times;</a>
             Your value is: [<span id="trm_success_value"></span>]
         </div>
     </div>
@@ -41,7 +39,7 @@
             <tr>
                 <td><input id="foo" name="foo" class="form-control trm_tv_name" type="text"/></td>
                 <td><input id="bar" name="bar" class="form-control trm_tv_pc" type="number" min="0" max="100" step="1"/></td>
-                <td><a style="vertical-align: central" class='form-control close' onclick="$(this).closest('tr').remove();">×</a></td>
+                <td><a style="vertical-align: central" class='form-control close' onclick="$(this).closest('tr').remove();">&times;</a></td>
             </tr>
             </tbody>
         </table>
@@ -50,7 +48,7 @@
 
 <script>
     $("#addBtn").on("click", function () {
-        var newRow = "<tr><td><input class='form-control trm_tv_name' type='text' /></td><td><input class='form-control trm_tv_pc' type='number' min='0' max='100' step='1' /></td><td><a class='form-control close' onclick=\"$(this).closest('tr').remove();\">×</a></td></tr>";
+        var newRow = "<tr><td><input class='form-control trm_tv_name' type='text' /></td><td><input class='form-control trm_tv_pc' type='number' min='0' max='100' step='1' /></td><td><a class='form-control close' onclick=\"$(this).closest('tr').remove();\">&times;</a></td></tr>";
 
         $("table").append(newRow);
     });

@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>@ViewBag.Title</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="@Url.Content("~/content/logo.ico")" />
 
     @Styles.Render("~/Content/css")
@@ -16,8 +17,8 @@
 </head>
 <body>
     @RenderBody()
-    <footer>
-        <p class="p-3">&copy; @DateTime.Now.Year - Mekmak</p>
+    <footer class="mpar-footer">
+        <p>&copy; @DateTime.Now.Year - Mekmak</p>
     </footer>
 </body>
 </html>

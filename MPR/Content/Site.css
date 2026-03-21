@@ -1,29 +1,454 @@
-﻿body {
-    padding-top: 50px;
-    padding-bottom: 20px;
+/* ============================================================
+   MPaR — Modern Dark Theme Overrides (GitHub Dark inspired)
+   Layered on top of Bootstrap 4 Cyborg theme
+   ============================================================ */
+
+/* --- Custom Properties --- */
+:root {
+    --bg-base: #0d1117;
+    --bg-surface: #161b22;
+    --bg-surface-hover: #1c2129;
+    --bg-inset: #010409;
+    --border-default: #30363d;
+    --border-muted: #21262d;
+
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+
+    --accent-blue: #58a6ff;
+    --accent-blue-active: #388bfd;
+    --accent-blue-deep: #1f6feb;
+    --accent-blue-subtle: #79c0ff;
+    --accent-green: #3fb950;
+    --accent-red: #f85149;
+
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
 }
 
-/* Set padding to keep content from hitting the edges */
+/* --- Base & Typography --- */
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+    background-color: var(--bg-base) !important;
+    color: var(--text-primary) !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 .body-content {
     padding-left: 15px;
     padding-right: 15px;
 }
 
-/* Override the default bootstrap behavior where horizontal description lists 
-   will truncate terms that are too long to fit in the left column 
-*/
 .dl-horizontal dt {
     white-space: normal;
 }
 
-/* Set width on the form input elements since they're 100% wide by default */
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-default);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* --- Selection --- */
+::selection {
+    background: rgba(56, 139, 253, 0.3);
+    color: var(--text-primary);
+}
+
+/* --- Form Controls --- */
 input,
 select,
 textarea {
     max-width: 280px;
 }
 
+.form-control {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-default) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--radius-sm) !important;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+    border-color: var(--accent-blue) !important;
+    box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.15) !important;
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* Number input spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    opacity: 0.5;
+}
+
+/* --- Buttons --- */
+.btn {
+    border-radius: var(--radius-md) !important;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-blue-deep), var(--accent-blue-active)) !important;
+    border-color: var(--accent-blue-active) !important;
+    box-shadow: 0 2px 8px rgba(31, 111, 235, 0.3);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--accent-blue-active), var(--accent-blue)) !important;
+    box-shadow: 0 4px 12px rgba(31, 111, 235, 0.4);
+}
+
+.btn-outline-primary {
+    color: var(--accent-blue) !important;
+    border-color: var(--border-default) !important;
+    background: transparent !important;
+}
+
+.btn-outline-primary:hover {
+    background: rgba(56, 139, 253, 0.1) !important;
+    border-color: var(--accent-blue) !important;
+    color: var(--accent-blue-subtle) !important;
+}
+
+.btn-secondary {
+    background-color: var(--bg-surface) !important;
+    border-color: var(--border-default) !important;
+    color: var(--text-secondary) !important;
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-surface-hover) !important;
+    color: var(--text-primary) !important;
+}
+
+/* --- Alerts --- */
+.alert {
+    border-radius: var(--radius-md) !important;
+    border: none !important;
+    border-left: 4px solid transparent !important;
+}
+
+.alert-danger {
+    background-color: rgba(248, 81, 73, 0.1) !important;
+    border-left-color: var(--accent-red) !important;
+    color: var(--accent-red) !important;
+}
+
+.alert-success {
+    background-color: rgba(63, 185, 80, 0.1) !important;
+    border-left-color: var(--accent-green) !important;
+    color: var(--accent-green) !important;
+}
+
+.alert .close {
+    color: inherit !important;
+    text-shadow: none;
+    opacity: 0.7;
+}
+
+.alert .close:hover {
+    opacity: 1;
+}
+
+/* --- Result animation --- */
+.alert-success.show {
+    animation: resultFadeIn 0.4s ease-out;
+}
+
+@keyframes resultFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- Tables --- */
 td {
-  text-align: center;
-  vertical-align: middle;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table {
+    border-collapse: separate !important;
+    border-spacing: 0 4px !important;
+}
+
+.table thead th {
+    border: none !important;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted) !important;
+    padding: 8px 12px !important;
+    background: transparent !important;
+}
+
+.table tbody tr {
+    background-color: var(--bg-surface) !important;
+    transition: background-color 0.15s ease;
+}
+
+.table tbody tr:hover {
+    background-color: var(--bg-surface-hover) !important;
+}
+
+.table tbody td {
+    border: none !important;
+    padding: 10px 12px !important;
+    vertical-align: middle;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.table tbody tr td:first-child {
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.table tbody tr td:last-child {
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* Sport section headers in game tables */
+.table tbody tr td[colspan] {
+    background: transparent !important;
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding-top: 20px !important;
+}
+
+/* Team name label styling */
+.table tbody tr td.team-name {
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+/* --- Cell Update Flash Animation --- */
+.cell-updated {
+    animation: cellFlash 0.8s ease-out;
+}
+
+@keyframes cellFlash {
+    0% {
+        box-shadow: inset 0 0 12px rgba(88, 166, 255, 0.4);
+        background-color: rgba(88, 166, 255, 0.15);
+    }
+    100% {
+        box-shadow: none;
+        background-color: transparent;
+    }
+}
+
+/* --- Games Page: Tab Switcher (Segmented Control) --- */
+#game_tab_buttons {
+    background-color: var(--bg-surface) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 3px !important;
+    border: 1px solid var(--border-default);
+}
+
+#game_tab_buttons .btn {
+    border: none !important;
+    border-radius: var(--radius-md) !important;
+    padding: 6px 16px !important;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease;
+}
+
+#game_tab_buttons .btn:hover {
+    color: var(--text-primary) !important;
+    background: var(--bg-surface-hover) !important;
+    transform: none;
+}
+
+#game_tab_buttons .btn.active {
+    background: var(--accent-blue-deep) !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 4px rgba(31, 111, 235, 0.3) !important;
+}
+
+/* --- Tab Content Transitions --- */
+#game_tabs > div {
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+#game_tabs > div.tab-hidden {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    pointer-events: none;
+}
+
+#game_tabs > div.tab-visible {
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+    pointer-events: auto;
+}
+
+/* --- Live Indicator --- */
+.live-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background-color: var(--accent-green);
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+#last_update_time {
+    font-size: 12px;
+    color: var(--text-muted) !important;
+}
+
+/* --- Footer --- */
+.mpar-footer {
+    border-top: 1px solid var(--border-muted);
+    text-align: center;
+    padding: 16px 0;
+    margin-top: 40px;
+}
+
+.mpar-footer p {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin: 0;
+}
+
+/* --- Randomizer Page --- */
+.mpar-randomizer .btn {
+    margin-left: 6px;
+}
+
+.mpar-randomizer .btn:first-child {
+    margin-left: 0;
+}
+
+.mpar-randomizer .table .close {
+    color: var(--text-muted) !important;
+    background: transparent !important;
+    border: none !important;
+    font-size: 18px;
+    transition: color 0.15s;
+}
+
+.mpar-randomizer .table .close:hover {
+    color: var(--accent-red) !important;
+}
+
+/* --- Delta Pill Badges --- */
+.delta-pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 1px 7px;
+    margin-left: 4px;
+    vertical-align: middle;
+    line-height: 1.4;
+}
+
+.delta-pill.delta-up {
+    background: rgba(63, 185, 80, 0.15);
+    color: var(--accent-green);
+}
+
+.delta-pill.delta-down {
+    background: rgba(248, 81, 73, 0.15);
+    color: var(--accent-red);
+}
+
+.delta-pill.delta-neutral {
+    background: rgba(139, 148, 158, 0.1);
+    color: var(--text-muted);
+}
+
+/* --- Delta Cell Layout (aligned value + pill) --- */
+.delta-cell {
+    display: inline-flex;
+    align-items: center;
+}
+
+.delta-cell > .delta-value {
+    min-width: 1.5em;
+    text-align: right;
+}
+
+.delta-cell > .delta-pill-slot {
+    flex: 0 0 0px;
+    width: 0;
+    overflow: visible;
+    white-space: nowrap;
+}
+
+/* --- Mobile: give delta pills real layout space --- */
+@media (max-width: 576px) {
+    .table tbody td {
+        padding: 8px 6px !important;
+    }
+
+    .delta-cell > .delta-pill-slot {
+        width: auto;
+        flex: 0 0 auto;
+    }
+}
+
+/* --- Text utilities override --- */
+.text-secondary {
+    color: var(--text-secondary) !important;
 }

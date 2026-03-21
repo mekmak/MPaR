@@ -1,12 +1,18 @@
-﻿table.bracket {
+table.bracket {
     border-collapse: collapse;
     border: none;
-    margin: 10px;
+    margin: 40px auto;
 }
 
 .bracket th {
     text-align: center;
     border: 0;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted, #6e7681);
+    padding: 8px 12px;
 }
 
 .bracket td {
@@ -16,21 +22,26 @@
 }
 
     .bracket td.top {
-        border-bottom: solid gray 1px;
+        border-bottom: solid var(--border-default, #30363d) 1px;
     }
 
     .bracket td.bottom {
-        border-bottom: solid gray 1px;
-        border-right: solid gray 1px;
+        border-bottom: solid var(--border-default, #30363d) 1px;
+        border-right: solid var(--border-default, #30363d) 1px;
     }
 
     .bracket td.gap {
-        border-right: solid gray 1px;
+        border-right: solid var(--border-default, #30363d) 1px;
     }
 
     .bracket td span {
-        padding-top: 10px;
-        padding-left: 5px;
+        display: inline-block;
+        padding: 3px 10px;
+        margin: 2px 0;
+        background-color: var(--bg-surface, #161b22);
+        border-radius: var(--radius-sm, 6px);
+        font-size: 13px;
+        color: var(--text-primary, #e6edf3);
     }
 
         /* Players */

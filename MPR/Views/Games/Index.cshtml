@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "Games";
 }
 
@@ -35,21 +35,26 @@
         </div>
         <div class="row">
             <div class="col" id="game_tabs">
-                <div data-sport-type="meat" class="d-none"></div>
-                <div data-sport-type="f1" class="d-none"></div>
-	            <div data-sport-type="f1St" class="d-none"></div>
+                <div data-sport-type="meat" class="tab-hidden"></div>
+                <div data-sport-type="f1" class="tab-hidden"></div>
+	            <div data-sport-type="f1St" class="tab-hidden"></div>
 	            @*<div data-sport-type="ncaa"></div>*@
                 @*<div data-sport-type="owl"></div>
-                <div data-sport-type="owlSt" class="d-none"></div>*@
+                <div data-sport-type="owlSt" class="tab-hidden"></div>*@
             </div>
         </div>
-    </div>    
+    </div>
 </div>
 
 <script>
     function showTab(sportType) {
-        $('#game_tabs div').addClass("d-none");
-        $(`#game_tabs div[data-sport-type=${sportType}]`).removeClass("d-none");
+        $('#game_tabs > div').each(function () {
+            if ($(this).data('sport-type') === sportType) {
+                $(this).removeClass('tab-hidden').addClass('tab-visible');
+            } else {
+                $(this).removeClass('tab-visible').addClass('tab-hidden');
+            }
+        });
 
         $('#game_tab_buttons label input').each((_, ele) => {
             $(ele).parent().removeClass('active')
@@ -57,33 +62,70 @@
         $(`#game_tab_buttons label input[data-sport-type=${sportType}]`).parent().addClass('active');
     }
 
+    function diffUpdate(container, newHtml) {
+        var $container = $(container);
+
+        // First load: just insert the content
+        if (!$container.html().trim()) {
+            $container.html(newHtml);
+            return;
+        }
+
+        var $newContent = $('<div>').html(newHtml);
+        var oldRows = $container.find('tr');
+        var newRows = $newContent.find('tr');
+
+        // If structure changed (different row count), fall back to full replacement
+        if (oldRows.length !== newRows.length) {
+            $container.html(newHtml);
+            return;
+        }
+
+        // Compare cell-by-cell, only update what changed
+        oldRows.each(function (rowIdx) {
+            var oldCells = $(this).find('td, th');
+            var newCells = $(newRows[rowIdx]).find('td, th');
+
+            if (oldCells.length !== newCells.length) {
+                // Row structure changed, replace the whole row
+                $(this).replaceWith($(newRows[rowIdx]));
+                return;
+            }
+
+            oldCells.each(function (cellIdx) {
+                var oldCell = $(this);
+                var newCell = $(newCells[cellIdx]);
+
+                if (oldCell.html() !== newCell.html()) {
+                    oldCell.html(newCell.html());
+                    // Trigger flash animation
+                    oldCell.removeClass('cell-updated');
+                    // Force reflow to restart animation
+                    void oldCell[0].offsetWidth;
+                    oldCell.addClass('cell-updated');
+                }
+            });
+        });
+    }
+
     function reloadGames() {
         var offset = new Date().getTimezoneOffset();
-        $('#game_tabs div').each((_, ele) => {
+        $('#game_tabs > div').each((_, ele) => {
             var st = $(ele).data('sport-type');
-            $(ele).load('@Url.Action("Games", "Games")' + `?gameType=${st}&offset=${offset}`);
+            var url = '@Url.Action("Games", "Games")' + `?gameType=${st}&offset=${offset}`;
+            $.get(url, function (html) {
+                diffUpdate(ele, html);
+            });
         });
         refreshLastUpdated();
     }
 
     function refreshLastUpdated() {
         var currentDate = new Date();
-        var hours = currentDate.getHours().toString();
-        if (hours.length === 1) {
-            hours = "0" + hours;
-        }
-
-        var minutes = currentDate.getMinutes().toString();
-        if (minutes.length === 1) {
-            minutes = "0" + minutes;
-        }
-
-        var seconds = currentDate.getSeconds().toString();
-        if (seconds.length === 1) {
-            seconds = "0" + seconds;
-        }
-
-        $('#last_update_time').html(`Last updated at: ${hours}:${minutes}:${seconds}`);
+        var hours = currentDate.getHours().toString().padStart(2, '0');
+        var minutes = currentDate.getMinutes().toString().padStart(2, '0');
+        var seconds = currentDate.getSeconds().toString().padStart(2, '0');
+        $('#last_update_time').html(`<span class="live-dot"></span>Last updated at: ${hours}:${minutes}:${seconds}`);
     }
 
     function registerSwipes() {
@@ -105,7 +147,7 @@
         if (isMobile) {
             registerSwipes();
         }
-        
+
         reloadGames();
         showTab('f1');
         setInterval(reloadGames, 5000);
