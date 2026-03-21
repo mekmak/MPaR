@@ -47,6 +47,22 @@
 </div>
 
 <script>
+    var tabHashMap = {
+        'meat': 'main',
+        'f1': 'f1-races',
+        'f1St': 'f1-standings'
+    };
+    var hashTabMap = {
+        'main': 'meat',
+        'f1-races': 'f1',
+        'f1-standings': 'f1St'
+    };
+
+    function getTabFromHash() {
+        var hash = window.location.hash.substring(1);
+        return hashTabMap[hash] || 'f1';
+    }
+
     function showTab(sportType) {
         $('#game_tabs > div').each(function () {
             if ($(this).data('sport-type') === sportType) {
@@ -60,6 +76,8 @@
             $(ele).parent().removeClass('active')
         });
         $(`#game_tab_buttons label input[data-sport-type=${sportType}]`).parent().addClass('active');
+
+        history.replaceState(null, '', '#' + tabHashMap[sportType]);
     }
 
     function diffUpdate(container, newHtml) {
@@ -148,8 +166,12 @@
             registerSwipes();
         }
 
+        $(window).on('hashchange', function () {
+            showTab(getTabFromHash());
+        });
+
         reloadGames();
-        showTab('f1');
+        showTab(getTabFromHash());
         setInterval(reloadGames, 5000);
     });
 </script>
