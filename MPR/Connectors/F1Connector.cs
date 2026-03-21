@@ -314,32 +314,6 @@ namespace MPR.Connectors
             return new F1RealTeamStandings { Teams = realTeams };
         }
 
-        private static readonly Dictionary<int, double> FakeRacePositionPoints = new Dictionary<int, double>
-        {
-            {1, 25},
-            {2, 18},
-            {3, 15},
-            {4, 12},
-            {5, 10},
-            {6, 8},
-            {7, 6},
-            {8, 4},
-            {9, 2},
-            {10, 1}
-        };
-
-        private static readonly Dictionary<int, double> FakeSprintRacePositionPoints = new Dictionary<int, double>
-        {
-            {1, 8},
-            {2, 7},
-            {3, 6},
-            {4, 5},
-            {5, 4},
-            {6, 3},
-            {7, 2},
-            {8, 1}
-        };
-
         private static readonly Dictionary<int, double> RealRacePositionPoints = new Dictionary<int, double>
         {
             {1, 25},
@@ -353,14 +327,14 @@ namespace MPR.Connectors
             {9, 2},
             {10, 1},
             {11, 0.8},
-            {12, 0.6},
-            {13, 0.5},
-            {14, 0.4},
-            {15, 0.3},
-            {16, 0.2},
-            {17, 0.15},
-            {18, 0.10},
-            {19, 0.05}
+            {12, 0.7},
+            {13, 0.6},
+            {14, 0.5},
+            {15, 0.4},
+            {16, 0.3},
+            {17, 0.25},
+            {18, 0.20},
+            {19, 0.15}
         };
 
         private static readonly Dictionary<int, double> RealSprintRacePositionPoints = new Dictionary<int, double>
@@ -374,14 +348,14 @@ namespace MPR.Connectors
             {7, 2},
             {8, 1},
             {9, 0.8},
-            {10, 0.6},
-            {11, 0.5},
-            {12, 0.4},
-            {13, 0.3},
-            {14, 0.2},
-            {15, 0.15},
-            {16, 0.10},
-            {17, 0.05}
+            {10, 0.7},
+            {11, 0.6},
+            {12, 0.5},
+            {13, 0.4},
+            {14, 0.3},
+            {15, 0.25},
+            {16, 0.20},
+            {17, 0.15}
         };
 
         private double CalculateRealPositionPoints(Event race, int position)
@@ -389,13 +363,6 @@ namespace MPR.Connectors
             return race.Type.Name == "Race" 
                 ? (RealRacePositionPoints.TryGetValue(position, out double rvalue) ? rvalue : 0)
                 : (RealSprintRacePositionPoints.TryGetValue(position, out double srvalue) ? srvalue : 0);
-        }
-
-        private double CalculateFakePositionPoints(Event race, int position)
-        {
-            return race.Type.Name == "Race" 
-                ? (FakeRacePositionPoints.TryGetValue(position, out double rvalue) ? rvalue : 0)
-                : (FakeSprintRacePositionPoints.TryGetValue(position, out double srvalue) ? srvalue : 0);
         }
 
         private static readonly Dictionary<string, string> EnglishDammit = new Dictionary<string, string>
@@ -408,7 +375,6 @@ namespace MPR.Connectors
         private F1RealDriverStandings CalculateRealDriverStandings(F1DriverStandings fakeStandings, List<Event> races)
         {
             var nameToPoints = new Dictionary<string, double>();
-            var nameToFakePoints = new Dictionary<string, double>();
             List<Event> relevantRaces = races.Where(r => IsComplete(r) && IsPointsScoring(r)).ToList();
             foreach(var race in relevantRaces)
             {
@@ -420,13 +386,7 @@ namespace MPR.Connectors
                         nameToPoints[englishPlease] = 0.0;
                     }
 
-                    if(!nameToFakePoints.ContainsKey(englishPlease))
-                    {
-                        nameToFakePoints[englishPlease] = 0.0;
-                    }
-
                     nameToPoints[englishPlease] += CalculateRealPositionPoints(race, competitor.Place);
-                    nameToFakePoints[englishPlease] += CalculateFakePositionPoints(race, competitor.Place);
                 }
             }
 
