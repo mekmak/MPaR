@@ -148,6 +148,21 @@ namespace MPR.Connectors
         {
             var races = new Dictionary<string, Models.Race>();
 
+            // Pre-compute effective completion: cancelled races are only complete
+            // if all chronologically earlier races are also complete
+            var effectiveCompletion = new Dictionary<string, bool>();
+            bool allPriorComplete = true;
+            foreach (var group in _currentEvents.GroupBy(e => e.Name).OrderBy(g => g.Min(e => e.DateUtc)))
+            {
+                bool isCancelled = group.All(e => e.Summary == "Canceled");
+                bool isComplete = isCancelled
+                    ? allPriorComplete && group.All(IsComplete)
+                    : group.All(IsComplete);
+
+                effectiveCompletion[group.Key] = isComplete;
+                if (!isComplete) allPriorComplete = false;
+            }
+
             int completedCounter = 1;
             int upcomingCounter = int.MinValue + 1;
 
@@ -155,9 +170,7 @@ namespace MPR.Connectors
             {
                 if (!races.TryGetValue(currentEvent.Name, out var race))
                 {
-                    bool isComplete = _currentEvents
-                        .Where(e => e.Name.Equals(currentEvent.Name))
-                        .All(IsComplete);
+                    bool isComplete = effectiveCompletion[currentEvent.Name];
 
                     // We want to first show all events that haven't finished yet,
                     // then all events that already finished
@@ -224,30 +237,30 @@ namespace MPR.Connectors
 
         private static readonly string[] RaceDates =
         {
-            "20250316", // Australia
-            "20250323", // China
-            "20250406", // Japan
-            "20250413", // Bahrain
-            "20250420", // Saudi Arabia
-            "20250504", // Miami
-            "20250518", // Imola
-            "20250525", // Monaco
-            "20250601", // Spain
-            "20250615", // Canada
-            "20250629", // Austria
-            "20250706", // Silverstone
-            "20250727", // Belgium
-            "20250803", // Hungary
-            "20250831", // Netherlands
-            "20250907", // Monza
-            "20250921", // Baku
-            "20251005", // Singapore
-            "20251019", // COTA
-            "20251026", // Mexico
-            "20251109", // Brazil
-            "20251122", // Vegas
-            "20251130", // Qatar
-            "20251207", // Abu Dhabi
+            "20260307", // Australia (Mar 8 local, Mar 7 EST)
+            "20260315", // China
+            "20260329", // Japan
+            "20260412", // Bahrain (cancelled)
+            "20260419", // Saudi Arabia (cancelled)
+            "20260503", // Miami
+            "20260524", // Canada
+            "20260607", // Monaco
+            "20260614", // Barcelona-Catalunya
+            "20260628", // Austria
+            "20260705", // Britain
+            "20260719", // Belgium
+            "20260726", // Hungary
+            "20260823", // Netherlands
+            "20260906", // Monza
+            "20260913", // Spain (Madrid)
+            "20260926", // Azerbaijan (Saturday race)
+            "20261011", // Singapore
+            "20261025", // COTA
+            "20261101", // Mexico
+            "20261108", // Brazil
+            "20261121", // Las Vegas (Saturday race, 8PM PST = 11PM EST same day)
+            "20261129", // Qatar
+            "20261206", // Abu Dhabi
         };
 
         private async Task UpdateTeamStandings(CancellationToken token)
@@ -407,7 +420,7 @@ namespace MPR.Connectors
             List<Event> relevantRaces = races.Where(r => IsComplete(r) && IsPointsScoring(r)).ToList();
             foreach(var race in relevantRaces)
             {
-                foreach(var competitor in race.Competitors)
+                foreach(var competitor in (race.Competitors ?? new List<Competitor>()))
                 {
                     var englishPlease = EnglishDammit.TryGetValue(competitor.Name, out var correctName) ? correctName : competitor.Name;
                     if(!nameToPoints.ContainsKey(englishPlease))
@@ -511,7 +524,7 @@ namespace MPR.Connectors
         {
             try
             {
-                var uri = new Uri("https://www.formula1.com/en/results/2025/team");
+                var uri = new Uri("https://www.formula1.com/en/results/2026/team");
                 using (var httpClient = new HttpClient())
                 using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
                 {                    
@@ -565,7 +578,7 @@ namespace MPR.Connectors
         {
             try
             {
-                var uri = new Uri("https://www.formula1.com/en/results/2025/drivers");
+                var uri = new Uri("https://www.formula1.com/en/results/2026/drivers");
                 using (var httpClient = new HttpClient())
                 using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
                 {                    
