@@ -63,23 +63,12 @@ namespace MPR.Connectors
             };
         }
 
-        private static readonly Dictionary<string,string> TeamLongNames = new Dictionary<string, string>
-        {
-            {"Racing Bulls Honda RBPT", "Visa CashApp Honda RBPT"},
-        };
+        private static readonly Dictionary<string,string> TeamLongNames = new Dictionary<string, string> {};
 
         private static readonly Dictionary<string,string> TeamShortNames = new Dictionary<string, string>
         {
-            {"Red Bull Racing Honda RBPT", "Red Bull"},
-            {"Ferrari", "Ferrari"},
-            {"Mercedes", "Mercedes"},
-            {"McLaren Mercedes", "McLaren"},
-            {"Kick Sauber Ferrari", "Kick Sauber"},
-            {"Alpine Renault", "Alpine"},
-            {"Racing Bulls Honda RBPT", "Visa CashApp"},
-            {"Haas Ferrari", "Haas"},
-            {"Aston Martin Aramco Mercedes", "Aston Martin"},
-            {"Williams Mercedes", "Williams"}
+            {"Red Bull Racing", "Red Bull"},
+            {"Haas F1 Team", "Haas"}
         };
 
         private Models.F1Team Wrap(F1.F1Team team)
@@ -412,7 +401,8 @@ namespace MPR.Connectors
         private static readonly Dictionary<string, string> EnglishDammit = new Dictionary<string, string>
         {
             {"Nico Hülkenberg", "Nico Hulkenberg"},
-            {"Andrea Kimi Antonelli", "Kimi Antonelli"}
+            {"Andrea Kimi Antonelli", "Kimi Antonelli"},
+            {"Sergio Pérez", "Sergio Perez"}
         };
 
         private F1RealDriverStandings CalculateRealDriverStandings(F1DriverStandings fakeStandings, List<Event> races)
