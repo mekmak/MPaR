@@ -37,6 +37,9 @@ namespace MPR.Controllers
                 case "f1St":
                     var f1Standings = F1Connector.Instance.GetStandings();
                     return PartialView("_F1Standings", f1Standings);
+                case "wc":
+                    WorldCupSchedule wc = WorldCupConnector.Instance.GetSchedule(offset);
+                    return PartialView("_WorldCup", wc);
                 default:
                     return PartialView("_UnknownGame");
             }
