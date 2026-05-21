@@ -19,6 +19,9 @@
 	                <label class="btn btn-secondary">
 		                <input id="f1StRadio" name="sport-type" type="radio" data-sport-type="f1St">F1 Standings
 	                </label>
+	                <label class="btn btn-secondary">
+		                <input id="wcRadio" name="sport-type" type="radio" data-sport-type="wc">World Cup
+	                </label>
 	                @*<label class="btn btn-secondary">
                         <input id="owlRadio" name="sport-type" type="radio" data-sport-type="owl" >OWL/G
                     </label>
@@ -38,6 +41,7 @@
                 <div data-sport-type="meat" class="tab-hidden"></div>
                 <div data-sport-type="f1" class="tab-hidden"></div>
 	            <div data-sport-type="f1St" class="tab-hidden"></div>
+	            <div data-sport-type="wc" class="tab-hidden"></div>
 	            @*<div data-sport-type="ncaa"></div>*@
                 @*<div data-sport-type="owl"></div>
                 <div data-sport-type="owlSt" class="tab-hidden"></div>*@
@@ -50,12 +54,14 @@
     var tabHashMap = {
         'meat': 'main',
         'f1': 'f1-races',
-        'f1St': 'f1-standings'
+        'f1St': 'f1-standings',
+        'wc': 'world-cup'
     };
     var hashTabMap = {
         'main': 'meat',
         'f1-races': 'f1',
-        'f1-standings': 'f1St'
+        'f1-standings': 'f1St',
+        'world-cup': 'wc'
     };
 
     function getTabFromHash() {
