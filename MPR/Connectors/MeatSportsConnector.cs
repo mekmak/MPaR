@@ -85,7 +85,7 @@ namespace MPR.Connectors
 
         private string GetEndPoint(Sport sport)
         {
-            return $@"http://sports.espn.go.com/{sport.ToString().ToLower()}/bottomline/scores";
+            return $@"https://sports.espn.go.com/{sport.ToString().ToLower()}/bottomline/scores";
         }
 
         private string GetCountKey(Sport sport)
