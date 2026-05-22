@@ -284,14 +284,16 @@ td {
 }
 
 /* --- Games Page: Tab Switcher (Segmented Control) --- */
-#game_tab_buttons {
+#l1_buttons,
+#l2_buttons {
     background-color: var(--bg-surface) !important;
     border-radius: var(--radius-lg) !important;
     padding: 3px !important;
     border: 1px solid var(--border-default);
 }
 
-#game_tab_buttons .btn {
+#l1_buttons .btn,
+#l2_buttons .btn {
     border: none !important;
     border-radius: var(--radius-md) !important;
     padding: 6px 16px !important;
@@ -303,16 +305,57 @@ td {
     transition: all 0.2s ease;
 }
 
-#game_tab_buttons .btn:hover {
+#l1_buttons .btn:hover,
+#l2_buttons .btn:hover {
     color: var(--text-primary) !important;
     background: var(--bg-surface-hover) !important;
     transform: none;
 }
 
-#game_tab_buttons .btn.active {
+#l1_buttons .btn.active,
+#l2_buttons .btn.active {
     background: var(--accent-blue-deep) !important;
     color: #ffffff !important;
     box-shadow: 0 1px 4px rgba(31, 111, 235, 0.3) !important;
+}
+
+.game-tab-row {
+    display: flex !important;
+    width: 560px;
+    max-width: calc(100vw - 30px);
+}
+
+.game-tab-row > .btn {
+    flex: 1 1 0 !important;
+    text-align: center;
+}
+
+#l1_buttons .btn {
+    position: relative;
+}
+
+#l1_buttons .btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -9px;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid var(--accent-blue-deep);
+    border-bottom: 2px solid var(--accent-blue-deep);
+    transform: translateX(-50%) rotate(45deg);
+    pointer-events: none;
+}
+
+/* --- Placeholder panel (empty tabs) --- */
+.placeholder-tab {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    letter-spacing: 0.04em;
 }
 
 /* --- Tab Content Transitions --- */
