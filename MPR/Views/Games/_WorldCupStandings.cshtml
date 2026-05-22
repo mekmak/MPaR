@@ -1,0 +1,43 @@
+@model MPR.Models.WorldCupStandings
+
+<div class="row">
+    @foreach (var group in Model.Groups)
+    {
+        <div class="col-12 col-md-6 col-xl-4 mb-3">
+            <table class="table mb-0">
+                <colgroup>
+                    <col style="width: 12%" />
+                    <col style="width: 52%" />
+                    <col style="width: 12%" />
+                    <col style="width: 12%" />
+                    <col style="width: 12%" />
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <td colspan="5" class="font-weight-bold text-center">@group.Header</td>
+                    </tr>
+                    @foreach (var row in group.Rows)
+                    {
+                        <tr>
+                            <td class="text-muted">@row.Position</td>
+                            <td class="text-left">
+                                @if (!string.IsNullOrEmpty(row.TeamLink))
+                                {
+                                    <a href="@row.TeamLink">@row.Name</a>
+                                }
+                                else
+                                {
+                                    @row.Name
+                                }
+                                <span class="text-muted">&nbsp;#@row.WorldRank</span>
+                            </td>
+                            <td>@row.Played</td>
+                            <td>@(row.GoalDifference > 0 ? "+" + row.GoalDifference : row.GoalDifference.ToString())</td>
+                            <td class="text-success">@row.Points</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -1,1 +1,0 @@
-Do not try and build the project to verify stuff.

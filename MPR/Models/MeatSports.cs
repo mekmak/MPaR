@@ -1,16 +1,13 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace MPR.Models
 {
     public class MeatSports
     {
-        public List<MeatSport> Sports { get; set; }
+        public List<MeatSportLeague> Leagues { get; set; }
     }
 
-    public class MeatSport
+    public class MeatSportLeague
     {
         public string Name { get; set; }
         public List<MeatSportGame> Games { get; set; }

@@ -358,6 +358,11 @@ td {
     letter-spacing: 0.04em;
 }
 
+/* Keep meat panels tall enough for reliable swipe even with few games */
+#game_tabs > div[data-l1="meat"] {
+    min-height: 60vh;
+}
+
 /* --- Tab Content Transitions --- */
 #game_tabs {
     position: relative;

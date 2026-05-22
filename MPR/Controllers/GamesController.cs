@@ -15,12 +15,16 @@ namespace MPR.Controllers
             return View();
         }        
 
-        public ActionResult Games(string gameType, int offset = 0)
+        public ActionResult Games(string gameType, int offset = 0, string sub = null)
         {
             switch(gameType)
             {
                 case "meat":
-                    MeatSports meatSports = GetMeatSports();
+                    if (!Enum.TryParse<MeatSportsConnector.Tab>(sub, true, out var tab))
+                    {
+                        return PartialView("_UnknownGame");
+                    }
+                    MeatSports meatSports = MeatSportsConnector.Instance.GetGames(tab);
                     return PartialView("_MeatSportsGames", meatSports);
                 case "owl":
                     List<OwlGame> owlGames = OwlConnector.Instance.GetGames(offset);
@@ -40,26 +44,13 @@ namespace MPR.Controllers
                 case "wc":
                     WorldCupSchedule wc = WorldCupConnector.Instance.GetSchedule(offset);
                     return PartialView("_WorldCup", wc);
+                case "wcSt":
+                    WorldCupStandings wcSt = WorldCupConnector.Instance.GetStandings();
+                    return PartialView("_WorldCupStandings", wcSt);
                 default:
                     return PartialView("_UnknownGame");
             }
         }
 
-        private MeatSports GetMeatSports()
-        {
-            var sports = new List<MeatSport>();
-            foreach(MeatSportsConnector.Sport s in Enum.GetValues(typeof(MeatSportsConnector.Sport)))
-            {
-                var games = MeatSportsConnector.Instance.GetGames(s);
-                if(!games.Any())
-                {
-                    continue;
-                }
-
-                sports.Add(new MeatSport { Name = s.ToString(), Games = games });
-            }
-
-            return new MeatSports { Sports = sports };
-        }
     }
 }

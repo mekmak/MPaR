@@ -1,333 +1,223 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
+using MPR.Meat;
 using MPR.Models;
 
 namespace MPR.Connectors
 {
     public class MeatSportsConnector : Connector
     {
-        private static readonly Dictionary<string, string> NhlShortNames = new Dictionary<string, string>();
-
-        private static readonly Dictionary<string, string> MlbShortNames = new Dictionary<string, string>
-        {
-            {"Chicago Cubs", "Cubs"},
-            {"Chicago Sox", "CHI Soxs"},
-            {"San Francisco", "SF Giants"}
-        };
-
-        private static readonly Dictionary<string, string> NbaShortNames = new Dictionary<string, string>
-        {
-            {"Golden State", "Warriors"}
-        };
-
-        private static readonly Dictionary<string, string> NflShortNames = new Dictionary<string, string>
-        {
-            {"Kansas City", "KC"},
-            {"Oakland", "OAK"},
-            {"Philadelphia", "PHI"},
-            {"Washington", "WAS"},
-            {"New England", "NE"},
-            {"Atlanta", "ATL"},
-            {"NY Giants", "NYG"},
-            {"Seattle", "SEA"},
-            {"Los Angeles", "LA"},
-            {"Denver", "DEN"},
-            {"Pittsburgh", "PIT"},
-            {"Cincinnati", "CIN"},
-            {"San Francisco", "SF"},
-            {"Dallas", "DAL"},
-            {"Minnesota", "MIN"},
-            {"Baltimore", "BAL"},
-            {"Miami", "MIA"},
-            {"NY Jets", "NYJ"},
-            {"Arizona", "ARI"},
-            {"Green Bay", "GB"},
-            {"New Orleans", "NO"},
-            {"Cleveland", "CLE"},
-            {"Tennessee", "TEN"},
-            {"Chicago", "CHI"},
-            {"Carolina", "CAR"},
-            {"Buffalo", "BUF"},
-            {"Tampa Bay", "TB"},
-            {"Detroit", "DET"},
-            {"Houston", "HOU"},
-            {"Jacksonville", "JAX" },
-            {"Indianapolis", "IND" }
-        };
-
-        private static readonly Dictionary<Sport, Dictionary<string, string>> NamesBySport = new Dictionary<Sport, Dictionary<string, string>>
-        {
-            {Sport.NFL, NflShortNames},
-            {Sport.MLB, MlbShortNames},
-            {Sport.NBA, NbaShortNames},
-            {Sport.NHL, NhlShortNames}
-        };
-
-        private readonly ConcurrentDictionary<Sport, List<MeatSportGame>> _gameCache = new ConcurrentDictionary<Sport, List<MeatSportGame>>();
-        private readonly Dictionary<string, Tuple<string, string>> _scoreCache = new Dictionary<string, Tuple<string, string>>();
-
-        #region Sport
-
-        public enum Sport
-        {
-            NFL,
-            MLB,
-            NBA,
-            NHL
-        }
-
-        private string GetEndPoint(Sport sport)
-        {
-            return $@"https://sports.espn.go.com/{sport.ToString().ToLower()}/bottomline/scores";
-        }
-
-        private string GetCountKey(Sport sport)
-        {
-            return $"{sport}_s_count";
-        }
-
-        private string GetGameKey(Sport sport)
-        {
-            return $"{sport}_s_left";
-        }
-
-        private string GetUrlKey(Sport sport)
-        {
-            return $"{sport}_s_url";
-        }
-
-        #endregion
-
         public static MeatSportsConnector Instance = new MeatSportsConnector();
+
+        private const string ApiUrl =
+            "https://site.web.api.espn.com/apis/personalized/v2/scoreboard/header";
+
+        public enum Tab
+        {
+            Basketball,
+            Football,
+            Hockey,
+            Baseball,
+            Soccer
+        }
+
+        private static readonly Dictionary<Tab, List<string>> TabLeagues =
+            new Dictionary<Tab, List<string>>
+        {
+            { Tab.Basketball, new List<string> { "NBA", "WNBA" } },
+            { Tab.Football,   new List<string> { "NFL", "NCAAF" } },
+            { Tab.Hockey,     new List<string> { "NHL" } },
+            { Tab.Baseball,   new List<string> { "MLB" } },
+            { Tab.Soccer,     new List<string> { "MLS" } },
+        };
+
+        private static readonly HashSet<string> AllowedLeagues =
+            new HashSet<string>(TabLeagues.Values.SelectMany(v => v));
+
+        private readonly ConcurrentDictionary<string, List<MeatSportGame>> _gamesByLeague =
+            new ConcurrentDictionary<string, List<MeatSportGame>>();
+        private readonly Dictionary<string, Tuple<string, string>> _scoreCache =
+            new Dictionary<string, Tuple<string, string>>();
 
         public void Init(CancellationToken token)
         {
+            ServicePointManager.SecurityProtocol |=
+                SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
             var pulls = new[]
             {
-                new Pull
-                {
-                    Name = "Meat Sports Games", Task = UpdateGames
-                }
+                new Pull { Name = "Meat Sports", Task = UpdateGames }
             };
 
-            StartPulls(token, pulls);      
+            StartPulls(token, pulls);
+        }
+
+        public MeatSports GetGames(Tab tab)
+        {
+            var leagues = TabLeagues[tab]
+                .Select(abbr => new MeatSportLeague
+                {
+                    Name = abbr,
+                    Games = _gamesByLeague.TryGetValue(abbr, out var games)
+                        ? games
+                        : new List<MeatSportGame>()
+                })
+                .ToList();
+
+            return new MeatSports { Leagues = leagues };
         }
 
         private async Task UpdateGames(CancellationToken token)
         {
-            foreach (Sport sport in Enum.GetValues(typeof(Sport)).Cast<Sport>())
+            var board = await FetchScoreBoard(token);
+            if (board?.Sports == null)
             {
-                try
+                return;
+            }
+
+            var parsed = new Dictionary<string, List<MeatSportGame>>();
+            foreach (var sport in board.Sports)
+            {
+                foreach (var league in sport.Leagues ?? new List<Meat.League>())
                 {
-                    List<MeatSportGame> games = await DownloadGames(token, sport);
-                    _gameCache.AddOrUpdate(sport, _ => games, (v1, v2) => games);
+                    if (string.IsNullOrEmpty(league.Abbreviation) ||
+                        !AllowedLeagues.Contains(league.Abbreviation))
+                    {
+                        continue;
+                    }
+
+                    var games = (league.Events ?? new List<Meat.Event>())
+                        .Select(e => ToGame(league.Abbreviation, e))
+                        .Where(g => g != null)
+                        .ToList();
+
+                    foreach (var g in games)
+                    {
+                        SetShouldNotify(g);
+                    }
+
+                    parsed[league.Abbreviation] = games;
                 }
-                catch
-                {
-                    // Ignore
-                }                
             }
-        }
 
-        public List<MeatSportGame> GetGames(Sport sport)
-        {
-            return _gameCache.TryGetValue(sport, out var games) ? games : new List<MeatSportGame>();
-        }
-
-        private async Task<List<MeatSportGame>> DownloadGames(CancellationToken token, Sport sport)
-        {
-            string requestResponse = await FetchScores(token, sport);
-
-            NameValueCollection keyValues = HttpUtility.ParseQueryString(requestResponse);
-
-            int gameCount = GetCount(sport, keyValues);
-            var games = new List<MeatSportGame>();
-            for (int gameNumber = 1; gameNumber <= gameCount; gameNumber++)
+            if (parsed.Count == 0)
             {
-                string score = GetScore(sport, keyValues, gameNumber);
-                string link = GetLink(sport, keyValues, gameNumber);
-                GameInfo gameInfo = GetGameInfo(sport, keyValues, gameNumber);
-
-                string homeTeam = GetShortName(sport, gameInfo.HomeTeam);
-                string awayTeam = GetShortName(sport, gameInfo.AwayTeam);
-
-                var game = new MeatSportGame
-                {
-                    HomeTeam = homeTeam,
-                    HomeTeamScore = gameInfo.HomeTeamScore,
-                    AwayTeam = awayTeam,
-                    AwayTeamScore = gameInfo.AwayTeamScore,
-                    Score = score,
-                    TimeLink = link,
-                    Time = gameInfo.Time
-                };
-
-                SetShouldNotify(sport, game);
-                games.Add(game);
+                return;
             }
 
-            return games;
+            foreach (var leagueAbbr in AllowedLeagues)
+            {
+                var games = parsed.TryGetValue(leagueAbbr, out var g)
+                    ? g
+                    : new List<MeatSportGame>();
+                _gamesByLeague.AddOrUpdate(leagueAbbr, _ => games, (_, __) => games);
+            }
         }
 
-        private string GetShortName(Sport sport, string name)
+        private MeatSportGame ToGame(string league, Meat.Event ev)
         {
-            name = name.Trim();
-            var shortNames = NamesBySport.TryGetValue(sport, out var n) ? n : new Dictionary<string, string>();
-            string shortName = shortNames.TryGetValue(name, out var sn) ? sn : name;
-            return shortName;
+            if (ev?.Competitors == null || ev.Competitors.Count < 2)
+            {
+                return null;
+            }
+
+            var home = ev.Competitors.FirstOrDefault(c => c.HomeAway == "home")
+                       ?? ev.Competitors[0];
+            var away = ev.Competitors.FirstOrDefault(c => c.HomeAway == "away")
+                       ?? ev.Competitors[1];
+
+            var state = ev.FullStatus?.Type?.State;
+            var detail = ev.FullStatus?.Type?.ShortDetail ?? "";
+            var isOver = state == "post";
+            var time = isOver ? "Final" : detail;
+
+            return new MeatSportGame
+            {
+                League = league,
+                HomeTeam = ShortLabel(home),
+                HomeTeamFull = FullLabel(home),
+                AwayTeam = ShortLabel(away),
+                AwayTeamFull = FullLabel(away),
+                HomeTeamScore = home.Score ?? "",
+                AwayTeamScore = away.Score ?? "",
+                Time = time,
+                TimeLink = ev.Links?.FirstOrDefault()?.Href,
+                IsOver = isOver
+            };
         }
 
-        private async Task<string> FetchScores(CancellationToken token, Sport sport)
+        private static string ShortLabel(Meat.Competitor c)
         {
-            using (var httpClient = new HttpClient())
-            {                                     
-                var uri = new Uri(GetEndPoint(sport));
-                using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
+            if (!string.IsNullOrWhiteSpace(c.Abbreviation))
+            {
+                return c.Abbreviation;
+            }
+
+            if (!string.IsNullOrWhiteSpace(c.Name))
+            {
+                return c.Name;
+            }
+
+            return c.DisplayName ?? "";
+        }
+
+        private static string FullLabel(Meat.Competitor c)
+        {
+            if (!string.IsNullOrWhiteSpace(c.Name))
+            {
+                return c.Name;
+            }
+
+            if (!string.IsNullOrWhiteSpace(c.DisplayName))
+            {
+                return c.DisplayName;
+            }
+
+            return c.Abbreviation ?? "";
+        }
+
+        private void SetShouldNotify(MeatSportGame game)
+        {
+            var key = $"{game.League}.{game.HomeTeam}.{game.AwayTeam}";
+
+            if (_scoreCache.TryGetValue(key, out var prev))
+            {
+                if (!game.HomeTeamScore.Equals(prev.Item1))
+                {
+                    game.NotifyHome = true;
+                }
+
+                if (!game.AwayTeamScore.Equals(prev.Item2))
+                {
+                    game.NotifyAway = true;
+                }
+            }
+
+            _scoreCache[key] = Tuple.Create(game.HomeTeamScore, game.AwayTeamScore);
+        }
+
+        private async Task<ScoreBoard> FetchScoreBoard(CancellationToken token)
+        {
+            try
+            {
+                using (var httpClient = new HttpClient())
+                using (var request = new HttpRequestMessage(HttpMethod.Get, new Uri(ApiUrl)))
                 {
                     var response = await httpClient.SendAsync(request, token);
-                    return await response.Content.ReadAsStringAsync();
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    return ScoreBoard.FromJson(responseString);
                 }
             }
-        }
-
-        private void SetShouldNotify(Sport sport, MeatSportGame meatGame)
-        {
-            string gameKey = $"{sport}.{meatGame.HomeTeam}.{meatGame.AwayTeam}";
-
-            if (_scoreCache.ContainsKey(gameKey))
+            catch
             {
-                if (!meatGame.HomeTeamScore.Equals(_scoreCache[gameKey].Item1))
-                {
-                    meatGame.NotifyHome = true;
-                }
-
-                if (!meatGame.AwayTeamScore.Equals(_scoreCache[gameKey].Item2))
-                {
-                    meatGame.NotifyAway = true;
-                }
+                return null;
             }
-
-            _scoreCache[gameKey] = new Tuple<string, string>(meatGame.HomeTeamScore, meatGame.AwayTeamScore);
-        }
-
-        private int GetCount(Sport sport, NameValueCollection collection)
-        {
-            return int.Parse(collection[GetCountKey(sport)]);
-        }
-
-        private string GetScore(Sport sport, NameValueCollection collection, int gameNumber)
-        {
-            return collection[$"{GetGameKey(sport)}{gameNumber}"];
-        }
-
-        private class GameInfo
-        {
-            public GameInfo(string homeTeam, string homeTeamScore, string awayTeam, string awayTeamScore, string time)
-            {
-                HomeTeam = homeTeam;
-                HomeTeamScore = homeTeamScore;
-                AwayTeam = awayTeam;
-                AwayTeamScore = awayTeamScore;
-                Time = time;
-            }
-
-            public string HomeTeam { get; }
-            public string HomeTeamScore { get; }
-            public string AwayTeam { get; }
-            public string AwayTeamScore { get; }
-            public string Time { get; }
-        }
-
-        private GameInfo GetGameInfo(Sport sport, NameValueCollection collection, int gameNumber)
-        {
-            string score = GetScore(sport, collection, gameNumber);
-
-            if (score.IndexOf(" at ", StringComparison.Ordinal) < 0)
-            {
-                string[] splits = score.Split(new [] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                string[] timeSplits = score.Split(new[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);
-
-                string time = "-";
-                try
-                {
-                    time = timeSplits[timeSplits.Length - 1];
-                    if(time == "FINAL" || time == "END OF 4TH" || time == "00:00 IN 4TH" || time == "00:00 IN 3RD")
-                    {
-                        time = "Final";
-                    }
-                    else
-                    {
-                        var quarterSplits = time.Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
-                        time = quarterSplits[quarterSplits.Length - 1].ToLower();
-                    }
-                }
-                catch
-                {
-                    // ignored
-                }
-
-                string homeTeam = "";
-                string homeTeamScore = "";
-
-                bool awayTeamSet = false;
-                string awayTeam = "";
-                string awayTeamScore = "";
-
-                foreach (string split in splits)
-                {
-                    if (int.TryParse(split, out int teamScore))
-                    {
-                        if (awayTeamSet)
-                        {
-                            homeTeamScore = teamScore.ToString();
-                            break;
-                        }
-                        else
-                        {
-                            awayTeamScore = teamScore.ToString();
-                            awayTeamSet = true;
-                        }
-
-                    }
-                    else
-                    {
-                        if (!awayTeamSet)
-                        {
-                            awayTeam = awayTeam + " " + split;
-                        }
-                        else
-                        {
-                            homeTeam = homeTeam + " " + split;
-                        }
-                    }
-                }
-
-                homeTeam = homeTeam.Replace("^", "");
-                awayTeam = awayTeam.Replace("^", "");
-
-                return new GameInfo(homeTeam, homeTeamScore, awayTeam, awayTeamScore, time);
-            }
-            else
-            {
-                string[] splits = score.Split(new [] { " at " }, StringSplitOptions.RemoveEmptyEntries);
-                string[] homeSplits = splits[1].Split(new [] {"(", ")"}, StringSplitOptions.RemoveEmptyEntries);
-                string homeTeam = homeSplits[0];
-                string time = homeSplits[1];
-                string awayTeam = splits[0];
-                return new GameInfo(homeTeam, "-", awayTeam, "-", time);
-            }
-        }
-
-        private string GetLink(Sport sport, NameValueCollection collection, int gameNumber)
-        {
-            return collection[$"{GetUrlKey(sport)}{gameNumber}"];
         }
     }
 }
