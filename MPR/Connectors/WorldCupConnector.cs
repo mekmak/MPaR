@@ -16,9 +16,13 @@ namespace MPR.Connectors
     {
         public static WorldCupConnector Instance = new WorldCupConnector();
         private List<Match> _currentMatches = new List<Match>();
+        private List<Squad> _currentSquads = new List<Squad>();
 
         private const string CalendarUrl =
             "https://api.fifa.com/api/v3/calendar/matches?language=en&count=500&idSeason=285023";
+
+        private const string SquadsUrl =
+            "https://play.fifa.com/json/bracket_predictor/squads.json";
 
         private const string MatchCentreBase =
             "https://www.fifa.com/en/match-centre/match";
@@ -78,6 +82,60 @@ namespace MPR.Connectors
             { "Uzbekistan", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/uzbekistan" },
         };
 
+        // FIFA team page URLs keyed by the abbr the squads API returns.
+        private static readonly Dictionary<string, string> TeamPageUrlsByAbbr =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "ALG", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/algeria" },
+            { "ARG", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/argentina" },
+            { "AUS", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/australia" },
+            { "AUT", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/austria" },
+            { "BEL", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/belgium" },
+            { "BIH", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/bosnia-herzegovina" },
+            { "BRA", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/brazil" },
+            { "CAN", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/canada" },
+            { "CIV", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/cote-d-ivoire" },
+            { "COD", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/congo-dr" },
+            { "COL", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/colombia" },
+            { "CPV", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/cabo-verde" },
+            { "CRO", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/croatia" },
+            { "CUW", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/curacao" },
+            { "CZE", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/czechia" },
+            { "ECU", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/ecuador" },
+            { "EGY", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/egypt" },
+            { "ENG", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/england" },
+            { "ESP", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/spain" },
+            { "FRA", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/france" },
+            { "GER", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/germany" },
+            { "GHA", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/ghana" },
+            { "HAI", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/haiti" },
+            { "IRN", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/ir-iran" },
+            { "IRQ", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/iraq" },
+            { "JOR", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/jordan" },
+            { "JPN", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/japan" },
+            { "KOR", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/korea-republic" },
+            { "KSA", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/saudi-arabia" },
+            { "MAR", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/morocco" },
+            { "MEX", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/mexico" },
+            { "NED", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/netherlands" },
+            { "NOR", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/norway" },
+            { "NZL", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/new-zealand" },
+            { "PAN", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/panama" },
+            { "PAR", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/paraguay" },
+            { "POR", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/portugal" },
+            { "QAT", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/qatar" },
+            { "RSA", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/south-africa" },
+            { "SCO", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/scotland" },
+            { "SEN", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/senegal" },
+            { "SUI", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/switzerland" },
+            { "SWE", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/sweden" },
+            { "TUN", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/tunisia" },
+            { "TUR", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/turkiye" },
+            { "URU", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/uruguay" },
+            { "USA", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/usa" },
+            { "UZB", "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/uzbekistan" },
+        };
+
         // Short codes for the 16 host cities, keyed by the CityName the calendar API returns.
         private static readonly Dictionary<string, string> CityCodes =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -107,7 +165,8 @@ namespace MPR.Connectors
 
             var pulls = new[]
             {
-                new Pull { Name = "World Cup Schedule", Task = UpdateMatches }
+                new Pull { Name = "World Cup Schedule", Task = UpdateMatches },
+                new Pull { Name = "World Cup Standings", Task = UpdateStandings }
             };
 
             StartPulls(token, pulls);
@@ -152,6 +211,64 @@ namespace MPR.Connectors
             }
 
             return new WorldCupSchedule { Days = days };
+        }
+
+        public WorldCupStandings GetStandings()
+        {
+            var squads = _currentSquads;
+
+            var groups = squads
+                .Where(s => !string.IsNullOrEmpty(s.Group))
+                .GroupBy(s => s.Group)
+                .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
+                .Select(BuildGroup)
+                .ToList();
+
+            return new WorldCupStandings { Groups = groups };
+        }
+
+        private static WorldCupGroup BuildGroup(IGrouping<string, Squad> grp)
+        {
+            var letter = grp.Key.ToUpperInvariant();
+            var anyPlayed = grp.Any(s => s.GroupPlayed > 0);
+
+            var ordered = anyPlayed
+                ? grp.OrderBy(s => s.GroupPosition).ToList()
+                : grp.OrderBy(s => s.WorldRank).ToList();
+
+            var rows = new List<WorldCupStandingsRow>();
+            for (int i = 0; i < ordered.Count; i++)
+            {
+                var s = ordered[i];
+                rows.Add(new WorldCupStandingsRow
+                {
+                    Position = anyPlayed ? s.GroupPosition : i + 1,
+                    Name = s.Name,
+                    Abbr = s.Abbr,
+                    WorldRank = s.WorldRank,
+                    Played = s.GroupPlayed,
+                    GoalDifference = s.GroupGoalsDifference,
+                    Points = s.GroupPoints,
+                    TeamLink = TeamLinkByAbbr(s.Abbr)
+                });
+            }
+
+            return new WorldCupGroup
+            {
+                Letter = letter,
+                Header = "Group " + letter,
+                Rows = rows
+            };
+        }
+
+        private static string TeamLinkByAbbr(string abbr)
+        {
+            if (string.IsNullOrWhiteSpace(abbr))
+            {
+                return null;
+            }
+
+            return TeamPageUrlsByAbbr.TryGetValue(abbr, out var url) ? url : null;
         }
 
         private static bool IsComplete(Match m)
@@ -278,6 +395,14 @@ namespace MPR.Connectors
                 : matches;
         }
 
+        private async Task UpdateStandings(CancellationToken token)
+        {
+            var squads = await FetchSquads(token);
+            _currentSquads = _currentSquads.Any()
+                ? squads.Any() ? squads : _currentSquads
+                : squads;
+        }
+
         private async Task<List<Match>> FetchMatches(CancellationToken token)
         {
             try
@@ -294,6 +419,24 @@ namespace MPR.Connectors
             catch
             {
                 return new List<Match>();
+            }
+        }
+
+        private async Task<List<Squad>> FetchSquads(CancellationToken token)
+        {
+            try
+            {
+                using (var httpClient = new HttpClient())
+                using (var request = new HttpRequestMessage(HttpMethod.Get, new Uri(SquadsUrl)))
+                {
+                    var response = await httpClient.SendAsync(request, token);
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    return Squad.FromJson(responseString) ?? new List<Squad>();
+                }
+            }
+            catch
+            {
+                return new List<Squad>();
             }
         }
     }

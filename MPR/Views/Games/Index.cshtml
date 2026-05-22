@@ -19,16 +19,25 @@
                 </div>
                 <div class="btn-group btn-group-toggle game-tab-row mt-2" id="l2_buttons" data-toggle="buttons">
                     <label class="btn btn-secondary" data-l1="meat">
-                        <input name="l2" type="radio" data-l1="meat" data-l2="basketball">Basketball
+                        <input name="l2" type="radio" data-l1="meat" data-l2="basketball">
+                        <span class="d-none d-md-inline">Basketball</span>
+                        <span class="d-md-none">Basket</span>
                     </label>
                     <label class="btn btn-secondary" data-l1="meat">
-                        <input name="l2" type="radio" data-l1="meat" data-l2="football">Football
+                        <input name="l2" type="radio" data-l1="meat" data-l2="football">
+                        <span class="d-none d-md-inline">Football</span>
+                        <span class="d-md-none">Foot</span>
                     </label>
                     <label class="btn btn-secondary" data-l1="meat">
                         <input name="l2" type="radio" data-l1="meat" data-l2="hockey">Hockey
                     </label>
                     <label class="btn btn-secondary" data-l1="meat">
-                        <input name="l2" type="radio" data-l1="meat" data-l2="baseball">Baseball
+                        <input name="l2" type="radio" data-l1="meat" data-l2="baseball">
+                        <span class="d-none d-md-inline">Baseball</span>
+                        <span class="d-md-none">Base</span>
+                    </label>
+                    <label class="btn btn-secondary" data-l1="meat">
+                        <input name="l2" type="radio" data-l1="meat" data-l2="soccer">Soccer
                     </label>
                     <label class="btn btn-secondary" data-l1="f1">
                         <input name="l2" type="radio" data-l1="f1" data-l2="races">Races
@@ -52,14 +61,15 @@
         </div>
         <div class="row">
             <div class="col" id="game_tabs">
-                <div data-l1="meat" data-l2="basketball" class="tab-hidden"><div class="placeholder-tab">Coming soon</div></div>
-                <div data-l1="meat" data-l2="football" class="tab-hidden"><div class="placeholder-tab">Coming soon</div></div>
-                <div data-l1="meat" data-l2="hockey" class="tab-hidden"><div class="placeholder-tab">Coming soon</div></div>
-                <div data-l1="meat" data-l2="baseball" class="tab-hidden"><div class="placeholder-tab">Coming soon</div></div>
+                <div data-l1="meat" data-l2="basketball" class="tab-hidden"></div>
+                <div data-l1="meat" data-l2="football" class="tab-hidden"></div>
+                <div data-l1="meat" data-l2="hockey" class="tab-hidden"></div>
+                <div data-l1="meat" data-l2="baseball" class="tab-hidden"></div>
+                <div data-l1="meat" data-l2="soccer" class="tab-hidden"></div>
                 <div data-l1="f1" data-l2="races" class="tab-hidden"></div>
                 <div data-l1="f1" data-l2="standings" class="tab-hidden"></div>
                 <div data-l1="wc" data-l2="matches" class="tab-hidden"></div>
-                <div data-l1="wc" data-l2="standings" class="tab-hidden"><div class="placeholder-tab">Coming soon</div></div>
+                <div data-l1="wc" data-l2="standings" class="tab-hidden"></div>
             </div>
         </div>
     </div>
@@ -68,10 +78,11 @@
 <script>
     var TABS = [
         { key: 'meat', children: [
-            { key: 'basketball', fetchKey: null },
-            { key: 'football',   fetchKey: null },
-            { key: 'hockey',     fetchKey: null },
-            { key: 'baseball',   fetchKey: null }
+            { key: 'basketball', fetchKey: 'meat' },
+            { key: 'football',   fetchKey: 'meat' },
+            { key: 'hockey',     fetchKey: 'meat' },
+            { key: 'baseball',   fetchKey: 'meat' },
+            { key: 'soccer',     fetchKey: 'meat' }
         ]},
         { key: 'f1', children: [
             { key: 'races',     fetchKey: 'f1' },
@@ -79,7 +90,7 @@
         ]},
         { key: 'wc', children: [
             { key: 'matches',   fetchKey: 'wc' },
-            { key: 'standings', fetchKey: null }
+            { key: 'standings', fetchKey: 'wcSt' }
         ]}
     ];
 
@@ -185,11 +196,16 @@
         var offset = new Date().getTimezoneOffset();
         $('#game_tabs > div').each(function () {
             var $panel = $(this);
-            var fetchKey = FETCH_KEY_BY_PAIR[$panel.data('l1') + '/' + $panel.data('l2')];
+            var l1 = $panel.data('l1');
+            var l2 = $panel.data('l2');
+            var fetchKey = FETCH_KEY_BY_PAIR[l1 + '/' + l2];
             if (!fetchKey) {
                 return;
             }
             var url = '@Url.Action("Games", "Games")' + '?gameType=' + fetchKey + '&offset=' + offset;
+            if (fetchKey === 'meat') {
+                url += '&sub=' + l2;
+            }
             $.get(url, function (html) {
                 diffUpdate($panel[0], html);
             });

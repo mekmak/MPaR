@@ -1,53 +1,74 @@
-﻿@model MPR.Models.MeatSports
+@model MPR.Models.MeatSports
 
 <table class="table" id="example">
     <tbody>
-        @foreach (var sport in Model.Sports)
+        @foreach (var league in Model.Leagues)
         {
-            <tr><td colspan="5" class="text-capitalize font-weight-bold">@sport.Name</td></tr>
-            foreach (var game in sport.Games)
+            if (league.Games == null || league.Games.Count == 0)
             {
                 <tr>
-                    @if(game.AwayTeamWon)
-                    {
-                        <td class="text-left text-success font-weight-bold">@game.AwayTeam</td>
-                    }
-                    else
-                    {
-                        <td class="text-left">@game.AwayTeam</td>
-                    }
-
-                    
-                    @if (@game.NotifyAway)
-                    {
-                        <td class="text-success font-weight-bold">@game.AwayTeamScore</td>
-                    }
-                    else
-                    {
-                        <td>@game.AwayTeamScore</td>
-                    }
-
-                    @if(game.HomeTeamWon)
-                    {
-                        <td class="text-left text-success font-weight-bold">@game.HomeTeam</td>
-                    }
-                    else
-                    {
-                        <td class="text-left">@game.HomeTeam</td>
-                    }
-
-                    
-                    @if (@game.NotifyHome)
-                    {
-                        <td class="text-success font-weight-bold">@game.HomeTeamScore</td>
-                    }
-                    else
-                    {
-                        <td>@game.HomeTeamScore</td>
-                    }
-
-                    <td><a href="@game.TimeLink">@game.Time</a></td>
+                    <td><span class="badge badge-secondary">@league.Name</span></td>
+                    <td colspan="5" class="text-secondary text-left">No games today</td>
                 </tr>
+            }
+            else
+            {
+                foreach (var game in league.Games)
+                {
+                    <tr>
+                        <td><span class="badge badge-secondary">@game.League</span></td>
+
+                        @if (game.AwayTeamWon)
+                        {
+                            <td class="text-left text-success font-weight-bold">
+                                <span class="d-none d-md-inline">@game.AwayTeamFull</span>
+                                <span class="d-md-none">@game.AwayTeam</span>
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="text-left">
+                                <span class="d-none d-md-inline">@game.AwayTeamFull</span>
+                                <span class="d-md-none">@game.AwayTeam</span>
+                            </td>
+                        }
+
+                        @if (game.NotifyAway)
+                        {
+                            <td class="text-success font-weight-bold">@game.AwayTeamScore</td>
+                        }
+                        else
+                        {
+                            <td>@game.AwayTeamScore</td>
+                        }
+
+                        @if (game.HomeTeamWon)
+                        {
+                            <td class="text-left text-success font-weight-bold">
+                                <span class="d-none d-md-inline">@game.HomeTeamFull</span>
+                                <span class="d-md-none">@game.HomeTeam</span>
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="text-left">
+                                <span class="d-none d-md-inline">@game.HomeTeamFull</span>
+                                <span class="d-md-none">@game.HomeTeam</span>
+                            </td>
+                        }
+
+                        @if (game.NotifyHome)
+                        {
+                            <td class="text-success font-weight-bold">@game.HomeTeamScore</td>
+                        }
+                        else
+                        {
+                            <td>@game.HomeTeamScore</td>
+                        }
+
+                        <td><a href="@game.TimeLink">@game.Time</a></td>
+                    </tr>
+                }
             }
         }
     </tbody>
