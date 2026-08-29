@@ -64,6 +64,28 @@ namespace MPR.F1
 
         [JsonProperty("vehicle")]
         public Vehicle Vehicle { get; set; }
+
+        [JsonProperty("status")]
+        public CompetitorStatus Status { get; set; }
+    }
+
+    public class CompetitorStatus
+    {
+        [JsonProperty("type")]
+        public CompetitorStatusType Type { get; set; }
+    }
+
+    public class CompetitorStatusType
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("description")]
+        public string Description { get; set; }
+
+        // False for a car that did not start, did not finish, or was disqualified
+        [JsonProperty("completed")]
+        public bool Completed { get; set; }
     }
 
     public class Vehicle
