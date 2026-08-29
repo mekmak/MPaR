@@ -13,9 +13,9 @@
                     <label class="btn btn-secondary">
                         <input name="l1" type="radio" data-l1="f1">F1
                     </label>
-                    <label class="btn btn-secondary">
+                    @*<label class="btn btn-secondary">
                         <input name="l1" type="radio" data-l1="wc">World Cup
-                    </label>
+                    </label>*@
                 </div>
                 <div class="btn-group btn-group-toggle game-tab-row mt-2" id="l2_buttons" data-toggle="buttons">
                     <label class="btn btn-secondary" data-l1="meat">
@@ -45,12 +45,12 @@
                     <label class="btn btn-secondary" data-l1="f1">
                         <input name="l2" type="radio" data-l1="f1" data-l2="standings">Standings
                     </label>
-                    <label class="btn btn-secondary" data-l1="wc">
+                    @*<label class="btn btn-secondary" data-l1="wc">
                         <input name="l2" type="radio" data-l1="wc" data-l2="matches">Matches
                     </label>
                     <label class="btn btn-secondary" data-l1="wc">
                         <input name="l2" type="radio" data-l1="wc" data-l2="standings">Standings
-                    </label>
+                    </label>*@
                 </div>
             </div>
         </div>
@@ -68,8 +68,8 @@
                 <div data-l1="meat" data-l2="soccer" class="tab-hidden"></div>
                 <div data-l1="f1" data-l2="races" class="tab-hidden"></div>
                 <div data-l1="f1" data-l2="standings" class="tab-hidden"></div>
-                <div data-l1="wc" data-l2="matches" class="tab-hidden"></div>
-                <div data-l1="wc" data-l2="standings" class="tab-hidden"></div>
+                @*<div data-l1="wc" data-l2="matches" class="tab-hidden"></div>
+                <div data-l1="wc" data-l2="standings" class="tab-hidden"></div>*@
             </div>
         </div>
     </div>
@@ -87,11 +87,11 @@
         { key: 'f1', children: [
             { key: 'races',     fetchKey: 'f1' },
             { key: 'standings', fetchKey: 'f1St' }
-        ]},
-        { key: 'wc', children: [
-            { key: 'matches',   fetchKey: 'wc' },
-            { key: 'standings', fetchKey: 'wcSt' }
         ]}
+        //{ key: 'wc', children: [
+        //    { key: 'matches',   fetchKey: 'wc' },
+        //    { key: 'standings', fetchKey: 'wcSt' }
+        //]}
     ];
 
     var FLAT_SEQUENCE = [];
@@ -100,7 +100,7 @@
     var FETCH_KEY_BY_PAIR = {};
     TABS.forEach(l1 => l1.children.forEach(l2 => { FETCH_KEY_BY_PAIR[l1.key + '/' + l2.key] = l2.fetchKey; }));
 
-    var DEFAULT_PAIR = { l1: 'wc', l2: 'matches' };
+    var DEFAULT_PAIR = { l1: 'f1', l2: 'races' };
 
     var lastL2PerL1 = {};
     TABS.forEach(l1 => { lastL2PerL1[l1.key] = l1.children[0].key; });

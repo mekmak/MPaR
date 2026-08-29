@@ -270,20 +270,49 @@ namespace MPR.Connectors
                 : standings;
 
             _currentRealDriverStandings = CalculateRealDriverStandings(_currentDriverStandings, _currentEvents);
-            _currentRealTeamStandings = CalculateRealTeamStandings(_currentRealDriverStandings, _currentTeamStandings);
+            _currentRealTeamStandings = CalculateRealTeamStandings(_currentEvents, _currentTeamStandings);
         }
 
-        private F1RealTeamStandings CalculateRealTeamStandings(F1RealDriverStandings driverStandings, F1TeamStandings fakeTeamStandings)
+        // ESPN's manufacturer names, mapped to the constructor names formula1.com uses in the standings
+        private static readonly Dictionary<string, string> EspnTeamNames = new Dictionary<string, string>
         {
-            var teamToPoints = new Dictionary<string, double>();
-            foreach(var driver in driverStandings.Drivers)
-            {
-                if(!teamToPoints.ContainsKey(driver.Car))
-                {
-                    teamToPoints[driver.Car] = 0;
-                }
+            {"Red Bull", "Red Bull Racing"},
+            {"Haas", "Haas F1 Team"}
+        };
 
-                teamToPoints[driver.Car] += driver.Points;
+        private static string TeamName(Competitor competitor)
+        {
+            var manufacturer = competitor.Vehicle?.Manufacturer;
+            if(string.IsNullOrWhiteSpace(manufacturer))
+            {
+                return null;
+            }
+
+            return EspnTeamNames.TryGetValue(manufacturer, out var f1Name) ? f1Name : manufacturer;
+        }
+
+        private F1RealTeamStandings CalculateRealTeamStandings(List<Event> races, F1TeamStandings fakeTeamStandings)
+        {
+            // A driver who switches teams mid season keeps every point he scored, but each
+            // race's points go to whichever team he actually drove for that weekend
+            var teamToPoints = new Dictionary<string, double>();
+            foreach(var race in races.Where(r => IsComplete(r) && IsPointsScoring(r)))
+            {
+                foreach(var competitor in (race.Competitors ?? new List<Competitor>()))
+                {
+                    var team = TeamName(competitor);
+                    if(team == null)
+                    {
+                        continue;
+                    }
+
+                    if(!teamToPoints.ContainsKey(team))
+                    {
+                        teamToPoints[team] = 0;
+                    }
+
+                    teamToPoints[team] += CalculateRealPositionPoints(race, competitor);
+                }
             }
 
             var realTeams = new List<F1.RealF1Team>();
@@ -358,8 +387,23 @@ namespace MPR.Connectors
             {17, 0.15}
         };
 
-        private double CalculateRealPositionPoints(Event race, int position)
+        // ESPN reports a DNS/DNF as STATUS_RETIRED and an exclusion as STATUS_DISQUALIFIED,
+        // both with completed = false, and still gives them a place on the timing sheet.
+        // A missing status counts as classified so a schema change cannot silently zero the standings.
+        private static bool IsClassified(Competitor competitor)
         {
+            return competitor.Status?.Type?.Completed ?? true;
+        }
+
+        private double CalculateRealPositionPoints(Event race, Competitor competitor)
+        {
+            // A car that did not start and finish the race cannot be awarded points
+            if (!IsClassified(competitor))
+            {
+                return 0;
+            }
+
+            var position = competitor.Place;
             return race.Type.Name == "Race" 
                 ? (RealRacePositionPoints.TryGetValue(position, out double rvalue) ? rvalue : 0)
                 : (RealSprintRacePositionPoints.TryGetValue(position, out double srvalue) ? srvalue : 0);
@@ -386,7 +430,7 @@ namespace MPR.Connectors
                         nameToPoints[englishPlease] = 0.0;
                     }
 
-                    nameToPoints[englishPlease] += CalculateRealPositionPoints(race, competitor.Place);
+                    nameToPoints[englishPlease] += CalculateRealPositionPoints(race, competitor);
                 }
             }
 
